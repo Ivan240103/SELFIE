@@ -1,11 +1,12 @@
 import React from 'react';
 import Accesso from './components/Accesso'
+import Calendario from './components/Calendario';
 
 
 function App() {
   return (
     <div className="App">
-      <Accesso></Accesso>
+      <Calendario></Calendario>
     </div>
   );
 }
