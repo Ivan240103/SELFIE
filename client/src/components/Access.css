@@ -1,0 +1,102 @@
+
+form{
+    justify-content: center;
+    text-align: center;
+    border: solid 2px black;
+    display: flex;
+    background-color: aquamarine;
+    flex-direction: column;
+    width: 40%;
+    height: 100%;
+    align-items: center;
+    margin-top: 200px;
+}
+.log{
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center; /* Centra orizzontalmente */
+    align-items: center; /* Centra verticalmente */
+}
+
+button {
+    background-color: #04AA6D;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 50%;
+}
+
+input[type=text], input[type=password] {
+    width: 50%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+body{
+    background-color: aliceblue;
+    justify-content: center; 
+    align-items: center; 
+}
+
+.navbar {
+    background: #333;
+    padding: 10px 20px;
+    position: sticky;
+    width: 100%;
+    z-index: 10;
+  }
+  
+  .navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+  }
+  
+  /* Logo */
+  .navbar-logo {
+    color: #fff;
+    font-size: 24px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  /* Menu Styles */
+  .navbar-menu {
+    display: flex;
+    list-style: none;
+  }
+  
+  .navbar-item {
+    margin-left: 20px;
+  }
+  
+  .navbar-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 5px 10px;
+    transition: background 0.3s ease;
+  }
+  
+  .navbar-link:hover {
+    background: #555;
+    border-radius: 5px;
+  }
+  
+  /* Mobile Toggle Button */
+  .navbar-toggle {
+    display: none;
+    font-size: 24px;
+    color: #fff;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }

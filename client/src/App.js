@@ -1,12 +1,18 @@
 import React from 'react';
-import Accesso from './components/Accesso'
+import Accesso from './components/Accesso';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Calendario from './components/Calendario';
 
 
 function App() {
   return (
     <div className="App">
-      <Calendario></Calendario>
+      <Router>
+            <Routes>
+                <Route path="/" element={<Accesso />} />
+                <Route path="/calendario" element={<Calendario />} />
+            </Routes>
+        </Router>
     </div>
   );
 }
