@@ -11,7 +11,7 @@ function Accesso() {
     function createEvent(e){
         e.preventDefault();
 
-        const URI = "http://localhost:5000/login?username=${usr}&password=${psw}";
+        const URI = "http://localhost:3000/login";
         const requestBody = {
             username:usr,
             password:psw
