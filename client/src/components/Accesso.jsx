@@ -40,8 +40,14 @@ function Accesso() {
 
     return(
         <div>
-            {/* Molto bello mi piasce, voto DIESCI */}
-            {/* DEBUG: <form method="post" action="http://localhost:8000/login"> */}
+            {/* Molto bello mi piasce, voto DIESCI. A seguito debug :) */}
+            {/* <form method="post" action="http://localhost:8000/users/login">
+                <label>Username</label>
+                <input type="text" name="usr" id="usr"/>
+                <label>Password</label>
+                <input type="password" name="psw"/>
+                <button type="submit">Accedi</button>
+            </form> */}
             <form onSubmit={createEvent}>
                 <label>Username</label>
                 <input type="text" value={usr} onChange={(e) => setUsr(e.target.value)}/>
