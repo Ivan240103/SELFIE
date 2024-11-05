@@ -5,9 +5,17 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 
-function Calendar() {
+
+function Calendar({notes = []}) {
   const [weekendsVisible, setWeekendsVisible] = useState(true)
 
+  // Converte le note in eventi di calendario
+  const calendarEvents = notes.map((note) => ({
+    title: note.text,
+    start: note.date,
+  }));
+
+  //funzione per rendere visibili i weekend
   function handleWeekendsToggle() {
     setWeekendsVisible(!weekendsVisible)
   }
@@ -33,6 +41,7 @@ function Calendar() {
           dayMaxEvents={true}
           showNonCurrentDates={false}
           weekends={weekendsVisible}
+          events={calendarEvents}
         />
       </div>
     </div>
