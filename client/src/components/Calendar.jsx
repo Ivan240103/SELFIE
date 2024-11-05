@@ -1,23 +1,25 @@
-import React, { useState } from 'react'
-import { formatDate } from '@fullcalendar/core'
-import FullCalendar from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin from '@fullcalendar/interaction'
+import React, { useState } from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import Notes from './Notes';
 
+function Calendar() {
+  const [weekendsVisible, setWeekendsVisible] = useState(true);
+  const [calendarEvents, setCalendarEvents] = useState([]);
 
-function Calendar({notes = []}) {
-  const [weekendsVisible, setWeekendsVisible] = useState(true)
-
-  // Converte le note in eventi di calendario
-  const calendarEvents = notes.map((note) => ({
-    title: note.text,
-    start: note.date,
-  }));
-
-  //funzione per rendere visibili i weekend
   function handleWeekendsToggle() {
-    setWeekendsVisible(!weekendsVisible)
+    setWeekendsVisible(!weekendsVisible);
+  }
+
+  function handleNoteSave(notes) {
+    // Converte le note in eventi di calendario
+    const events = notes.map((note) => ({
+      title: note.text,
+      start: note.date,
+    }));
+    setCalendarEvents(events);
   }
 
   return (
@@ -41,15 +43,15 @@ function Calendar({notes = []}) {
           dayMaxEvents={true}
           showNonCurrentDates={false}
           weekends={weekendsVisible}
-          events={calendarEvents}
+          events={calendarEvents} // Imposta gli eventi nel calendario
         />
       </div>
+      <Notes onNoteSave={handleNoteSave} />
     </div>
-  )
+  );
 }
 
-
-function Sidebar({ weekendsVisible, handleWeekendsToggle}) {
+function Sidebar({ weekendsVisible, handleWeekendsToggle }) {
   return (
     <div className='demo-app-sidebar'>
       <nav className="navbar">
@@ -74,7 +76,7 @@ function Sidebar({ weekendsVisible, handleWeekendsToggle}) {
         </label>
       </div>
     </div>
-  )
+  );
 }
 
 export default Calendar;

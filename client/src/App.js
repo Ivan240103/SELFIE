@@ -6,11 +6,6 @@ import Tomato from './components/Tomato/Tomato';
 import Notes from './components/Notes'
 
 function App() {
-  const [notes, setNotes] = useState([]);
-
-  function handleNoteSave(updatedNotes) {
-    setNotes(updatedNotes); // Aggiorna le note quando vengono salvate nella pagina Note
-  }
 
   return (
     <div className="App">
@@ -19,7 +14,7 @@ function App() {
                 <Route path="/" element={<Access />} />
                 <Route path="/Calendar" element={<Calendar />} />
                 <Route path="/Tomato" element={<Tomato />} />
-                <Route path="/Notes" element={<Notes onNoteSave={handleNoteSave} />} />
+                <Route path="/Notes" element={<Notes/>} />
             </Routes>
         </Router>
     </div>

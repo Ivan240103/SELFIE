@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function Note({ onNoteSave }) {
+function Notes({ onNoteSave }) {
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
@@ -9,9 +9,9 @@ function Note({ onNoteSave }) {
     if (newNote && selectedDate) {
       const updatedNotes = [...notes, { date: selectedDate, text: newNote }];
       setNotes(updatedNotes);
-      onNoteSave(updatedNotes); // Aggiorna le note in App.js
       setNewNote('');
       setSelectedDate('');
+      onNoteSave(updatedNotes); // Passa le note aggiornate al calendario
     }
   }
 
@@ -40,4 +40,4 @@ function Note({ onNoteSave }) {
   );
 }
 
-export default Note;
+export default Notes;
