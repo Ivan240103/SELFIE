@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Importa useNavigate;
+import { Link } from "react-router-dom"; //Importa il linking per la registrazione dell'utente
 import "./Access.css";
 
 function Access() {
@@ -54,13 +55,16 @@ function Access() {
                 </div>
             </nav>
             <div className="log">
+                <h1>Login</h1>
                 <form method="post" action="http://localhost:8000/login" onSubmit={createEvent}>
-                    <label><b>Username</b></label>
-                    <input type="text" placeholder="Enter Username" value={usr} onChange={(e) => setUsr(e.target.value)} required/>
-                    <label><b>Password</b></label>
-                    <input type="password" placeholder="Enter Password" value={psw} onChange={(e) => setPsw(e.target.value)} required/>
-                    <button type="submit">Accedi</button>
+                    <label for="username" id="username"><b>Username</b></label>
+                    <input id="usr" type="text" placeholder="Enter Username" value={usr} onChange={(e) => setUsr(e.target.value)} required/>
+                    <label for="password" id="password"><b>Password</b></label>
+                    <input id="psw" type="password" placeholder="Enter Password" value={psw} onChange={(e) => setPsw(e.target.value)} required/>
+                    <button type="submit">Login</button>
                 </form>
+                {/*Per registrare un nuovo utente*/}
+                <p> Not registered yet? <Link to="/register">Click here</Link> </p>
             </div>
         </div>
     )

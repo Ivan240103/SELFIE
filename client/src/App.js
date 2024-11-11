@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Calendar from './components/Calendar';
 import Tomato from './components/Tomato/Tomato';
 import Notes from './components/Notes'
+import Registration from './components/Registration';
 
 function App() {
 
@@ -11,7 +12,8 @@ function App() {
     <div className="App">
       <Router>
             <Routes>
-                <Route path="/" element={<Access />} />
+                <Route path="/login" element={<Access />} />
+                <Route path="/register" element={<Registration />} />
                 <Route path="/Calendar" element={<Calendar />} />
                 <Route path="/Tomato" element={<Tomato />} />
                 <Route path="/Notes" element={<Notes/>} />
