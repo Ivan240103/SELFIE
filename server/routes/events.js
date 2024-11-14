@@ -20,7 +20,7 @@ router.post('/create', async (req, res) => {
 
   try {
     await newEvent.save()
-    res.send('ok')
+    res.status(200).send('ok')
   } catch(error) {
     console.error(error)
     res.status(500).send('Error while creating the event')
@@ -31,7 +31,7 @@ router.post('/create', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const allEvents = await Event.find({})
-    res.json(allEvents)
+    res.status(200).json(allEvents)
   } catch (error) {
     console.error(error)
     res.status(500).send('Error while getting all events')

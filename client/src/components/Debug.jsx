@@ -6,7 +6,7 @@ const API_BASE_URL = 'http://localhost:8000'
 function Debug() {
   const getAllEvents = async () => {
     const r = await axios.get(`${API_BASE_URL}/events/`)
-    document.getElementById('debug').innerHTML = JSON.stringify(r) // NON FUNZIONA
+    document.getElementById('debug').innerHTML = JSON.stringify(r.data)
   }
 
   return(
