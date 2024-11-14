@@ -1,4 +1,64 @@
-# Cose da fare - server
+# Cose da fare
+
+## Client
+- [ ] memorizzare User nei cookie (?) per creare eventi, task...
+- [ ] home dashboard
+  - [ ] ultima nota modificata
+  - [ ] ultima sessione pomodoro oppure crea nuova
+  - [ ] 3 task a scadenza più ravvicinata
+  - [ ] prossimo evento
+- [ ] eventi e task
+  - [ ] calendario month
+  - [ ] calendario week
+  - [ ] calendario day (?)
+  - [ ] creazione evento
+  - [ ] visualizzazione evento specifico
+  - [ ] modifica di un evento
+  - [ ] eliminazione di un evento
+  - [ ] creazione task
+  - [ ] visualizzazione task specifico
+  - [ ] modifica task
+  - [ ] eliminazione task
+- [ ] solo task
+  - [ ] task scaduti
+- [ ] note
+  - [ ] tutte le note
+  - [ ] nota specifica
+  - [ ] modifica di una nota
+  - [ ] eliminazione nota
+  - [ ] ordinamento note ???
+- [ ] pomodoro
+  - [ ] schermata timer pomodoro
+- [ ] profilo utente
+  - [ ] pagina del profilo personale
+
+## Server
+- [x] route per eventi
+  - [x] creazione nuovo evento
+  - [x] ottenere tutti gli eventi
+  - [x] ottenere un evento specifico
+  - [x] ottenere eventi in un intervallo di tempo dato
+  - [x] modificare un evento specifico
+  - [x] eliminare un evento specifico
+- [ ] route per task
+  - [ ] creazione nuovo task
+  - [ ] ottenere tutti i task
+  - [ ] ottenere un task specifico
+  - [ ] ottenere task in un intervallo di tempo dato
+  - [ ] modificare un task specifico
+  - [ ] segnare un task come completato
+  - [ ] eliminare un task specifico
 - [ ] route per utenti
-- [ ] route per eventi
-- [ ] route per pomodoro
+  - [ ] controllare funzionamento di Passport
+- [ ] route per pomodoro (ogni user max 1 pomodoro salvato)
+  - [ ] salvare nuovo pomodoro
+  - [ ] prendere i dati del pomodoro dell'utente
+  - [ ] modificare un pomodoro specifico
+  - [ ] eliminare un pomodoro specifico (finito o eliminato)
+- [ ] route per note
+  - [ ] creare nuova nota
+  - [ ] ottenere una nota specifica
+  - [ ] ottenere tutte le note
+  - [ ] ottenere ultima nota modificata
+  - [ ] modificare una nota
+  - [ ] eliminare una nota

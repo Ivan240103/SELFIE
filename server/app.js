@@ -1,5 +1,5 @@
 /**
- * Start this server with `npx nodemon app.js` inside server/
+ * Server's entry point
  */
 
 const express = require('express')
