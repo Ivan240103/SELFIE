@@ -9,7 +9,7 @@ const tomatoSchema = mongoose.Schema({
   // 'n' = not interrupted, 's' = interrupted during study time, 'p' = interrupted during pause time
   interrupted: { type: String, default: 'n' },
   remainingMinutes: Number,
-  user: { type: mongoose.ObjectId, ref: 'User', required: true }
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 })
 
 module.exports = mongoose.model("Tomato", tomatoSchema)

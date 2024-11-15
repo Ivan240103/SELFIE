@@ -20,6 +20,8 @@ const userRoutes = require('./routes/users')
 app.use('/users', userRoutes)
 const eventRoutes = require('./routes/events')
 app.use('/events', eventRoutes)
+const taskRoutes = require('./routes/task')
+app.use('/tasks', taskRoutes)
 
 // connessione al db
 const mongoURL = 'mongodb+srv://ivan:eP3C9N8S9nRkK6TS@selfie.qv0gx.mongodb.net/?retryWrites=true&w=majority&appName=SELFIE'

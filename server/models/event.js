@@ -16,7 +16,7 @@ const eventSchema = mongoose.Schema({
   repetitions: String,
   place: String,
   // TODO: rimettere user required a true dopo il debug
-  user: { type: mongoose.ObjectId, ref: 'User', required: false }
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false }
 })
 
 module.exports = mongoose.model("Event", eventSchema)

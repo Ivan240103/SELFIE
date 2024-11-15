@@ -40,14 +40,15 @@
   - [x] ottenere eventi in un intervallo di tempo dato
   - [x] modificare un evento specifico
   - [x] eliminare un evento specifico
-- [ ] route per task
-  - [ ] creazione nuovo task
-  - [ ] ottenere tutti i task
-  - [ ] ottenere un task specifico
-  - [ ] ottenere task in un intervallo di tempo dato
-  - [ ] modificare un task specifico
-  - [ ] segnare un task come completato
-  - [ ] eliminare un task specifico
+- [x] route per task
+  - [x] creazione nuovo task
+  - [x] ottenere tutti i task
+  - [x] ottenere tutti i task non completati
+  - [x] ottenere un task specifico
+  - [x] ottenere task in un intervallo di tempo dato
+  - [x] modificare un task specifico
+  - [x] segnare un task come completato o non
+  - [x] eliminare un task specifico
 - [ ] route per utenti
   - [ ] controllare funzionamento di Passport
 - [ ] route per pomodoro (ogni user max 1 pomodoro salvato)

@@ -9,7 +9,7 @@ const noteSchema = mongoose.Schema({
   modification: { type: Date, default: Date.now },
   categories: [String],
   length: { type: Number, default: -1 },
-  user: { type: mongoose.ObjectId, ref: 'User', required: true }
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 })
 
 module.exports = mongoose.model("Note", noteSchema)
