@@ -1,61 +1,67 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Importa useNavigate;
 
-// ivan: "se si può per favore nominiamo tutto in inglese pleaseee, per mantenere conformità"
 function Accesso() {
-    // ivan: "queste tre variabili non dovrebbero servire, user e psw vengono mantenuti nel backend e l'errore ce l'hai quando serve nel ramo .cacth della fetch"
     const [usr, setUsr] = useState("");
     const [psw, setPsw] = useState("");
     const [err, setError] = useState("");
+    const navigate = useNavigate(); // Inizializza useNavigate
 
     function createEvent(e){
         e.preventDefault();
 
-        // ivan: "INVIARE I DATI AL BACKEND CON IL POST === DATI SEGRETI" -> chiamare i campi 'usr' e 'psw'
-        // la route dovebbe essere http://localhost:8000/login
-        //Ora bisognerebbe fare la fect con il GET (quindi senza request body ecc.) confrontando l'username e la password
+        const URI = "http://localhost:8000/api/users/login";
+        const requestBody = {
+            username:usr,
+            password:psw
+        }
         
-        fetch("http://localhost:5000/login?username=${username}&password=${password}")
+        const request = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestBody),
+        }
+        
+        fetch(URI, request)
             .then((res) => {
-                // ivan: "i controlli degli errori non servono perchè se c'è errore non entri qui"
                 if (res.ok) return res.json();
-                if (res.status === 400) throw new Error("Errore: Richiesta non valida");
-                if (res.status === 404) throw new Error("Errore: Risorsa non trovata");
-                if (res.status === 500) throw new Error("Errore interno del server");
-                if (res.status === 502) throw new Error("Errore: Bad Gateway");
-                throw new Error("Errore: risposta non valida");
             })
             .then((data) => {
-                //Qua bisogna settare i dati dopo i login se ha avuto successo
-                // ivan: "login con successo quindi mostrare la dashboard della homepage (un placeholder per ora)"
-                setUsr(data.usr);
-                setPsw(data.psw);
-                setError("");
+                if(data){
+                    window.alert('login successful');
+                    // TODO: localStorage.setItem('token', data.token)
+                    console.log("Access completed!");
+                }
             })
             .catch((err) => {
                 //Qua se sei un coglione e sbagli i dati
-                // ivan: "mostrare un messaggio di errore con il codice ed il testo"
-                setError(err.message);
+                setError("Login failed: " + err.message);
             });
     }
 
     return(
-        <div>
-            {/* Molto bello mi piasce, voto DIESCI. A seguito debug :) */}
-            {/* <form method="post" action="http://localhost:8000/users/login">
-                <label>Username</label>
-                <input type="text" name="usr" id="usr"/>
-                <label>Password</label>
-                <input type="password" name="psw"/>
-                <button type="submit">Accedi</button>
-            </form> */}
-            <form onSubmit={createEvent}>
-                <label>Username</label>
-                <input type="text" value={usr} onChange={(e) => setUsr(e.target.value)}/>
-                <label>Password</label>
-                <input type="text" value={usr} onChange={(e) => setPsw(e.target.value)}/>
-                <button type="submit">Accedi</button>
-            </form>
-        </div>
+        <body>
+            <nav class="navbar">
+                <div class="navbar-container">
+                    <a href="#" class="navbar-logo">MyLogo</a>
+                    <ul class="navbar-menu">
+                        <li class="navbar-item"><a href="#" class="navbar-link">Home</a></li>
+                        <li class="navbar-item"><a href="#" class="navbar-link">About</a></li>
+                        <li class="navbar-item"><a href="#" class="navbar-link">Services</a></li>
+                        <li class="navbar-item"><a href="#" class="navbar-link">Contact</a></li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="log">
+                <form onSubmit={createEvent}>
+                    <label><b>Username</b></label>
+                    <input type="text" placeholder="Enter Username" value={usr} onChange={(e) => setUsr(e.target.value)} required/>
+                    <label><b>Password</b></label>
+                    <input type="password" placeholder="Enter Password" value={psw} onChange={(e) => setPsw(e.target.value)} required/>
+                    <button type="submit">Accedi</button>
+                </form>
+            </div>
+        </body>
     )
 }
 

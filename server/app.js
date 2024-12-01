@@ -44,7 +44,7 @@ const userRoutes = require('./routes/users')
 app.use('/api/users', userRoutes)
 const eventRoutes = require('./routes/events')
 app.use('/api/events', eventRoutes)
-const taskRoutes = require('./routes/task')
+const taskRoutes = require('./routes/tasks')
 app.use('/api/tasks', taskRoutes)
 
 // connessione al db

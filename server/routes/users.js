@@ -9,12 +9,15 @@ const User = require('../models/user')
 // registrare un nuovo utente
 // TODO: la psw viaggia in chiaro
 router.post('/register', async (req, res) => {
+  // TODO: password non viene criptata nel db
+  const { username, password, name, surname, birthday } = req.body
+  await bcrypt.hash(password, 10)
   const newUser = User({
-    username: req.body.username,
-    password: req.body.password,
-    name: req.body.name,
-    surname: req.body.surname,
-    birthday: req.body.birthday,
+    username: username,
+    password: password,
+    name: name,
+    surname: surname,
+    birthday: birthday,
   })
 
   try {
@@ -32,13 +35,20 @@ router.post('/login', async (req, res) => {
   const { username, password } = req.body
   try {
     const user = await User.findOne({ username: username })
-    if (!user) res.status(404).send(`No user found with username ${username}`)
-    const pswOk = await bcrypt.compare(password, user.password)
-    if (!pswOk) res.status(400).send('Password incorrect')
-    
+    if (!user) {
+      res.status(404).send(`No user found with username ${username}`)
+      return
+    }
+    // const pswOk = await bcrypt.compare(password, user.password)
+    const pswOk = password == user.password
+    if (!pswOk) {
+      res.status(400).send('Password incorrect')
+      return
+    }
+
     const payload = { userId: user._id, username: user.username }
     const token = jwt.sign(payload, '6e1811f7f6040238567c4a280a1184c1', { expiresIn: '24h' })
-    res.json(token)
+    res.json({ token })
   } catch (error) {
     console.error(error)
     res.status(500).send('Error during authentication')
