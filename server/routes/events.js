@@ -20,7 +20,7 @@ router.post('/', async (req, res) => {
 
   try {
     await newEvent.save()
-    res.status(200).send('ok')
+    res.send('ok')
   } catch(error) {
     console.error(error)
     res.status(500).send('Error while creating the event')
@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
     // TODO: aggiungere filtro user
     const allEvents = await Event.find({})
     // se non ne trova nessuno invia un oggetto vuoto
-    res.status(200).json(allEvents)
+    res.json(allEvents)
   } catch (error) {
     console.error(error)
     res.status(500).send('Error while getting all events')
@@ -50,7 +50,7 @@ router.get('/interval', async (req, res) => {
       // TODO: aggiungere filtro user
     })
     // se non ne trova nessuno invia un oggetto vuoto
-    res.status(200).json(intervalEvents)
+    res.json(intervalEvents)
   } catch (error) {
     console.error(error)
     res.status(500).send('Error while getting events in a time interval')
@@ -62,7 +62,7 @@ router.get('/:id', async (req, res) => {
   try {
     const singleEvent = await Event.findById(req.params.id, {user:0})
     if (singleEvent) {
-      res.status(200).json(singleEvent)
+      res.json(singleEvent)
     } else {
       res.status(404).send(`No event found with id ${req.params.id}`)
     }
@@ -86,7 +86,7 @@ router.put('/:id', async (req, res) => {
     toUpdate.isAllDay = req.body.isAllDay
     toUpdate.place = req.body.place
     await toUpdate.save()
-    res.status(200).send('ok')
+    res.send('ok')
   } catch (error) {
     console.error(error)
     res.status(500).send('Error while updating event')
@@ -98,7 +98,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const deletion = await Event.findByIdAndDelete(req.params.id)
     if (!deletion) res.status(404).send(`No event found with id ${req.params.id}`)
-    res.status(200).send('ok')
+    res.send('ok')
   } catch (error) {
     console.error(error)
     res.status(500).send('Error while deleting event')

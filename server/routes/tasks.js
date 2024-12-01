@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
 
   try {
     await newTask.save()
-    res.status(200).send('ok')
+    res.send('ok')
   } catch(error) {
     console.error(error)
     res.status(500).send('Error while creating the task')
@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
     // TODO: aggiungere filtro user
     const allTasks = await Task.find({})
     // se non ne trova nessuno invia un oggetto vuoto
-    res.status(200).json(allTasks)
+    res.json(allTasks)
   } catch (error) {
     console.error(error)
     res.status(500).send('Error while getting all tasks')
@@ -44,7 +44,7 @@ router.get('/interval', async (req, res) => {
       // TODO: aggiungere filtro user
     })
     // se non ne trova nessuno invia un oggetto vuoto
-    res.status(200).json(intervalTasks)
+    res.json(intervalTasks)
   } catch (error) {
     console.error(error)
     res.status(500).send('Error while getting tasks in a time interval')
@@ -59,7 +59,7 @@ router.get('/notdone', async (req, res) => {
       // TODO: aggiungere filtro user
     })
     // se non ne trova nessuno invia un oggetto vuoto
-    res.status(200).json(notdoneTask)
+    res.json(notdoneTask)
   } catch (error) {
     console.error(error)
     res.status(500).send('Error while getting tasks not done')
@@ -71,7 +71,7 @@ router.get('/:id', async (req, res) => {
   try {
     const singleTask = await Task.findById(req.params.id, {user:0})
     if (singleTask) {
-      res.status(200).json(singleTask)
+      res.json(singleTask)
     } else {
       res.status(404).send(`No task found with id ${req.params.id}`)
     }
@@ -91,7 +91,7 @@ router.put('/:id', async (req, res) => {
     toUpdate.description = req.body.description
     toUpdate.deadline = req.body.deadline
     await toUpdate.save()
-    res.status(200).send('ok')
+    res.send('ok')
   } catch (error) {
     console.error(error)
     res.status(500).send('Error while updating task')
@@ -103,7 +103,7 @@ router.put('/toggle/:id', async (req, res) => {
   try {
     const toggle = await Task.findByIdAndUpdate(req.params.id, { isDone: !isDone })
     if (!toggle) res.status(404).send(`No task found with id ${req.params.id}`)
-    res.status(200).send('ok')
+    res.send('ok')
   } catch (error) {
     console.error(error)
     res.status(500).send('Error while toggling task')
@@ -115,7 +115,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const deletion = await Task.findByIdAndDelete(req.params.id)
     if (!deletion) res.status(404).send(`No task found with id ${req.params.id}`)
-    res.status(200).send('ok')
+    res.send('ok')
   } catch (error) {
     console.error(error)
     res.status(500).send('Error while deleting task')

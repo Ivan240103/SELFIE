@@ -50,7 +50,13 @@
   - [x] segnare un task come completato o non
   - [x] eliminare un task specifico
 - [ ] route per utenti
-  - [ ] controllare funzionamento di Passport
+  - [x] controllare funzionamento di Passport
+  - [x] registrare un nuovo utente
+  - [x] login dell'utente
+  - [ ] logout dell'utente
+  - [x] ottenere i dati di un utente specifico
+  - [ ] aggiornare i dati di un utente
+  - [ ] eliminare un utente
 - [ ] route per pomodoro (ogni user max 1 pomodoro salvato)
   - [ ] salvare nuovo pomodoro
   - [ ] prendere i dati del pomodoro dell'utente

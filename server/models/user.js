@@ -1,12 +1,20 @@
 // User model for db
 const mongoose = require('mongoose')
+const bcrypt = require('bcrypt')
 
 const userSchema = new mongoose.Schema({
   username: { type: String, unique: true, required: true },
   password: { type: String, required: true },
-  name: String,
-  surname: String,
+  name: { type: String, default: 'Nome' },
+  surname: { type: String, default: 'Cognome' },
   birthday: { type: Date, max: Date.now }
+})
+
+// della password viene salvato l'hash nel db
+userSchema.pre('save', async () => {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10)
+  }
 })
 
 module.exports = mongoose.model('User', userSchema)
