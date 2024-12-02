@@ -12,7 +12,7 @@ function Access() {
     function createEvent(e){
         e.preventDefault();
 
-        const URI = "http://localhost:8000/login";
+        const URI = "http://localhost:8000/api/users/login";
         const requestBody = {
             username:usr,
             password:psw
