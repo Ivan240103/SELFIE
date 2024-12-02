@@ -31,8 +31,8 @@ function Access() {
             //qua ho messo temporaneamente che va direttamente al calendario
             .then((data) => {
                 if(data.success){
-                    console.log("Access completed!");
-                    navigate("/calendario");
+                    localStorage.setItem('token', data.token)
+                    navigate("/dashboard");
                 }
             })
             .catch((err) => {
@@ -43,17 +43,6 @@ function Access() {
 
     return(
         <div className="corpo">
-            <nav className="navbar">
-                <div className="navbar-container">
-                    <a href="#" className="navbar-logo">MyLogo</a>
-                    <ul className="navbar-menu">
-                        <li className="navbar-item"><a href="#" className="navbar-link">Calendario</a></li>
-                        <li className="navbar-item"><a href="#" className="navbar-link">Note</a></li>
-                        <li className="navbar-item"><a href="#" className="navbar-link">Pomodoro</a></li>
-                        <li className="navbar-item"><a href="#" className="navbar-link">Contatti</a></li>
-                    </ul>
-                </div>
-            </nav>
             <div className="log">
                 <h1>Login</h1>
                 <form method="post" action="http://localhost:8000/login" onSubmit={createEvent}>
