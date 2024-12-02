@@ -5,6 +5,7 @@ import Calendar from './components/Calendar';
 import Tomato from './components/Tomato/Tomato';
 import Notes from './components/Notes'
 import Registration from './components/Registration';
+import Dashboard from './components/Dashboard';
 
 function App() {
 
@@ -16,7 +17,8 @@ function App() {
                 <Route path="/register" element={<Registration />} />
                 <Route path="/Calendar" element={<Calendar />} />
                 <Route path="/Tomato" element={<Tomato />} />
-                <Route path="/Notes" element={<Notes/>} />
+                <Route path="/Notes" element={<Notes />} />
+                <Route path="/dashboard" element={<Dashboard/>} />
             </Routes>
         </Router>
     </div>

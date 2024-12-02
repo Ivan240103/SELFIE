@@ -12,7 +12,7 @@ function Access() {
     function createEvent(e){
         e.preventDefault();
 
-        const URI = "http://localhost:8000/login";
+        const URI = "http://localhost:8000/api/users/login";
         const requestBody = {
             username:usr,
             password:psw
@@ -28,9 +28,12 @@ function Access() {
             .then((res) => {
                 if (res.ok) return res.json();
             })
-            //qua ho messo temporaneamente che va direttamente al calendario
+            //Avevo messo un console.log per vedere cosa mi diceva il server
             .then((data) => {
-                if(data.success){
+                console.log("Server Response:", data);
+                //Vede se il token dato corrisponde e va alla pagina dashboard
+                //Provato con username "desi" e password "desi"
+                if(data.token){
                     localStorage.setItem('token', data.token)
                     navigate("/dashboard");
                 }
