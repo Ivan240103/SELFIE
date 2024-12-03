@@ -57,7 +57,7 @@
   - [x] controllare funzionamento di Passport
   - [x] registrare un nuovo utente
   - [x] login dell'utente
-  - [ ] logout dell'utente
+  - [x] logout dell'utente
   - [x] ottenere i dati di un utente specifico
   - [ ] aggiornare i dati di un utente
   - [ ] modificare la password
