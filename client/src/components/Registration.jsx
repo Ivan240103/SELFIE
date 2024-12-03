@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Importa useNavigate;
 
 
 function Registration(){
@@ -8,11 +9,12 @@ function Registration(){
     const [surname, setSurname] = useState("");
     const [date, setDate] = useState("");
     const [err, setError] = useState("");
+    const navigate = useNavigate();
 
     function createEvent(e){
         e.preventDefault();
 
-        const URI = "http://localhost:8000/register";
+        const URI = "http://localhost:8000/api/users/register";
         const requestBody = {
             username:usr,
             password:psw,
@@ -29,12 +31,18 @@ function Registration(){
         
         fetch(URI, request)
             .then((res) => {
-                if (res.ok) return res.json();
+                if (res.ok){
+                    return res.json();
+                }
             })
             .then((data) => {
-                if(data.success){
-                    console.log("Registration completed!");
-                }
+                console.log("Registration completed!");
+                navigate("/login");
+                setUsr("");
+                setPsw("");
+                setName("");
+                setSurname("");
+                setDate("");
             })
             .catch((err) => {
                 //messaggio di errore
@@ -45,7 +53,7 @@ function Registration(){
     return(
         <div className="log">
             <h1>Register</h1>
-            <form method="post" action="" onSubmit={createEvent}>
+            <form method="post" action="http://localhost:8000/register" onSubmit={createEvent}>
                 <label for="username" id="username"><b>Username</b></label>
                 <input id="usr" type="text" placeholder="Enter Username" value={usr} onChange={(e) => setUsr(e.target.value)} required/>
                 <label for="password" id="password"><b>Password</b></label>
