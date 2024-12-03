@@ -51,16 +51,6 @@ app.use('/api/tasks', taskRoutes)
 const mongoURL = 'mongodb+srv://ivan:eP3C9N8S9nRkK6TS@selfie.qv0gx.mongodb.net/?retryWrites=true&w=majority&appName=SELFIE'
 mongoose.connect(mongoURL)
 
-const path = require('path');
-
-// Serve i file statici della build React
-app.use(express.static(path.join(__dirname, 'client/build')));
-
-// Gestisce tutte le altre richieste restituendo index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-});
-
 app.listen(port, () => {
   console.log(`Server online on port ${port}`)
 })
