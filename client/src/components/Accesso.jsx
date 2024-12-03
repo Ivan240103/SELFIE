@@ -29,7 +29,7 @@ function Accesso() {
             .then((data) => {
                 localStorage.setItem('token', data)
                 console.log("Access completed!");
-                console.log(localStorage.getItem('token'))
+                navigate('/protected')
             })
             .catch((err) => {
                 //Qua se sei un coglione e sbagli i dati

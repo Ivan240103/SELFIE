@@ -4,54 +4,54 @@ import axios from 'axios'
 const API_BASE_URL = 'http://localhost:8000/api'
 
 function Debug() {
+  const createEvent = async () => {
+    await axios.post(`${API_BASE_URL}/events/`,
+      {
+        title: 'TITOLO',
+        description: 'DESCRIZIONE'
+      },
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      }
+    )
+  }
+  
   const getAllEvents = async () => {
-    const r = await axios.get(`${API_BASE_URL}/events/`)
+    const r = await axios.get(`${API_BASE_URL}/events/`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    })
     document.getElementById('debug').innerHTML = JSON.stringify(r.data)
   }
 
   const getSpecificEvent = async () => {
     const id = document.getElementById('id').value
-    const r = await axios.get(`${API_BASE_URL}/events/${id}`)
+    const r = await axios.get(`${API_BASE_URL}/events/${id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    })
     document.getElementById('debug').innerHTML = JSON.stringify(r.data)
   }
   
   const deleteSpecificEvent = async () => {
     const id = document.getElementById('id').value
-    const r = await axios.delete(`${API_BASE_URL}/events/${id}`)
+    const r = await axios.delete(`${API_BASE_URL}/events/${id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    })
     document.getElementById('debug').innerHTML = JSON.stringify(r.data)
-  }
-  
-  const getSpecificUser = async () => {
-    const usr = document.getElementById('username').value
-    const r = await axios.get(`${API_BASE_URL}/users/${usr}`)
-    document.getElementById('debug').innerHTML = JSON.stringify(r.data)
-  }
-
-  const registerUser = async () => {
-    const body = {
-        username: 'desi',
-        password: 'desi',
-        name: 'ivan',
-        surname: 'de simone'
-    }
-    await axios.post(`${API_BASE_URL}/users/register`, body)
   }
 
   return(
     <div>
-      <button type="button" onClick={registerUser}>Registra</button>
+      <h1>Debug</h1>
       <p id="debug"></p>
-      <button type="button" onClick={getAllEvents}>Get all event</button><br />
+      <button type="button" onClick={getAllEvents}>Get all event</button>
+      <br />
       <input type="text" name="id" id="id" />
       <button type="button" onClick={getSpecificEvent}>Get specific event</button>
+      <br />
       <input type="text" name="username" id="username" />
-      <button type="button" onClick={getSpecificUser}>Get specific user</button>
       <button type="button" onClick={deleteSpecificEvent}>Delete event</button>
-      <form action="http://localhost:8000/events/" method="post">
-        <input type="date" name="start" />
-        <input type="date" name="end" />
-        <button type="submit">Create event</button>
-      </form>
+      <br />
+      <button type="button" onClick={createEvent}>Create event</button>
     </div>
   )
 }
