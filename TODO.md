@@ -1,7 +1,7 @@
 # Cose da fare
 
 ## Client
-- [ ] memorizzare User nei cookie (?) per creare eventi, task...
+- [x] memorizzare User nel localStorage per creare eventi, task...
 - [ ] home dashboard
   - [ ] ultima nota modificata
   - [ ] ultima sessione pomodoro oppure crea nuova
@@ -33,13 +33,17 @@
   - [ ] pagina del profilo personale
 
 ## Server
-- [x] route per eventi
+- [ ] criptare la password nel db
+- [ ] criptare la password nel tragitto c <---> s
+- [ ] route per eventi
   - [x] creazione nuovo evento
   - [x] ottenere tutti gli eventi
   - [x] ottenere un evento specifico
   - [x] ottenere eventi in un intervallo di tempo dato
   - [x] modificare un evento specifico
   - [x] eliminare un evento specifico
+  - [ ] modificare un evento ripetibile
+  - [ ] eliminare un evento ripetibile
 - [x] route per task
   - [x] creazione nuovo task
   - [x] ottenere tutti i task
@@ -56,6 +60,8 @@
   - [ ] logout dell'utente
   - [x] ottenere i dati di un utente specifico
   - [ ] aggiornare i dati di un utente
+  - [ ] modificare la password
+  - [ ] recupero della password
   - [ ] eliminare un utente
 - [ ] route per pomodoro (ogni user max 1 pomodoro salvato)
   - [ ] salvare nuovo pomodoro

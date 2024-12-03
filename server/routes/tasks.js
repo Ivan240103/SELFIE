@@ -1,125 +1,125 @@
-// Route for task-related operations
-const express = require('express');
-const router = express.Router();
+/**
+ * Routes for Task-related operations
+ */
+
+const express = require('express')
+const auth = require('../middleware/auth')
 const Task = require('../models/task')
 
+const router = express.Router()
+
 // creazione nuovo task
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   const newTask = new Task({
     title: req.body.title,
     description: req.body.description,
     deadline: req.body.deadline,
-    isDone: req.body.isDone,
-    user: req.body.user
+    owner: req.user.username
   })
 
   try {
     await newTask.save()
-    res.send('ok')
-  } catch(error) {
-    console.error(error)
-    res.status(500).send('Error while creating the task')
+    return res.send('ok')
+  } catch(err) {
+    console.error(err)
+    return res.status(500).send('Error while creating the task')
   }
 })
 
 // ottenere tutti i task
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
-    // TODO: aggiungere filtro user
-    const allTasks = await Task.find({})
+    const allTasks = await Task.find({ owner: req.user.username })
     // se non ne trova nessuno invia un oggetto vuoto
-    res.json(allTasks)
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Error while getting all tasks')
+    return res.json(allTasks)
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while getting all tasks')
   }
 })
 
 // ottenere task in un intervallo di tempo dato
 // request template: .../interval?s={startDatetime}&e={endDatetime}
-router.get('/interval', async (req, res) => {
+router.get('/interval', auth, async (req, res) => {
   try {
     const intervalTasks = await Task.find({
-      deadline: { $gte: req.query.s, $lte: req.query.e }
-      // TODO: aggiungere filtro user
+      deadline: { $gte: req.query.s, $lte: req.query.e },
+      owner: req.user.username
     })
     // se non ne trova nessuno invia un oggetto vuoto
-    res.json(intervalTasks)
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Error while getting tasks in a time interval')
+    return res.json(intervalTasks)
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while getting tasks in a time interval')
   }
 })
 
 // ottenere tutti i task non completati
-router.get('/notdone', async (req, res) => {
+router.get('/notdone', auth, async (req, res) => {
   try {
     const notdoneTask = await Task.find({
-      isDone: { $eq: false }
-      // TODO: aggiungere filtro user
+      isDone: { $eq: false },
+      owner: req.user.username
     })
     // se non ne trova nessuno invia un oggetto vuoto
-    res.json(notdoneTask)
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Error while getting tasks not done')
+    return res.json(notdoneTask)
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while getting tasks not done')
   }
 })
 
 // ottenere un task specifico
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
-    const singleTask = await Task.findById(req.params.id, {user:0})
-    if (singleTask) {
-      res.json(singleTask)
-    } else {
-      res.status(404).send(`No task found with id ${req.params.id}`)
-    }
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Error while getting specific task')
+    const singleTask = await Task.findById(req.params.id)
+    if (!singleTask) return res.status(404).send(`No task found with id ${req.params.id}`)
+    return res.json(singleTask)
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while getting specific task')
   }
 })
 
 // modificare un task specifico
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   try {
     const toUpdate = await Task.findById(req.params.id)
-    if (!toUpdate) res.status(404).send(`No task found with id ${req.params.id}`)
+    if (!toUpdate) return res.status(404).send(`No task found with id ${req.params.id}`)
     // modifiche
     toUpdate.title = req.body.title
     toUpdate.description = req.body.description
     toUpdate.deadline = req.body.deadline
     await toUpdate.save()
-    res.send('ok')
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Error while updating task')
+    return res.send('ok')
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while updating task')
   }
 })
 
 // segnare un task come completato o non
-router.put('/toggle/:id', async (req, res) => {
+router.put('/toggle/:id', auth, async (req, res) => {
   try {
     const toggle = await Task.findByIdAndUpdate(req.params.id, { isDone: !isDone })
-    if (!toggle) res.status(404).send(`No task found with id ${req.params.id}`)
-    res.send('ok')
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Error while toggling task')
+    if (!toggle) return res.status(404).send(`No task found with id ${req.params.id}`)
+    return res.send('ok')
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while toggling task')
   }
 })
 
 // eliminare un task specifico
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const deletion = await Task.findByIdAndDelete(req.params.id)
-    if (!deletion) res.status(404).send(`No task found with id ${req.params.id}`)
-    res.send('ok')
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Error while deleting task')
+    if (!deletion) return res.status(404).send(`No task found with id ${req.params.id}`)
+    return res.send('ok')
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while deleting task')
   }
 })
 
-module.exports = router;
+module.exports = router

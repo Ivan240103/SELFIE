@@ -1,13 +1,31 @@
-// Task model for db
+/**
+ * Task model for db
+ */
+
 const mongoose = require('mongoose')
-const User = require('./user')
 
 const taskSchema = mongoose.Schema({
-  title: { type: String, default: 'Senza titolo' },
-  description: String,
-  deadline: { type: Date, default: Date.now() + 7 },
-  isDone: { type: Boolean, default: false },
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  title: {
+    type: String,
+    default: 'Senza titolo'
+  },
+  description: {
+    type: String,
+    default: 'Nessuna descrizione'
+  },
+  deadline: {
+    type: Date,
+    required: true
+  },
+  isDone: {
+    type: Boolean,
+    default: false
+  },
+  // username dell'utente che ha creato l'attività
+  owner: {
+    type: String,
+    required: true
+  }
 })
 
 module.exports = mongoose.model("Task", taskSchema)

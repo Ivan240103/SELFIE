@@ -6,8 +6,9 @@ const express = require('express')
 const mongoose = require('mongoose')
 const passport = require('passport')
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt')
-const User = require('./models/user')
 const cors = require('cors')
+require('dotenv').config()
+const User = require('./models/user')
 
 const app = express()
 const port = 8000
@@ -25,7 +26,7 @@ app.use(passport.initialize())
 // configurazione passport.js
 const opts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: '6e1811f7f6040238567c4a280a1184c1'
+  secretOrKey: process.env.JWT_SECRET
 }
 
 passport.use(
@@ -48,8 +49,12 @@ const taskRoutes = require('./routes/tasks')
 app.use('/api/tasks', taskRoutes)
 
 // connessione al db
-const mongoURL = 'mongodb+srv://ivan:eP3C9N8S9nRkK6TS@selfie.qv0gx.mongodb.net/?retryWrites=true&w=majority&appName=SELFIE'
-mongoose.connect(mongoURL)
+const u = process.env.DB_USER
+const p = process.env.DB_PSW
+const mongoURL = `mongodb+srv://${u}:${p}@selfie.qv0gx.mongodb.net/?retryWrites=true&w=majority&appName=SELFIE`
+mongoose.connect(mongoURL).then(() => {
+  console.log('MongoDB connected')
+})
 
 app.listen(port, () => {
   console.log(`Server online on port ${port}`)

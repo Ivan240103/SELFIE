@@ -24,14 +24,12 @@ function Accesso() {
         
         fetch(URI, request)
             .then((res) => {
-                if (res.ok) return res.json();
+                return res.json();
             })
             .then((data) => {
-                if(data){
-                    window.alert('login successful');
-                    // TODO: localStorage.setItem('token', data.token)
-                    console.log("Access completed!");
-                }
+                localStorage.setItem('token', data)
+                console.log("Access completed!");
+                console.log(localStorage.getItem('token'))
             })
             .catch((err) => {
                 //Qua se sei un coglione e sbagli i dati
@@ -40,19 +38,19 @@ function Accesso() {
     }
 
     return(
-        <body>
-            <nav class="navbar">
-                <div class="navbar-container">
-                    <a href="#" class="navbar-logo">MyLogo</a>
-                    <ul class="navbar-menu">
-                        <li class="navbar-item"><a href="#" class="navbar-link">Home</a></li>
-                        <li class="navbar-item"><a href="#" class="navbar-link">About</a></li>
-                        <li class="navbar-item"><a href="#" class="navbar-link">Services</a></li>
-                        <li class="navbar-item"><a href="#" class="navbar-link">Contact</a></li>
+        <div>
+            <nav className="navbar">
+                <div className="navbar-container">
+                    <a href="#" className="navbar-logo">MyLogo</a>
+                    <ul className="navbar-menu">
+                        <li className="navbar-item"><a href="#" className="navbar-link">Home</a></li>
+                        <li className="navbar-item"><a href="#" className="navbar-link">About</a></li>
+                        <li className="navbar-item"><a href="#" className="navbar-link">Services</a></li>
+                        <li className="navbar-item"><a href="#" className="navbar-link">Contact</a></li>
                     </ul>
                 </div>
             </nav>
-            <div class="log">
+            <div className="log">
                 <form onSubmit={createEvent}>
                     <label><b>Username</b></label>
                     <input type="text" placeholder="Enter Username" value={usr} onChange={(e) => setUsr(e.target.value)} required/>
@@ -61,7 +59,7 @@ function Accesso() {
                     <button type="submit">Accedi</button>
                 </form>
             </div>
-        </body>
+        </div>
     )
 }
 

@@ -1,70 +1,66 @@
-// Route for user-related operations
-const express = require('express');
+/**
+ * Routes for User-related operations
+ */
+
+const express = require('express')
+const auth = require('../middleware/auth')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
-const passport = require('passport')
-const router = express.Router();
+require('dotenv').config()
 const User = require('../models/user')
 
+const router = express.Router()
+
 // registrare un nuovo utente
-// TODO: la psw viaggia in chiaro
 router.post('/register', async (req, res) => {
-  // TODO: password non viene criptata nel db
   const { username, password, name, surname, birthday } = req.body
-  await bcrypt.hash(password, 10)
-  const newUser = User({
+  // FIXME: await bcrypt.hash(password, 10)
+  const newUser = new User({
     username: username,
     password: password,
     name: name,
     surname: surname,
-    birthday: birthday,
+    birthday: birthday
   })
 
   try {
     await newUser.save()
-    res.send('ok')
-  } catch(error) {
-    console.error(error)
-    res.status(500).send('Error while registering new user')
+    return res.send('ok')
+  } catch(err) {
+    console.error(err)
+    return res.status(500).send('Error while registering new user')
   }
 })
 
 // login dell'utente
-// TODO: la psw viaggia in chiaro
 router.post('/login', async (req, res) => {
   const { username, password } = req.body
   try {
     const user = await User.findOne({ username: username })
-    if (!user) {
-      res.status(404).send(`No user found with username ${username}`)
-      return
-    }
-    // const pswOk = await bcrypt.compare(password, user.password)
+    if (!user) return res.status(400).send('Incorrect username')
+    // FIXME: const pswOk = await bcrypt.compare(password, user.password)
     const pswOk = password == user.password
-    if (!pswOk) {
-      res.status(400).send('Password incorrect')
-      return
-    }
+    if (!pswOk) return res.status(400).send('Incorrect password')
 
-    const payload = { userId: user._id, username: user.username }
-    const token = jwt.sign(payload, '6e1811f7f6040238567c4a280a1184c1', { expiresIn: '24h' })
-    res.json({ token })
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Error during authentication')
+    const tokenPayload = { userId: user._id, username: user.username }
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '24h' })
+    return res.json(token)
+  } catch (err) {
+    console.error(err)
+    res.status(500).send('Error during login')
   }
 })
 
 // ottenere i dati di un utente specifico
-router.get('/:username', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.params.username })
-    if (!user) res.status(404).send(`No user found with username ${req.params.username}`)
-    res.json(user)
-  } catch (error) {
-    console.error(error)
+    const user = await User.findOne({ username: req.user.username })
+    if (!user) return res.status(404).send(`No user found with username ${req.user.username}`)
+    return res.json(user)
+  } catch (err) {
+    console.error(err)
     res.status(500).send('Error while getting specific user')
   }
 })
 
-module.exports = router;
+module.exports = router
