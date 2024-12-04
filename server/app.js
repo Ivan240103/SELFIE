@@ -49,6 +49,8 @@ const taskRoutes = require('./routes/tasks')
 app.use('/api/tasks', taskRoutes)
 const tomatoRoutes = require('./routes/tomatoes')
 app.use('/api/tomatoes', tomatoRoutes)
+const noteRoutes = require('./routes/notes')
+app.use('/api/notes', noteRoutes)
 
 // connessione al db
 const u = process.env.DB_USER

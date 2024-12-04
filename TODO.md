@@ -1,6 +1,8 @@
 # Cose da fare
 
-## Client
+## Progetto base
+
+### Client
 - [x] memorizzare User nel localStorage per creare eventi, task...
 - [ ] home dashboard
   - [ ] ultima nota modificata
@@ -32,7 +34,7 @@
 - [ ] profilo utente
   - [ ] pagina del profilo personale
 
-## Server
+### Server
 - [ ] criptare la password nel db
 - [ ] criptare la password nel tragitto c <---> s
 - [ ] route per eventi
@@ -68,10 +70,16 @@
   - [x] prendere i dati del pomodoro dell'utente
   - [x] modificare un pomodoro specifico
   - [x] eliminare un pomodoro specifico (finito o eliminato)
-- [ ] route per note
-  - [ ] creare nuova nota
-  - [ ] ottenere una nota specifica
-  - [ ] ottenere tutte le note
-  - [ ] ottenere ultima nota modificata
-  - [ ] modificare una nota
-  - [ ] eliminare una nota
+- [x] route per note
+  - [x] creare una nuova nota
+  - [x] ottenere tutte le note
+  - [x] ottenere ultima nota modificata
+  - [x] ottenere una nota specifica
+  - [x] modificare una nota
+  - [x] eliminare una nota
+
+## Prima estensione
+- [ ] 
+
+## Seconda estensione
+- [ ] 

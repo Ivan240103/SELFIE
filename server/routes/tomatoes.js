@@ -1,5 +1,5 @@
 /**
- * Route for Tomato-related operations
+ * Routes for Tomato-related operations
  */
 
 const express = require('express')
