@@ -62,12 +62,12 @@
   - [ ] aggiornare i dati di un utente
   - [ ] modificare la password
   - [ ] recupero della password
-  - [ ] eliminare un utente
-- [ ] route per pomodoro (ogni user max 1 pomodoro salvato)
-  - [ ] salvare nuovo pomodoro
-  - [ ] prendere i dati del pomodoro dell'utente
-  - [ ] modificare un pomodoro specifico
-  - [ ] eliminare un pomodoro specifico (finito o eliminato)
+  - [x] eliminare un utente
+- [x] route per pomodoro (ogni user max 1 pomodoro salvato)
+  - [x] salvare nuovo pomodoro
+  - [x] prendere i dati del pomodoro dell'utente
+  - [x] modificare un pomodoro specifico
+  - [x] eliminare un pomodoro specifico (finito o eliminato)
 - [ ] route per note
   - [ ] creare nuova nota
   - [ ] ottenere una nota specifica

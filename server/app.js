@@ -47,6 +47,8 @@ const eventRoutes = require('./routes/events')
 app.use('/api/events', eventRoutes)
 const taskRoutes = require('./routes/tasks')
 app.use('/api/tasks', taskRoutes)
+const tomatoRoutes = require('./routes/tomatoes')
+app.use('/api/tomatoes', tomatoRoutes)
 
 // connessione al db
 const u = process.env.DB_USER

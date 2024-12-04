@@ -33,8 +33,10 @@ const eventSchema = mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // n = no repetition, d = daily, w = weekly, m = monthly, y = yearly
   frequency: {
-    type: String
+    type: String,
+    default: 'n'
   },
   repetitions: {
     type: String

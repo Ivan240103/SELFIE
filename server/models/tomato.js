@@ -30,6 +30,11 @@ const tomatoSchema = mongoose.Schema({
     type: Number,
     default: -1
   },
+  // un loop è inteso come studio + pausa
+  remainingLoops: {
+    type: Number,
+    default: -1
+  },
   // username dell'utente che ha creato il timer
   owner: {
     type: String,

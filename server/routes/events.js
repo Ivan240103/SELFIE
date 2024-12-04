@@ -80,12 +80,12 @@ router.put('/:id', auth, async (req, res) => {
     const toUpdate = await Event.findById(req.params.id)
     if (!toUpdate) return res.status(404).send(`No event found with id ${req.params.id}`)
     // modifiche
-    toUpdate.title = req.body.title
-    toUpdate.description = req.body.description
-    toUpdate.start = req.body.start
-    toUpdate.end = req.body.end
-    toUpdate.isAllDay = req.body.isAllDay
-    toUpdate.place = req.body.place
+    toUpdate.title = req.body.title || toUpdate.title
+    toUpdate.description = req.body.description || toUpdate.description
+    toUpdate.start = req.body.start || toUpdate.start
+    toUpdate.end = req.body.end || toUpdate.end
+    toUpdate.isAllDay = req.body.isAllDay || toUpdate.isAllDay
+    toUpdate.place = req.body.place || toUpdate.place
     await toUpdate.save()
     return res.send('ok')
   } catch (err) {

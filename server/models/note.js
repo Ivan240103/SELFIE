@@ -25,7 +25,7 @@ const noteSchema = mongoose.Schema({
     type: [String],
     default: ['None']
   },
-  length: {
+  textLength: {
     type: Number,
     default: -1
   },

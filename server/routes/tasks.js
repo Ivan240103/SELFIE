@@ -87,9 +87,9 @@ router.put('/:id', auth, async (req, res) => {
     const toUpdate = await Task.findById(req.params.id)
     if (!toUpdate) return res.status(404).send(`No task found with id ${req.params.id}`)
     // modifiche
-    toUpdate.title = req.body.title
-    toUpdate.description = req.body.description
-    toUpdate.deadline = req.body.deadline
+    toUpdate.title = req.body.title || toUpdate.title
+    toUpdate.description = req.body.description || toUpdate.description
+    toUpdate.deadline = req.body.deadline || toUpdate.deadline
     await toUpdate.save()
     return res.send('ok')
   } catch (err) {

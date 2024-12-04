@@ -63,4 +63,16 @@ router.get('/', auth, async (req, res) => {
   }
 })
 
+// eliminare un utente
+router.delete('/', auth, async (req, res) => {
+  try {
+    const deletion = await User.findOneAndDelete({ username: req.user.username })
+    if (!deletion) return res.status(404).send(`No user found with username ${req.user.username}`)
+    return res.send('ok')
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while deleting user')
+  }
+})
+
 module.exports = router
