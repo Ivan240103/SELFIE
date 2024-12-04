@@ -4,6 +4,7 @@
 
 ### Client
 - [x] memorizzare User nel localStorage per creare eventi, task...
+- [ ] view time machine
 - [ ] home dashboard
   - [ ] ultima nota modificata
   - [ ] ultima sessione pomodoro oppure crea nuova
@@ -12,7 +13,7 @@
 - [ ] eventi e task
   - [ ] calendario month
   - [ ] calendario week
-  - [ ] calendario day (?)
+  - [ ] calendario day
   - [ ] creazione evento
   - [ ] visualizzazione evento specifico
   - [ ] modifica di un evento
@@ -37,6 +38,7 @@
 ### Server
 - [ ] criptare la password nel db
 - [ ] criptare la password nel tragitto c <---> s
+- [ ] time machine
 - [ ] route per eventi
   - [x] creazione nuovo evento
   - [x] ottenere tutti gli eventi
@@ -79,7 +81,23 @@
   - [x] eliminare una nota
 
 ## Prima estensione
-- [ ] 
+- [ ] messaggistica ???
+- [ ] sistemi di notifica
+- [ ] geolocalizzazione per gli eventi
+- [ ] personalizzazione di ogni preview nella dashboard
+- [ ] notifica per gli eventi a scelta (mail, SO, whatsapp...), con un certo anticipo e una certa ripetizione
+- [ ] notifica crescente di urgenza per le attività
+- [ ] note in markdown
+- [ ] cicli di pomodoro programmati come eventi
+- [ ] cicli non completati si spostano alle giornate successive
 
 ## Seconda estensione
-- [ ] 
+- [ ] eventi e task condivisi tra utenti
+- [ ] integrazione con calendari terzi
+- [ ] mandare messaggi o notifiche ad altri utenti (non chat)
+- [ ] includere altri utenti negli eventi, i quali possono accettare o rifiutare
+- [ ] utenti si possono segnare non disponibili in certi intervalli di tempo
+- [ ] eventi integrati con standard iCalendar, importabili ed esportabili
+- [ ] attività assegnabili a più utenti
+- [ ] lista di accesso per le note
+- [ ] notifica ad un utente per condividere un pomodoro
