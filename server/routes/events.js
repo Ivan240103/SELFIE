@@ -1,10 +1,15 @@
-// Route for event-related operations
-const express = require('express');
-const router = express.Router();
+/**
+ * Routes for Event-related operations
+ */
+
+const express = require('express')
+const auth = require('../middleware/auth')
 const Event = require('../models/event')
 
+const router = express.Router()
+
 // creazione nuovo evento
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   const newEvent = new Event({
     title: req.body.title,
     description: req.body.description,
@@ -15,94 +20,90 @@ router.post('/', async (req, res) => {
     frequency: req.body.frequency,
     repetitions: req.body.repetitions,
     place: req.body.place,
-    user: req.body.user
+    owner: req.user.username
   })
 
   try {
     await newEvent.save()
-    res.send('ok')
-  } catch(error) {
-    console.error(error)
-    res.status(500).send('Error while creating the event')
+    return res.send('ok')
+  } catch(err) {
+    console.error(err)
+    return res.status(500).send('Error while creating the event')
   }
 })
 
 // ottenere tutti gli eventi
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
-    // TODO: aggiungere filtro user
-    const allEvents = await Event.find({})
+    const allEvents = await Event.find({ owner: req.user.username })
     // se non ne trova nessuno invia un oggetto vuoto
-    res.json(allEvents)
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Error while getting all events')
+    return res.json(allEvents)
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while getting all events')
   }
 })
 
 // ottenere eventi in un intervallo di tempo dato
 // request template: .../interval?s={startDatetime}&e={endDatetime}
-router.get('/interval', async (req, res) => {
+router.get('/interval', auth, async (req, res) => {
   try {
     const intervalEvents = await Event.find({
       start: { $gte: req.query.s },
-      end: { $lte: req.query.e }
-      // TODO: aggiungere filtro user
+      end: { $lte: req.query.e },
+      owner: req.user.username
     })
     // se non ne trova nessuno invia un oggetto vuoto
-    res.json(intervalEvents)
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Error while getting events in a time interval')
+    return res.json(intervalEvents)
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while getting events in a time interval')
   }
 })
 
 // ottenere un evento specifico
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
-    const singleEvent = await Event.findById(req.params.id, {user:0})
-    if (singleEvent) {
-      res.json(singleEvent)
-    } else {
-      res.status(404).send(`No event found with id ${req.params.id}`)
-    }
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Error while getting specific event')
+    const singleEvent = await Event.findById(req.params.id)
+    if (!singleEvent) return res.status(404).send(`No event found with id ${req.params.id}`)
+    return res.json(singleEvent)
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while getting specific event')
   }
 })
 
 // modificare un evento specifico
 // la "ripetibilità" non è modificabile, si crea un nuovo evento
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   try {
     const toUpdate = await Event.findById(req.params.id)
-    if (!toUpdate) res.status(404).send(`No event found with id ${req.params.id}`)
+    if (!toUpdate) return res.status(404).send(`No event found with id ${req.params.id}`)
     // modifiche
-    toUpdate.title = req.body.title
-    toUpdate.description = req.body.description
-    toUpdate.start = req.body.start
-    toUpdate.end = req.body.end
-    toUpdate.isAllDay = req.body.isAllDay
-    toUpdate.place = req.body.place
+    toUpdate.title = req.body.title || toUpdate.title
+    toUpdate.description = req.body.description || toUpdate.description
+    toUpdate.start = req.body.start || toUpdate.start
+    toUpdate.end = req.body.end || toUpdate.end
+    toUpdate.isAllDay = req.body.isAllDay || toUpdate.isAllDay
+    toUpdate.place = req.body.place || toUpdate.place
     await toUpdate.save()
-    res.send('ok')
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Error while updating event')
+    return res.send('ok')
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while updating event')
   }
 })
 
 // eliminare un evento specifico
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const deletion = await Event.findByIdAndDelete(req.params.id)
-    if (!deletion) res.status(404).send(`No event found with id ${req.params.id}`)
-    res.send('ok')
-  } catch (error) {
-    console.error(error)
+    if (!deletion) return res.status(404).send(`No event found with id ${req.params.id}`)
+    return res.send('ok')
+  } catch (err) {
+    console.error(err)
     res.status(500).send('Error while deleting event')
   }
 })
 
-module.exports = router;
+module.exports = router

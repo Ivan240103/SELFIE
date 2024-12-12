@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useEffect } from "react";
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import Notes from './Notes';
+import Event from "./Event";
+import Task from "./Task"
 
 function Calendar() {
   const [weekendsVisible, setWeekendsVisible] = useState(true);
@@ -13,14 +15,37 @@ function Calendar() {
     setWeekendsVisible(!weekendsVisible);
   }
 
-  function handleNoteSave(notes) {
-    // Converte le note in eventi di calendario
-    const events = notes.map((note) => ({
-      title: note.text,
-      start: note.date,
-    }));
-    setCalendarEvents(events);
+  function handleEventSave(newEvent) {
+    setCalendarEvents([...calendarEvents, newEvent]);
   }
+
+  function handleTaskSave(newTask) {
+    const taskEvent = {
+      title: newTask.title,
+      start: newTask.deadline,
+      allDay: false, // Puoi modificare in base ai requisiti
+    };
+    setCalendarEvents([...calendarEvents, taskEvent]);
+  }
+
+
+  useEffect(() => {
+    // Carica gli eventi dal backend
+    async function fetchEvents() {
+      try {
+        const response = await fetch("http://localhost:8000/api/events/");
+        if (response.ok) {
+          const events = await response.json();
+          setCalendarEvents(events);
+        } else {
+          console.error('Errore durante il caricamento degli eventi.');
+        }
+        } catch (error) {
+        console.error('Errore nel caricamento degli eventi:', error);
+        }
+    }
+    fetchEvents();
+  }, []);
 
   return (
     <div className='demo-app'>
@@ -45,8 +70,9 @@ function Calendar() {
           weekends={weekendsVisible}
           events={calendarEvents} // Imposta gli eventi nel calendario
         />
+        <Event onSaveEvent={handleEventSave} />
+        <Task onSaveTask={handleTaskSave} /> {/* Aggiunge il form per le task */}
       </div>
-      <Notes onNoteSave={handleNoteSave} />
     </div>
   );
 }
