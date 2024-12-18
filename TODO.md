@@ -63,7 +63,7 @@
   - [x] login dell'utente
   - [x] logout dell'utente
   - [x] ottenere i dati di un utente specifico
-  - [ ] aggiornare i dati di un utente
+  - [x] aggiornare i dati di un utente
   - [ ] modificare la password
   - [ ] recupero della password
   - [x] eliminare un utente

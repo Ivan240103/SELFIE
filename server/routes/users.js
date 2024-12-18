@@ -13,10 +13,11 @@ const router = express.Router()
 
 // registrare un nuovo utente
 router.post('/register', async (req, res) => {
-  const { username, password, name, surname, birthday } = req.body
+  const { username, email, password, name, surname, birthday } = req.body
   // FIXME: await bcrypt.hash(password, 10)
   const newUser = new User({
     username: username,
+    email: email,
     password: password,
     name: name,
     surname: surname,
@@ -60,6 +61,24 @@ router.get('/', auth, async (req, res) => {
   } catch (err) {
     console.error(err)
     res.status(500).send('Error while getting specific user')
+  }
+})
+
+// aggiornare i dati di un utente
+router.put('/', auth, async (req, res) => {
+  try {
+    const toUpdate = await User.findOne({ username: req.user.username })
+    if (!toUpdate) return res.status(404).send(`No user found with username ${req.sur.username}`)
+    // modifiche
+    toUpdate.email = req.body.email || toUpdate.email
+    toUpdate.name = req.body.name || toUpdate.name
+    toUpdate.surname = req.body.surname || toUpdate.surname
+    toUpdate.birthday = req.body.birthday || toUpdate.birthday
+    await toUpdate.save()
+    return res.json(toUpdate)
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while updating user info')
   }
 })
 
