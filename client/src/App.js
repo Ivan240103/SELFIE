@@ -8,6 +8,8 @@ import Debug from './components/Debug';
 import Protected from './components/Protected';
 import Unauthorized from './components/Unauthorized';
 
+import './css/App.css'
+
 function App() {
   return (
     <TimeMachineProvider>
