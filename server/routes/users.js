@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 require('dotenv').config()
 const User = require('../models/user')
+import { getTime, setTime } from '../services/TimeMachine'
 
 const router = express.Router()
 
@@ -64,6 +65,16 @@ router.get('/', auth, async (req, res) => {
   }
 })
 
+// ottenere il tempo in vigore per un utente
+router.get('/time', auth, async (req, res) => {
+  try {
+    const time = getTime(req.user.username)
+    return res.json(time)
+  } catch (err) {
+    return res.status(500).send('Error while getting time')
+  }
+})
+
 // aggiornare i dati di un utente
 router.put('/', auth, async (req, res) => {
   try {
@@ -79,6 +90,17 @@ router.put('/', auth, async (req, res) => {
   } catch (err) {
     console.error(err)
     return res.status(500).send('Error while updating user info')
+  }
+})
+
+// modificare l'offset di un utente
+// body.time = Date a cui ci si vuole spostare
+router.put('/time', auth, async (req, res) => {
+  try {
+    setTime(req.user.username, req.body.time)
+    return res.send('ok')
+  } catch (err) {
+    return res.status(500).send('Error while setting time')
   }
 })
 

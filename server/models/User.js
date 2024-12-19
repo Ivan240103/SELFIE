@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema({
   birthday: {
     type: Date,
     max: Date.now
+  },
+  // spostamento del datetime
+  offset: {
+    type: Number,
+    default: 0
   }
 })
 
