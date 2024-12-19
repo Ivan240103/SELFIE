@@ -13,27 +13,6 @@ function Tomato() {
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [totalTime, setTotalTime] = useState("");
 
-    const calculateCycles = (totalMinutes) => {
-        const studyTime = 35;
-        const breakTime = 5;
-        const cycleTime = studyTime + breakTime;
-
-        const cycles = Math.floor(totalMinutes / cycleTime);
-        const remainingTime = totalMinutes % cycleTime;
-
-        let finalStudyTime = studyTime;
-        let finalBreakTime = breakTime;
-        let finalSessions = cycles;
-
-        if (remainingTime > 0) {
-            finalStudyTime = Math.min(remainingTime, studyTime);
-            finalBreakTime = Math.max(remainingTime - studyTime, 0);
-            finalSessions += 1;
-        }
-
-        return { studyTime: finalStudyTime, breakTime: finalBreakTime, sessions: finalSessions };
-    };
-
     useEffect(() => {
         let interval;
         if (buttonActivated && !buttonPaused) {
@@ -67,20 +46,41 @@ function Tomato() {
         numberOfSessions,
     ]);
 
-    const formatTime = (timeInSeconds) => {
+    function calculateCycles(totalMinutes){
+        const studyTime = 35;
+        const breakTime = 5;
+        const cycleTime = studyTime + breakTime;
+
+        const cycles = Math.floor(totalMinutes / cycleTime);
+        const remainingTime = totalMinutes % cycleTime;
+
+        let finalStudyTime = studyTime;
+        let finalBreakTime = breakTime;
+        let finalSessions = cycles;
+
+        if (remainingTime > 0) {
+            finalStudyTime = Math.min(remainingTime, studyTime);
+            finalBreakTime = Math.max(remainingTime - studyTime, 0);
+            finalSessions += 1;
+        }
+
+        return { studyTime: finalStudyTime, breakTime: finalBreakTime, sessions: finalSessions };
+    };
+
+    function formatTime(timeInSeconds) {
         const minutes = Math.floor(timeInSeconds / 60);
         const seconds = timeInSeconds % 60;
         return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     };
 
-    const handleStartPauseClick = () => {
+    function handleStartPauseClick(){
         setButtonPaused(!buttonPaused);
         if (buttonPaused) {
             setButtonActivated(true);
         }
     };
 
-    const handleResetClick = () => {
+    function handleResetClick(){
         setButtonActivated(false);
         setButtonPaused(true);
         setCurrentSecond(selectStudyTime * 60);
@@ -88,7 +88,7 @@ function Tomato() {
         setPauseTime(false);
     };
 
-    const handleSkipClick = () => {
+    function handleSkipClick(){
         if (pauseTime) {
             setPauseTime(false);
             setCurrentSecond(selectStudyTime * 60);
@@ -105,24 +105,24 @@ function Tomato() {
     };
 
 
-    const handleRestartCycleClick = () => {
+    function handleRestartCycleClick(){
         setCurrentSession(1);
         setCurrentSecond(selectStudyTime * 60); 
         setPauseTime(false); 
     };
 
-    const handleEndCycleClick = () => {
+    function handleEndCycleClick(){
         setButtonActivated(false);
         setButtonPaused(true);
         setCurrentSecond(0); 
         setCurrentSession(numberOfSessions); 
     };
 
-    const toggleSettings = () => {
+    function toggleSettings(){
         setSettingsOpen(!settingsOpen);
     };
 
-    const handleSelectChange = (e) => {
+    function handleSelectChange(e){
         const { name, value } = e.target;
         if (name === 'studyTime') {
             setSelectStudyTime(Number(value));
@@ -134,11 +134,11 @@ function Tomato() {
         }
     };
 
-    const handleTotalTimeChange = (e) => {
+    function handleTotalTimeChange(e){
         setTotalTime(e.target.value);
     };
 
-    const handleStartCycles = () => {
+    function handleStartCycles(){
         if (totalTime.trim() !== "") {
             const totalMinutes = Number(totalTime);
             if (totalMinutes > 0) {
