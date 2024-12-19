@@ -12,10 +12,10 @@ body {
 
 .main {
     display: flex;
-    justify-content: center; /* Centra orizzontalmente */
-    align-items: center;     /* Centra verticalmente */
+    justify-content: center; 
+    align-items: center;    
     width: 100%;
-    height: 100vh;            /* Utilizza tutta l'altezza della finestra */
+    height: 100vh;            
 }
 
 .pom-container {
@@ -203,7 +203,6 @@ textarea:focus, input:focus {
     outline: none;
 }
 
-/* Stile per il campo "Tempo totale" */
 .total-time-selector {
     margin-top: 20px;
     text-align: center;

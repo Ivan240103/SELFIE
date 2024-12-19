@@ -84,8 +84,8 @@ function Tomato() {
         setButtonActivated(false);
         setButtonPaused(true);
         setCurrentSecond(selectStudyTime * 60);
-        setCurrentSession(1); // Resetta la sessione corrente
-        setPauseTime(false); // Torna alla modalità di studio
+        setCurrentSession(1);
+        setPauseTime(false);
     };
 
     const handleSkipClick = () => {
@@ -94,9 +94,9 @@ function Tomato() {
             setCurrentSecond(selectStudyTime * 60);
             setCurrentSession((prevSession) => {
                 if (prevSession >= numberOfSessions) {
-                    return 1; // Torna alla prima sessione se è l'ultima
+                    return 1; 
                 }
-                return prevSession + 1; // Incrementa la sessione
+                return prevSession + 1; 
             });
         } else {
             setPauseTime(true);
@@ -106,16 +106,16 @@ function Tomato() {
 
 
     const handleRestartCycleClick = () => {
-        setCurrentSession(1); // Resetta alla prima sessione
-        setCurrentSecond(selectStudyTime * 60); // Imposta il tempo di studio iniziale
-        setPauseTime(false); // Torna alla modalità di studio
+        setCurrentSession(1);
+        setCurrentSecond(selectStudyTime * 60); 
+        setPauseTime(false); 
     };
 
     const handleEndCycleClick = () => {
         setButtonActivated(false);
         setButtonPaused(true);
-        setCurrentSecond(0); // Fine immediata
-        setCurrentSession(numberOfSessions); // Imposta come ultimo ciclo
+        setCurrentSecond(0); 
+        setCurrentSession(numberOfSessions); 
     };
 
     const toggleSettings = () => {
@@ -143,23 +143,16 @@ function Tomato() {
             const totalMinutes = Number(totalTime);
             if (totalMinutes > 0) {
                 const { studyTime, breakTime, sessions } = calculateCycles(totalMinutes);
-
-                // Aggiorna i parametri della pagina iniziale con il tempo totale
                 setSelectStudyTime(studyTime);
                 setSelectPauseTime(breakTime);
                 setNumberOfSessions(sessions);
                 setCurrentSecond(studyTime * 60);
-
-                // Chiudi il pannello impostazioni e fai partire il timer
                 setSettingsOpen(false);
                 setButtonActivated(true);
                 setButtonPaused(false);
             }
         } else {
-            // Usa i valori dai menu a tendina
             setCurrentSecond(selectStudyTime * 60);
-
-            // Chiudi il pannello impostazioni e fai partire il timer
             setSettingsOpen(false);
             setButtonActivated(true);
             setButtonPaused(false);
