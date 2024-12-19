@@ -4,7 +4,7 @@
 
 const express = require('express')
 const auth = require('../middleware/auth')
-const Event = require('../models/event')
+const Event = require('../models/Event')
 
 const router = express.Router()
 

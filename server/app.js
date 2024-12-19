@@ -8,7 +8,7 @@ const passport = require('passport')
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt')
 const cors = require('cors')
 require('dotenv').config()
-const User = require('./models/user')
+const User = require('./models/User')
 
 const app = express()
 const port = 8000

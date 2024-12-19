@@ -7,8 +7,8 @@ const auth = require('../middleware/auth')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 require('dotenv').config()
-const User = require('../models/user')
-import { getTime, setTime } from '../services/TimeMachine'
+const User = require('../models/User')
+const tm = require('../services/TimeMachine')
 
 const router = express.Router()
 
@@ -65,10 +65,10 @@ router.get('/', auth, async (req, res) => {
   }
 })
 
-// ottenere il tempo in vigore per un utente
+// ottenere il tempo in vigore per un utente in formato ISO string
 router.get('/time', auth, async (req, res) => {
   try {
-    const time = getTime(req.user.username)
+    const time = await tm.getTime(req.user.username)
     return res.json(time)
   } catch (err) {
     return res.status(500).send('Error while getting time')
@@ -94,11 +94,17 @@ router.put('/', auth, async (req, res) => {
 })
 
 // modificare l'offset di un utente
-// body.time = Date a cui ci si vuole spostare
+// body.time = data a cui ci si vuole spostare in formato ISO string
+// senza body per resettare la data
 router.put('/time', auth, async (req, res) => {
   try {
-    setTime(req.user.username, req.body.time)
-    return res.send('ok')
+    if (req.body.time) {
+      const time = await tm.setTime(req.user.username, req.body.time)
+      return res.json(time)
+    } else {
+      const time = await tm.resetTime(req.user.username)
+      return res.json(time)
+    }
   } catch (err) {
     return res.status(500).send('Error while setting time')
   }

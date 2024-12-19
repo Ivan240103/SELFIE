@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema({
   // spostamento del datetime
   offset: {
     type: Number,
-    default: 0
+    default: 3600000
   }
 })
 

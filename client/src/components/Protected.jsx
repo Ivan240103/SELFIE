@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from "react-router-dom"
 import axios from 'axios'
+import TimeMachine from './TimeMachine/TimeMachine'
 
 function Protected() {
   const navigate = useNavigate()
@@ -29,6 +30,7 @@ function Protected() {
 
   return(
     <div>
+      <TimeMachine />
       <p>Nome: {user.name || ''}</p>
       <p>Cognome: {user.surname || ''}</p>
       <br />
