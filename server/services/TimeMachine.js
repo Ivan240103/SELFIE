@@ -66,8 +66,7 @@ const resetTime = async (username) => {
   try {
     const user = await User.findOne({ username: username })
     if (!user) throw 'resetTime 404'
-    // di base si è a +1h sul GMT
-    user.offset = 3600000
+    user.offset = 0
     await user.save()
     return calcDateString(user.offset)
   } catch (err) {

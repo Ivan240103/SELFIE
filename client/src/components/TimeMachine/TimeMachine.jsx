@@ -6,22 +6,21 @@ import '../../css/TimeMachine.css'
 function TimeMachine() {
   const { time, updateTime, resetTime } = useTimeMachine()
 
+  // TODO: aprire un modale per cambiare il tempo e/o resettarlo
+
   const backToTheFuture = async () => {
-    // TODO: aprire un modale per cambiare il tempo
-    const d = new Date(Date.now() + 43200000)
+    const d = new Date(time.getTime() + 43200000)
     await updateTime(d)
   }
 
   return(
     <div className="time-container">
-      <button type="button"
-        onClick={() => backToTheFuture()}>
-        {time.toUTCString()}
-      </button>
-      <button type="button"
-        onClick={() => resetTime()}>
-        Reset
-      </button>
+      <div className="time-display">
+        <button
+          type="button"
+          className="time-btn"
+          onClick={() => backToTheFuture()}>{time.toLocaleString('it-IT')}</button>
+      </div>
     </div>
   )
 }
