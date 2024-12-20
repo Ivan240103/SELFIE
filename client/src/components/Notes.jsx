@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './Note.css'; // Import del file CSS
+import './Note.css';
 
 function Notes({ onNoteSave }) {
   const [notes, setNotes] = useState([]);
@@ -120,23 +120,21 @@ function Notes({ onNoteSave }) {
 
   return (
     <div className="notes-container">
-      <h3>Note</h3>
+      <h1 className="notes-header">Note</h1>
 
       <div className="notes-form">
         <h4>{selectedNoteIndex === null ? 'Crea Nuova Nota' : 'Modifica Nota'}</h4>
-        <input
-          type="text"
+        <textarea
           placeholder="Titolo..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="note-form-input"
+          className="note-form-textarea"
         />
-        <input
-          type="text"
+        <textarea
           placeholder="Categorie (separate da virgola)..."
           value={categories}
           onChange={(e) => setCategories(e.target.value)}
-          className="note-form-input"
+          className="note-form-textarea"
         />
         <textarea
           value={text}
