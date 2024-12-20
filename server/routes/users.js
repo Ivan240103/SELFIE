@@ -7,16 +7,18 @@ const auth = require('../middleware/auth')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 require('dotenv').config()
-const User = require('../models/user')
+const User = require('../models/User')
+const tm = require('../services/TimeMachine')
 
 const router = express.Router()
 
 // registrare un nuovo utente
 router.post('/register', async (req, res) => {
-  const { username, password, name, surname, birthday } = req.body
+  const { username, email, password, name, surname, birthday } = req.body
   // FIXME: await bcrypt.hash(password, 10)
   const newUser = new User({
     username: username,
+    email: email,
     password: password,
     name: name,
     surname: surname,
@@ -60,6 +62,51 @@ router.get('/', auth, async (req, res) => {
   } catch (err) {
     console.error(err)
     res.status(500).send('Error while getting specific user')
+  }
+})
+
+// ottenere il tempo in vigore per un utente in formato ISO string
+router.get('/time', auth, async (req, res) => {
+  try {
+    const time = await tm.getTime(req.user.username)
+    return res.json(time)
+  } catch (err) {
+    return res.status(500).send('Error while getting time')
+  }
+})
+
+// aggiornare i dati di un utente
+router.put('/', auth, async (req, res) => {
+  try {
+    const toUpdate = await User.findOne({ username: req.user.username })
+    if (!toUpdate) return res.status(404).send(`No user found with username ${req.sur.username}`)
+    // modifiche
+    toUpdate.email = req.body.email || toUpdate.email
+    toUpdate.name = req.body.name || toUpdate.name
+    toUpdate.surname = req.body.surname || toUpdate.surname
+    toUpdate.birthday = req.body.birthday || toUpdate.birthday
+    await toUpdate.save()
+    return res.json(toUpdate)
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while updating user info')
+  }
+})
+
+// modificare l'offset di un utente
+// body.time = data a cui ci si vuole spostare in formato ISO string
+// senza body per resettare la data
+router.put('/time', auth, async (req, res) => {
+  try {
+    if (req.body.time) {
+      const time = await tm.setTime(req.user.username, req.body.time)
+      return res.json(time)
+    } else {
+      const time = await tm.resetTime(req.user.username)
+      return res.json(time)
+    }
+  } catch (err) {
+    return res.status(500).send('Error while setting time')
   }
 })
 
