@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from "react-router-dom"
 import axios from 'axios'
 import TimeMachine from './TimeMachine/TimeMachine'
-import { useTimeMachine } from './TimeMachine/TimeMachineContext'
 
 function Protected() {
   const navigate = useNavigate()
-  const { resetTime } = useTimeMachine()
   const [user, setUser] = useState({})
 
   useEffect(() => {
@@ -37,7 +35,6 @@ function Protected() {
       <p>Cognome: {user.surname || ''}</p>
       <br />
       <button type="button" onClick={logout}>Logout</button>
-      <button type="button" onClick={resetTime}>Reset time</button>
     </div>
   )
 }

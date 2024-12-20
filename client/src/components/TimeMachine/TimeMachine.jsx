@@ -1,26 +1,86 @@
-import React from "react"
+import React, { useState } from "react"
+import Modal from 'react-modal'
 import { useTimeMachine } from "./TimeMachineContext"
 
 import '../../css/TimeMachine.css'
 
+// per accessibilità, scritto nella documentazione
+Modal.setAppElement('#root');
+
 function TimeMachine() {
   const { time, updateTime, resetTime } = useTimeMachine()
+  const [modalIsOpen, setModalIsOpen] = useState(false)
+  const [selectedTime, setSelectedTime] = useState(time)
 
-  // TODO: aprire un modale per cambiare il tempo e/o resettarlo
+  /**
+   * Converte un datetime in una stringa leggibile da un input
+   * di type="datetime-local"
+   * @param {Date} datetime datetime da convertire
+   * @returns Stringa formattata da passare ad un <input>
+   */
+  const datetimeToString = (datetime) => {
+    const dd = datetime.getDate()
+    const mm = datetime.getMonth() + 1
+    const yyyy = datetime.getFullYear()
+    const h = datetime.getHours()
+    const m = datetime.getMinutes()
+    return `${yyyy}-${mm}-${dd}T${h}:${m}`
+  }
 
-  const backToTheFuture = async () => {
-    const d = new Date(time.getTime() + 43200000)
-    await updateTime(d)
+  /**
+   * Sposta il tempo in avanti o indietro
+   */
+  const backToTheFuture = async (e) => {
+    e.preventDefault()
+    await updateTime(selectedTime)
+    setModalIsOpen(false)
+  }
+
+  /**
+   * Riporta il tempo al presente
+   */
+  const reset = async () => {
+    await resetTime()
+    setModalIsOpen(false)
   }
 
   return(
     <div className="time-container">
-      <div className="time-display">
-        <button
-          type="button"
-          className="time-btn"
-          onClick={() => backToTheFuture()}>{time.toLocaleString('it-IT')}</button>
-      </div>
+      <button
+        type="button"
+        className="time-btn"
+        onClick={() => setModalIsOpen(true)}>{time.toLocaleString('it-IT')}</button>
+
+      <Modal
+        isOpen={modalIsOpen}
+        onAfterOpen={() => setSelectedTime(time)}
+        onRequestClose={() => setModalIsOpen(false)}
+        className='time-modal'
+      >
+        <h2>Time Machine</h2>
+        <form
+          onSubmit={(e) => backToTheFuture(e)}
+        >
+          <div>
+            <label htmlFor="picker">
+              Seleziona data e ora
+            </label>
+            <br />
+            <input
+              type="datetime-local"
+              name="picker"
+              value={datetimeToString(selectedTime)}
+              onChange={(e) => setSelectedTime(new Date(e.target.value))} />
+          </div>
+          <button
+            type="button"
+            className="time-reset"
+            onClick={reset}>Resetta</button>
+          <button
+            type="submit"
+            className="time-submit">Viaggia</button>
+        </form>
+      </Modal>
     </div>
   )
 }

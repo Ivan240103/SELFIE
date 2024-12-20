@@ -38,7 +38,7 @@
 ### Server
 - [ ] criptare la password nel db
 - [ ] criptare la password nel tragitto c <---> s
-- [ ] time machine
+- [x] time machine
 - [ ] route per eventi
   - [x] creazione nuovo evento
   - [x] ottenere tutti gli eventi
