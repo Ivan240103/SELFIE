@@ -9,6 +9,8 @@
   padding: 20px;
   max-width: 800px;  
   margin: 0 auto;    
+  max-width: 800px;  /* Limita la larghezza massima del contenitore */
+  margin: 0 auto;    /* Centra il contenuto */
   box-sizing: border-box;
 }
 
@@ -17,6 +19,7 @@
   padding: 10px;
   margin-bottom: 20px;
   width: 100%; 
+  width: 100%; /* Si adatta alla max-width del container */
   box-sizing: border-box;
 }
 
@@ -25,6 +28,8 @@
   margin-bottom: 10px;
   width: 100%;        
   min-width: 0;        
+  width: 100%;        /* Piena larghezza all’interno del container */
+  min-width: 0;        /* Rimuove larghezza minima */
   font-size: 14px;
   line-height: 1.4;
   box-sizing: border-box;
@@ -36,6 +41,7 @@
   font-family: Arial, sans-serif;
   resize: vertical;
   overflow-wrap: break-word; 
+  overflow-wrap: break-word; /* Se il contenuto è lungo, va a capo */
 }
 
 .note-form-textarea::placeholder {
@@ -105,4 +111,5 @@
 .note-item div {
   color: #000;
   overflow-wrap: break-word; 
+  overflow-wrap: break-word; /* Se il testo è troppo lungo, va a capo */
 }
