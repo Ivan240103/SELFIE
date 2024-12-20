@@ -47,6 +47,71 @@ function Calendar() {
     fetchEvents();
   }, []);
 
+  function handleEventClick(clickInfo) {
+    const eventId = clickInfo.event.id; // L'ID dell'evento cliccato
+  
+    const userChoice = window.confirm(`Vuoi modificare o eliminare l'evento "${clickInfo.event.title}"? 
+    OK per modificare, Annulla per eliminare.`);
+  
+    if (userChoice) {
+      handleEditEvent(eventId); // Modifica evento
+    } else {
+      handleDeleteEvent(eventId); // Elimina evento
+    }
+  }
+  
+
+  function handleEditEvent(eventId) {
+    const eventToEdit = calendarEvents.find(event => event.id === eventId);
+    const newTitle = prompt("Modifica il titolo dell'evento:", eventToEdit.title);
+  
+    if (newTitle) {
+      const updatedEvent = { ...eventToEdit, title: newTitle };
+  
+      fetch(`http://localhost:8000/api/events/${eventId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedEvent),
+      })
+        .then(response => {
+          if (!response.ok) throw new Error('Errore durante la modifica dell\'evento.');
+          return response.text();
+        })
+        .then(() => {
+          setCalendarEvents(calendarEvents.map(event =>
+            event.id === eventId ? { ...event, title: newTitle } : event
+          ));
+          alert('Evento modificato con successo!');
+        })
+        .catch(error => {
+          console.error(error);
+          alert('Errore durante la modifica dell\'evento.');
+        });
+    }
+  }
+  function handleDeleteEvent(eventId) {
+    const confirmDelete = window.confirm("Sei sicuro di voler eliminare questo evento?");
+    if (confirmDelete) {
+      fetch(`http://localhost:8000/api/events/${eventId}`, {
+        method: 'DELETE',
+      })
+        .then(response => {
+          if (!response.ok) throw new Error('Errore durante l\'eliminazione dell\'evento.');
+          return response.text();
+        })
+        .then(() => {
+          setCalendarEvents(calendarEvents.filter(event => event.id !== eventId));
+          alert('Evento eliminato con successo!');
+        })
+        .catch(error => {
+          console.error(error);
+          alert('Errore durante l\'eliminazione dell\'evento.');
+        });
+    }
+  }
+  
+  
+
   return (
     <div className='demo-app'>
       <Sidebar
@@ -69,6 +134,7 @@ function Calendar() {
           showNonCurrentDates={false}
           weekends={weekendsVisible}
           events={calendarEvents} // Imposta gli eventi nel calendario
+          eventClick={handleEventClick} // Gestione del clic su un evento
         />
         <Event onSaveEvent={handleEventSave} />
         <Task onSaveTask={handleTaskSave} /> {/* Aggiunge il form per le task */}

@@ -1,0 +1,62 @@
+.notes-container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.notes-form {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.note-form-input,
+.note-form-textarea {
+  display: block;
+  margin-bottom: 10px;
+  width: 100%;
+  font-size: 14px;
+}
+
+.note-form-textarea {
+  height: 100px;
+}
+
+.note-save-button,
+.note-paste-button,
+.note-item button {
+  cursor: pointer;
+  margin-right: 10px;
+  padding: 5px 10px;
+  font-size: 14px;
+}
+
+.note-save-button:hover,
+.note-paste-button:hover,
+.note-item button:hover {
+  background-color: #f0f0f0;
+}
+
+.notes-sort-controls {
+  margin-bottom: 20px;
+}
+
+.notes-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.note-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.note-item h4 {
+  margin-top: 0;
+}
+
+.notes-sort-select {
+  margin-left: 10px;
+  padding: 5px;
+  font-size: 14px;
+}
