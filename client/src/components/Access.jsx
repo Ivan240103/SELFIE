@@ -30,9 +30,15 @@ function Access() {
             })
             //Avevo messo un console.log per vedere cosa mi diceva il server
             .then((data) => {
-                console.log("Server Response:", data);
-                    localStorage.setItem('token', data.token)
+                if (typeof data === "string") {
+                    console.log("Risposta come stringa:", data);
+                    localStorage.setItem("token", data);
                     navigate("/dashboard");
+                } else if (data.token) {
+                    console.log("Token trovato nell'oggetto:", data.token);
+                    localStorage.setItem("token", data.token);
+                    navigate("/dashboard");
+                }
             })
             .catch((err) => {
                 //messaggio di errore

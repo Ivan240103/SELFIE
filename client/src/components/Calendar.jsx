@@ -10,6 +10,7 @@ import Task from "./Task"
 function Calendar() {
   const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);
+  const [currentEvent, setCurrentEvent] = useState(null);
 
   function handleWeekendsToggle() {
     setWeekendsVisible(!weekendsVisible);
@@ -17,6 +18,14 @@ function Calendar() {
 
   function handleEventSave(newEvent) {
     setCalendarEvents([...calendarEvents, newEvent]);
+  }
+
+  function handleEventUpdate(updatedEvent) {
+    setCalendarEvents(calendarEvents.map(event => event.id === updatedEvent.id ? updatedEvent : event));
+  }
+
+  function handleEventDelete(eventId) {
+    setCalendarEvents(calendarEvents.filter(event => event.id !== eventId));
   }
 
   function handleTaskSave(newTask) {
@@ -33,12 +42,11 @@ function Calendar() {
     // Carica gli eventi dal backend
     async function fetchEvents() {
       try {
-        const token = localStorage.getItem('token');
         const response = await fetch("http://localhost:8000/api/events/", {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
         if (response.ok) {
@@ -47,77 +55,13 @@ function Calendar() {
         } else {
           console.error('Errore durante il caricamento degli eventi.');
         }
-        } catch (error) {
+      } catch (error) {
         console.error('Errore nel caricamento degli eventi:', error);
         }
     }
     fetchEvents();
   }, []);
 
-  function handleEventClick(clickInfo) {
-    const eventId = clickInfo.event.id; // L'ID dell'evento cliccato
-  
-    const userChoice = window.confirm(`Vuoi modificare o eliminare l'evento "${clickInfo.event.title}"? 
-    OK per modificare, Annulla per eliminare.`);
-  
-    if (userChoice) {
-      handleEditEvent(eventId); // Modifica evento
-    } else {
-      handleDeleteEvent(eventId); // Elimina evento
-    }
-  }
-  
-
-  function handleEditEvent(eventId) {
-    const eventToEdit = calendarEvents.find(event => event.id === eventId);
-    const newTitle = prompt("Modifica il titolo dell'evento:", eventToEdit.title);
-  
-    if (newTitle) {
-      const updatedEvent = { ...eventToEdit, title: newTitle };
-  
-      fetch(`http://localhost:8000/api/events/${eventId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedEvent),
-      })
-        .then(response => {
-          if (!response.ok) throw new Error('Errore durante la modifica dell\'evento.');
-          return response.text();
-        })
-        .then(() => {
-          setCalendarEvents(calendarEvents.map(event =>
-            event.id === eventId ? { ...event, title: newTitle } : event
-          ));
-          alert('Evento modificato con successo!');
-        })
-        .catch(error => {
-          console.error(error);
-          alert('Errore durante la modifica dell\'evento.');
-        });
-    }
-  }
-  function handleDeleteEvent(eventId) {
-    const confirmDelete = window.confirm("Sei sicuro di voler eliminare questo evento?");
-    if (confirmDelete) {
-      fetch(`http://localhost:8000/api/events/${eventId}`, {
-        method: 'DELETE',
-      })
-        .then(response => {
-          if (!response.ok) throw new Error('Errore durante l\'eliminazione dell\'evento.');
-          return response.text();
-        })
-        .then(() => {
-          setCalendarEvents(calendarEvents.filter(event => event.id !== eventId));
-          alert('Evento eliminato con successo!');
-        })
-        .catch(error => {
-          console.error(error);
-          alert('Errore durante l\'eliminazione dell\'evento.');
-        });
-    }
-  }
-  
-  
 
   return (
     <div className='demo-app'>
@@ -140,10 +84,31 @@ function Calendar() {
           dayMaxEvents={true}
           showNonCurrentDates={false}
           weekends={weekendsVisible}
-          events={calendarEvents} // Imposta gli eventi nel calendario
-          eventClick={handleEventClick} // Gestione del clic su un evento
+          events={calendarEvents.map(event => ({
+            ...event,
+            extendedProps: { id: event.id, owner: event.owner }
+          }))}
+          eventClick={(info) => {
+            // Gestione del clic su un evento per aprire il form di modifica
+            console.log('Evento cliccato:', info.event);
+            // Passa i dettagli dell'evento al componente Event per la modifica
+            setCurrentEvent({
+              _id: info.event.extendedProps.id,
+              title: info.event.title,
+              start: info.event.start,
+              end: info.event.end,
+              isAllDay: info.event.allDay,
+              place: info.event.extendedProps.place,
+              owner: info.event.extendedProps.owner
+            });
+          }}
         />
-        <Event onSaveEvent={handleEventSave} />
+        <Event 
+          onSaveEvent={handleEventSave}
+          onUpdateEvent={handleEventUpdate} 
+          onDeleteEvent={handleEventDelete} 
+          eventDetails={currentEvent}
+        />
         <Task onSaveTask={handleTaskSave} /> {/* Aggiunge il form per le task */}
       </div>
     </div>

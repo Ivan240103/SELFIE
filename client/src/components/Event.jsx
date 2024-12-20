@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 
-function Event({ onSaveEvent }) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
-  const [isAllDay, setIsAllDay] = useState(true);
-  const [frequency, setFrequency] = useState("n");
-  const [place, setPlace] = useState("");
-  const [owner, setOwner] = useState("desi"); // Ci andrebbe l'username dell'owner 
+function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
+    const [title, setTitle] = useState(eventDetails?.title || "");
+    const [description, setDescription] = useState(eventDetails?.description || "");
+    const [start, setStart] = useState(eventDetails?.start || "");
+    const [end, setEnd] = useState(eventDetails?.end || "");
+    const [isAllDay, setIsAllDay] = useState(eventDetails?.isAllDay || true);
+    const [frequency, setFrequency] = useState(eventDetails?.frequency || "n");
+    const [place, setPlace] = useState(eventDetails?.place || "");
+    const [owner, setOwner] = useState(eventDetails?.owner || "pay");
 
   const handleSave = async () => {
     const eventData = {
@@ -27,6 +27,7 @@ function Event({ onSaveEvent }) {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}` // Importante!
             },
             body: JSON.stringify(eventData),
         });
@@ -34,7 +35,6 @@ function Event({ onSaveEvent }) {
             throw new Error(`Errore HTTP: ${response.status}`);
           }
       
-          // Uso .text() se il backend restituisce una stringa come "ok"
           const result = await response.text();
           console.log('Evento salvato con successo:', result);
           alert('Evento salvato con successo!');
@@ -42,6 +42,61 @@ function Event({ onSaveEvent }) {
           console.error('Errore nel salvataggio dell\'evento:', err);
           alert('Errore nel salvataggio dell\'evento.');
         }
+  };
+
+  const handleUpdate = async () => {
+    const updatedEventData = {
+        title: title,
+        description: description,
+        start: start,
+        end: end,
+        isAllDay: isAllDay,
+        frequency: frequency,
+        place: place,
+        owner: owner,
+    };
+
+    try {
+      const response = await fetch("http://localhost:8000/api/events/:id${eventDetails._id}", {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(updatedEventData),
+      });
+      if (!response.ok) {
+        throw new Error(`Errore HTTP: ${response.status}`);
+      }
+
+      const result = await response.text();
+      console.log('Evento aggiornato con successo:', result);
+      alert('Evento aggiornato con successo!');
+    } catch (err) {
+      console.error('Errore nell\'aggiornamento dell\'evento:', err);
+      alert('Errore nell\'aggiornamento dell\'evento.');
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+        const response = await fetch(`http://localhost:8000/api/events/:id${eventDetails._id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`Errore HTTP: ${response.status}`);
+        }
+  
+        console.log('Evento cancellato con successo');
+        alert('Evento cancellato con successo!');
+        onDeleteEvent(eventDetails.id);
+      } catch (err) {
+        console.error('Errore nella cancellazione dell\'evento:', err);
+        alert('Errore nella cancellazione dell\'evento.');
+      }
   };
 
   return (
@@ -121,7 +176,14 @@ function Event({ onSaveEvent }) {
             />
             </label>
         </div>
-        <button onClick={handleSave}>Salva Evento</button>
+        <button onClick={eventDetails ? handleUpdate : handleSave}>
+            {eventDetails ? "Aggiorna Evento" : "Salva Evento"}
+        </button>
+        {eventDetails && (
+        <>
+          <button onClick={handleDelete}>Elimina Evento</button>
+        </>
+      )}
     </div>
   );
 }
