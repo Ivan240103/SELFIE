@@ -11,6 +11,10 @@ const userSchema = new mongoose.Schema({
     unique: true,
     required: true
   },
+  email: {
+    type: String,
+    required: true
+  },
   password: {
     type: String,
     required: true
@@ -26,6 +30,11 @@ const userSchema = new mongoose.Schema({
   birthday: {
     type: Date,
     max: Date.now
+  },
+  // spostamento del datetime
+  offset: {
+    type: Number,
+    default: 0
   }
 })
 

@@ -4,7 +4,7 @@
 
 const express = require('express')
 const auth = require('../middleware/auth')
-const Tomato = require('../models/tomato')
+const Tomato = require('../models/Tomato')
 
 const router = express.Router()
 
