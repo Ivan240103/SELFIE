@@ -34,7 +34,7 @@ function Event({ onSaveEvent }) {
             throw new Error(`Errore HTTP: ${response.status}`);
           }
       
-          // Usa .text() se il backend restituisce una stringa come "ok"
+          // Uso .text() se il backend restituisce una stringa come "ok"
           const result = await response.text();
           console.log('Evento salvato con successo:', result);
           alert('Evento salvato con successo!');
