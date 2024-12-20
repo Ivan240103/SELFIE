@@ -173,21 +173,6 @@
     font-size: 2vh;
 }
 
-input[type='text'] {
-    margin-left: 0.5vh;
-    width: 2vh;
-    height: 2.5vh;
-    margin-right: 0.5vh;
-    text-align: center;
-    background: none;
-    border: 0;
-    color: white;
-    font-family: 'Nunito', sans-serif;
-    font-size: 1.5vh;
-    font-weight: 300;
-    border: solid 1.5px rgba(255, 255, 255, 0.381);
-    border-radius: 9px;
-}
 
 textarea:focus, input:focus {
     outline: none;

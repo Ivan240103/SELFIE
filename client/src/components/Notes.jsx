@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './Note.css'; // Import del file CSS
+import './Note.css';
 
 function Notes({ onNoteSave }) {
   const [notes, setNotes] = useState([]);
@@ -12,7 +12,6 @@ function Notes({ onNoteSave }) {
 
   useEffect(() => {
     sortNotes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortCriteria]);
 
   function handleSaveNote() {
@@ -23,7 +22,6 @@ function Notes({ onNoteSave }) {
 
     const now = new Date().toISOString();
     if (selectedNoteIndex === null) {
-      // Creazione nuova nota
       const newNote = {
         title: title.trim(),
         categories: categories.split(',').map(cat => cat.trim()).filter(Boolean),
@@ -35,7 +33,6 @@ function Notes({ onNoteSave }) {
       setNotes(updatedNotes);
       onNoteSave && onNoteSave(updatedNotes);
     } else {
-      // Modifica nota esistente
       const updatedNotes = [...notes];
       updatedNotes[selectedNoteIndex] = {
         ...updatedNotes[selectedNoteIndex],
@@ -48,7 +45,6 @@ function Notes({ onNoteSave }) {
       onNoteSave && onNoteSave(updatedNotes);
     }
 
-    // Reset campi
     setTitle('');
     setCategories('');
     setText('');
@@ -120,23 +116,21 @@ function Notes({ onNoteSave }) {
 
   return (
     <div className="notes-container">
-      <h3>Note</h3>
+      <h1 className="notes-header">Note</h1>
 
       <div className="notes-form">
         <h4>{selectedNoteIndex === null ? 'Crea Nuova Nota' : 'Modifica Nota'}</h4>
-        <input
-          type="text"
+        <textarea
           placeholder="Titolo..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="note-form-input"
+          className="note-form-textarea"
         />
-        <input
-          type="text"
+        <textarea
           placeholder="Categorie (separate da virgola)..."
           value={categories}
           onChange={(e) => setCategories(e.target.value)}
-          className="note-form-input"
+          className="note-form-textarea"
         />
         <textarea
           value={text}

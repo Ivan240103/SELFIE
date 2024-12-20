@@ -31,12 +31,8 @@ function Access() {
             //Avevo messo un console.log per vedere cosa mi diceva il server
             .then((data) => {
                 console.log("Server Response:", data);
-                //Vede se il token dato corrisponde e va alla pagina dashboard
-                //Provato con username "desi" e password "desi"
-                if(data.token){
                     localStorage.setItem('token', data.token)
                     navigate("/dashboard");
-                }
             })
             .catch((err) => {
                 //messaggio di errore

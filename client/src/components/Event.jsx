@@ -8,7 +8,7 @@ function Event({ onSaveEvent }) {
   const [isAllDay, setIsAllDay] = useState(true);
   const [frequency, setFrequency] = useState("n");
   const [place, setPlace] = useState("");
-  const [owner, setOwner] = useState("pay"); // Ci andrebbe l'username dell'owner 
+  const [owner, setOwner] = useState("desi"); // Ci andrebbe l'username dell'owner 
 
   const handleSave = async () => {
     const eventData = {

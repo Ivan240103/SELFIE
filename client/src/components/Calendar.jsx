@@ -23,7 +23,7 @@ function Calendar() {
     const taskEvent = {
       title: newTask.title,
       start: newTask.deadline,
-      allDay: false, // Puoi modificare in base ai requisiti
+      allDay: false, 
     };
     setCalendarEvents([...calendarEvents, taskEvent]);
   }
@@ -33,7 +33,14 @@ function Calendar() {
     // Carica gli eventi dal backend
     async function fetchEvents() {
       try {
-        const response = await fetch("http://localhost:8000/api/events/");
+        const token = localStorage.getItem('token');
+        const response = await fetch("http://localhost:8000/api/events/", {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (response.ok) {
           const events = await response.json();
           setCalendarEvents(events);
