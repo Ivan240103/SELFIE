@@ -4,8 +4,6 @@
 
 const mongoose = require('mongoose')
 
-// TODO: pensare bene come salvare frequency e repetitions
-
 const eventSchema = mongoose.Schema({
   title: {
     type: String,
@@ -15,31 +13,28 @@ const eventSchema = mongoose.Schema({
     type: String,
     default: 'Nessuna descrizione'
   },
-  // se il giorno di start e end coincide, l'evento si svolge solo in quel giorno
+  // se la data di start e end coincide, l'evento si svolge solo in quel giorno
   start: {
     type: Date,
-    default: Date.now
+    required: true
   },
   end: {
     type: Date,
-    default: Date.now
+    required: true
   },
-  // se isAllDay = false, start e end conterranno anche l'orario in formato timestamp
+  // se isAllDay = false, start e end conterranno anche l'orario
   isAllDay: {
     type: Boolean,
     default: true
   },
-  isRepeatable: {
-    type: Boolean,
-    default: false
-  },
-  // n = no repetition, d = daily, w = weekly, m = monthly, y = yearly
-  frequency: {
+  /*
+  standard iCalendar
+  RRULE:FREQ=f;INTERVAL=i;COUNT=c
+  RRULE:FREQ=f;INTERVAL=i;UNTIL=u
+  */
+  recurrence: {
     type: String,
-    default: 'n'
-  },
-  repetitions: {
-    type: String
+    default: null
   },
   place: String,
   // username dell'utente che ha creato l'evento

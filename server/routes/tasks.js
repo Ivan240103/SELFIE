@@ -9,11 +9,12 @@ const Task = require('../models/Task')
 const router = express.Router()
 
 // creazione nuovo task
+// body.deadline è una stringa rappresentante un datetime
 router.post('/', auth, async (req, res) => {
   const newTask = new Task({
     title: req.body.title,
     description: req.body.description,
-    deadline: req.body.deadline,
+    deadline: new Date(req.body.deadline),
     owner: req.user.username
   })
 
@@ -43,7 +44,10 @@ router.get('/', auth, async (req, res) => {
 router.get('/interval', auth, async (req, res) => {
   try {
     const intervalTasks = await Task.find({
-      deadline: { $gte: req.query.s, $lte: req.query.e },
+      deadline: {
+        $gte: new Date(req.query.s),
+        $lte: new Date(req.query.e)
+      },
       owner: req.user.username
     })
     // se non ne trova nessuno invia un oggetto vuoto
@@ -82,6 +86,7 @@ router.get('/:id', auth, async (req, res) => {
 })
 
 // modificare un task specifico
+// body.deadline è una stringa rappresentante un datetime
 router.put('/:id', auth, async (req, res) => {
   try {
     const toUpdate = await Task.findById(req.params.id)
@@ -89,7 +94,7 @@ router.put('/:id', auth, async (req, res) => {
     // modifiche
     toUpdate.title = req.body.title || toUpdate.title
     toUpdate.description = req.body.description || toUpdate.description
-    toUpdate.deadline = req.body.deadline || toUpdate.deadline
+    toUpdate.deadline = req.body.deadline ? new Date(req.body.deadline) : toUpdate.deadline
     await toUpdate.save()
     return res.send('ok')
   } catch (err) {

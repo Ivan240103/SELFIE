@@ -8,6 +8,10 @@ const Event = require('../models/Event')
 
 const router = express.Router()
 
+// TODO: SISTEMARE LA GESTIONE DEGLI EVENTI RIPETIBILI === chatGPT Rrule npm !!!
+
+// TODO: sistemare le modifiche al model Event
+
 // creazione nuovo evento
 router.post('/', auth, async (req, res) => {
   const newEvent = new Event({

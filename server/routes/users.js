@@ -5,7 +5,6 @@
 const express = require('express')
 const auth = require('../middleware/auth')
 const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
 require('dotenv').config()
 const User = require('../models/User')
 const tm = require('../services/TimeMachine')
@@ -13,16 +12,16 @@ const tm = require('../services/TimeMachine')
 const router = express.Router()
 
 // registrare un nuovo utente
+// body.birthday è una stringa rappresentante una data
 router.post('/register', async (req, res) => {
   const { username, email, password, name, surname, birthday } = req.body
-  // FIXME: await bcrypt.hash(password, 10)
   const newUser = new User({
     username: username,
     email: email,
     password: password,
     name: name,
     surname: surname,
-    birthday: birthday
+    birthday: new Date(birthday)
   })
 
   try {
@@ -40,12 +39,12 @@ router.post('/login', async (req, res) => {
   try {
     const user = await User.findOne({ username: username })
     if (!user) return res.status(400).send('Incorrect username')
-    // FIXME: const pswOk = await bcrypt.compare(password, user.password)
     const pswOk = password == user.password
     if (!pswOk) return res.status(400).send('Incorrect password')
 
     const tokenPayload = { userId: user._id, username: user.username }
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '24h' })
+    // DEBUG: token non scade mai
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET/*, { expiresIn: '24h' } */)
     return res.json(token)
   } catch (err) {
     console.error(err)
@@ -84,7 +83,7 @@ router.put('/', auth, async (req, res) => {
     toUpdate.email = req.body.email || toUpdate.email
     toUpdate.name = req.body.name || toUpdate.name
     toUpdate.surname = req.body.surname || toUpdate.surname
-    toUpdate.birthday = req.body.birthday || toUpdate.birthday
+    toUpdate.birthday = req.body.birthday ? new Date(req.body.birthday) : toUpdate.birthday
     await toUpdate.save()
     return res.json(toUpdate)
   } catch (err) {

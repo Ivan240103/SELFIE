@@ -5,6 +5,7 @@
 const express = require('express')
 const auth = require('../middleware/auth')
 const Note = require('../models/Note')
+const tm = require('../services/TimeMachine')
 
 const router = express.Router()
 
@@ -13,13 +14,12 @@ router.post('/', auth, async (req, res) => {
   const newNote = new Note({
     title: req.body.title,
     text: req.body.text,    
+    creation: new Date(await tm.getTime(req.user.username)),
+    modification: new Date(await tm.getTime(req.user.username)),
+    categories: req.body.categories.trim(),
     textLength: req.body.text.length,
     owner: req.user.username    
   })
-  // se ha messo delle categorie le aggiungo, altrimenti default ['None']
-  if (req.body.categories.length !== 0) {
-    newNote.categories = req.body.categories
-  }
 
   try {
     await newNote.save()
@@ -74,11 +74,11 @@ router.put('/:id', auth, async (req, res) => {
     // modifiche
     toUpdate.title = req.body.title || toUpdate.title
     toUpdate.text = req.body.text || toUpdate.text
-    toUpdate.modification = Date.now()
+    toUpdate.modification = new Date(await tm.getTime(req.user.username))
     toUpdate.textLength = req.body.text.length || toUpdate.textLength
-    if (req.body.categories) {
-      if (req.body.categories.length === 0) {
-        toUpdate.categories = ['None']
+    if (req.body.categories !== undefined) {
+      if (req.body.categories === '') {
+        toUpdate.categories = ''
       } else {
         toUpdate.categories = req.body.categories
       }
