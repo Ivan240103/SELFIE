@@ -45,6 +45,10 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
   };
 
   const handleUpdate = async () => {
+    if (!eventDetails || !eventDetails.id) {
+      alert("Errore: ID evento non trovato.");
+      return;
+    }
     const updatedEventData = {
         title: title,
         description: description,
@@ -57,7 +61,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
     };
 
     try {
-      const response = await fetch("http://localhost:8000/api/events/:id${eventDetails._id}", {
+      const response = await fetch(`http://localhost:8000/api/events/${eventDetails.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -65,13 +69,11 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
         },
         body: JSON.stringify(updatedEventData),
       });
-      if (!response.ok) {
-        throw new Error(`Errore HTTP: ${response.status}`);
-      }
 
       const result = await response.text();
       console.log('Evento aggiornato con successo:', result);
       alert('Evento aggiornato con successo!');
+      onUpdateEvent({ ...updatedEventData, id: eventDetails.id });
     } catch (err) {
       console.error('Errore nell\'aggiornamento dell\'evento:', err);
       alert('Errore nell\'aggiornamento dell\'evento.');
@@ -79,13 +81,18 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
   };
 
   const handleDelete = async () => {
+    if (!eventDetails || !eventDetails.id) {
+      alert("Errore: ID evento non trovato.");
+      return;
+    }
     try {
-        const response = await fetch(`http://localhost:8000/api/events/:id${eventDetails._id}`, {
+        const response = await fetch(`http://localhost:8000/api/events/${eventDetails.id}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
+        console.log(eventDetails.id);
         if (!response.ok) {
           throw new Error(`Errore HTTP: ${response.status}`);
         }

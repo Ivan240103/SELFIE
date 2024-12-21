@@ -51,7 +51,12 @@ function Calendar() {
         });
         if (response.ok) {
           const events = await response.json();
-          setCalendarEvents(events);
+           // Mappa _id come id
+           const mappedEvents = events.map(event => ({
+            ...event,
+            id: event._id // Mappa _id a id
+          }));
+          setCalendarEvents(mappedEvents);
         } else {
           console.error('Errore durante il caricamento degli eventi.');
         }
@@ -93,13 +98,13 @@ function Calendar() {
             console.log('Evento cliccato:', info.event);
             // Passa i dettagli dell'evento al componente Event per la modifica
             setCurrentEvent({
-              _id: info.event.extendedProps.id,
+              id: info.event.id,
               title: info.event.title,
               start: info.event.start,
               end: info.event.end,
               isAllDay: info.event.allDay,
-              place: info.event.extendedProps.place,
-              owner: info.event.extendedProps.owner
+              place: info.event.place,
+              owner: info.event.owner
             });
           }}
         />
