@@ -5,12 +5,46 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import Event from "./Event";
-import Task from "./Task"
+import Task from "./Task";
 
 function Calendar() {
   const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [currentEvent, setCurrentEvent] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [calendarTasks, setCalendarTasks] = useState([]);
+  const [selectedTasks, setSelectedTasks] = useState([]);
+  const [taskToEdit, setTaskToEdit] = useState(null);
+
+  function handleTaskSave(newTask) {
+    setTasks([...tasks, newTask]);
+    setCalendarTasks([
+      ...calendarTasks,
+      {
+        id: newTask.id,
+        title: newTask.title,
+        start: newTask.deadline,
+        allDay: true,
+        color: 'yellow', // Colore diverso per le attività
+        textColor: 'black' //Perchè in bianco non si vedeva
+      },
+    ]);
+  }
+
+  function handleTaskSelect(taskId) {
+    setSelectedTasks(prevSelectedTasks => {
+      if (prevSelectedTasks.includes(taskId)) {
+        return prevSelectedTasks.filter(id => id !== taskId); // Deseleziona
+      } else {
+        return [...prevSelectedTasks, taskId]; // Seleziona
+      }
+    });
+  }
+
+  function handleTaskClick(task) {
+    // Impostiamo la task da modificare quando l'utente la seleziona per modificarla
+    setTaskToEdit(task);
+  }
 
   function handleWeekendsToggle() {
     setWeekendsVisible(!weekendsVisible);
@@ -28,14 +62,6 @@ function Calendar() {
     setCalendarEvents(calendarEvents.filter(event => event.id !== eventId));
   }
 
-  function handleTaskSave(newTask) {
-    const taskEvent = {
-      title: newTask.title,
-      start: newTask.deadline,
-      allDay: false, 
-    };
-    setCalendarEvents([...calendarEvents, taskEvent]);
-  }
 
 
   useEffect(() => {
@@ -51,7 +77,12 @@ function Calendar() {
         });
         if (response.ok) {
           const events = await response.json();
-          setCalendarEvents(events);
+           // Mappa _id come id
+           const mappedEvents = events.map(event => ({
+            ...event,
+            id: event._id // Mappa _id a id
+          }));
+          setCalendarEvents(mappedEvents);
         } else {
           console.error('Errore durante il caricamento degli eventi.');
         }
@@ -60,6 +91,38 @@ function Calendar() {
         }
     }
     fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    // Carica le task dal backend
+    async function fetchTasks() {
+      try {
+        const response = await fetch("http://localhost:8000/api/tasks/", {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const tasks = await response.json();
+        const mappedTasks = tasks.map(task => ({
+          id: task._id,
+          title: task.title,
+          start: task.deadline,
+          allDay: true, // FullCalendar richiede questa proprietà
+          color: 'yellow', // Colore specifico per le task
+          textColor: 'black' // Per visibilità
+        }));
+        setCalendarTasks(mappedTasks);
+        } else {
+          console.error('Errore durante il caricamento degli eventi.');
+        }
+      } catch (error) {
+        console.error('Errore nel caricamento degli eventi:', error);
+        }
+    }
+    fetchTasks();
   }, []);
 
 
@@ -84,23 +147,25 @@ function Calendar() {
           dayMaxEvents={true}
           showNonCurrentDates={false}
           weekends={weekendsVisible}
-          events={calendarEvents.map(event => ({
-            ...event,
-            extendedProps: { id: event.id, owner: event.owner }
-          }))}
+          events={[
+            ...calendarEvents,
+            ...calendarTasks, // Assicurati di aggiungere le task qui
+          ]}
           eventClick={(info) => {
             // Gestione del clic su un evento per aprire il form di modifica
             console.log('Evento cliccato:', info.event);
             // Passa i dettagli dell'evento al componente Event per la modifica
             setCurrentEvent({
-              _id: info.event.extendedProps.id,
+              id: info.event.id,
               title: info.event.title,
               start: info.event.start,
               end: info.event.end,
               isAllDay: info.event.allDay,
-              place: info.event.extendedProps.place,
-              owner: info.event.extendedProps.owner
+              place: info.event.place,
+              owner: info.event.owner
             });
+            const clickedTask = calendarTasks.find(task => task.id === info.event.id);
+            handleTaskClick(clickedTask);
           }}
         />
         <Event 
@@ -109,7 +174,33 @@ function Calendar() {
           onDeleteEvent={handleEventDelete} 
           eventDetails={currentEvent}
         />
-        <Task onSaveTask={handleTaskSave} /> {/* Aggiunge il form per le task */}
+        <div>
+          <h3>Lista Attività</h3>
+          <ul>
+            {calendarTasks.map(task => (
+                <li key={task.id}>
+                  <input
+                    type="checkbox"
+                    checked={selectedTasks.includes(task.id)}
+                    onChange={() => handleTaskSelect(task.id)}
+                  />
+                  {task.title} - Scadenza: {new Date(task.start).toLocaleDateString()}
+                </li>
+            ))}
+          </ul>
+          {/* Mostra il bottone di modifica solo se una singola task è selezionata */}
+          {selectedTasks.length === 1 && (
+            <button onClick={() => handleTaskClick(calendarTasks.find(task => task.id === selectedTasks[0]))}>
+              Modifica Task
+            </button>
+          )}
+        </div>
+        <Task 
+          onSaveTask={handleTaskSave} 
+          tasks={calendarTasks}
+          selectedTasks={selectedTasks}  // Passa le task selezionate qui
+          taskToEdit={taskToEdit}  // Passa la task da modificare qui
+        />
       </div>
     </div>
   );

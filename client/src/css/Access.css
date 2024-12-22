@@ -24,7 +24,7 @@ label {
   margin-bottom: 10px;
   font-weight: bold;
 }
-#usr, #psw, #name, #surname, #date {
+#usr, #psw, #name, #surname, #date, #email {
   width: 100%;
   padding: 10px;
   border-radius: 5px;

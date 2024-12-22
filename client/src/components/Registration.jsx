@@ -8,6 +8,7 @@ function Registration(){
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
     const [date, setDate] = useState("");
+    const [email, setEmail] = useState("");
     const [err, setError] = useState("");
     const navigate = useNavigate();
 
@@ -62,6 +63,8 @@ function Registration(){
                 <input id="name" type="text" placeholder="Enter Name" value={name} onChange={(e) => setName(e.target.value)} />
                 <label for="surname"><b>Surname</b></label>
                 <input id="surname" type="text" placeholder="Enter Surname" value={surname} onChange={(e) => setSurname(e.target.value)} />
+                <label for="email"><b>Email</b></label>
+                <input id="email" type="email" placeholder="Enter Email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 <label for="date"><b>Date of birth</b></label>
                 <input id="date" type="date" placeholder="Enter date of birth" value={date} onChange={(e) => setDate(e.target.value)} />
                 <button type="submit">Register</button>
