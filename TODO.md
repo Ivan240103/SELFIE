@@ -39,15 +39,14 @@
 - [ ] criptare la password nel db
 - [ ] criptare la password nel tragitto c <---> s
 - [x] time machine
-- [ ] route per eventi
+- [x] route per eventi
   - [x] creazione nuovo evento
   - [x] ottenere tutti gli eventi
   - [x] ottenere un evento specifico
-  - [x] ottenere eventi in un intervallo di tempo dato
   - [x] modificare un evento specifico
   - [x] eliminare un evento specifico
-  - [ ] modificare un evento ripetibile
-  - [ ] eliminare un evento ripetibile
+  - [x] modificare un evento ripetibile
+  - [x] eliminare un evento ripetibile
 - [x] route per task
   - [x] creazione nuovo task
   - [x] ottenere tutti i task
