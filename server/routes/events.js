@@ -12,18 +12,27 @@ const router = express.Router()
 
 // TODO: sistemare le modifiche al model Event
 
+// TODO: controllare uso delle date quando si ritorna il json al client
+
 // creazione nuovo evento
+// body.start e body.end sono datetime in ISO string (UTC)
+/* 
+body.recurrence = null per eventi non ripetibili
+body.recurrence = {
+  ... TODO: 
+} per eventi ripetibili
+*/
 router.post('/', auth, async (req, res) => {
+  // TODO: analizzare recurrence per creare la stringa RRULE (funzione a parte?)
+  const { title, description, start, end, isAllDay, place } = req.body
   const newEvent = new Event({
-    title: req.body.title,
-    description: req.body.description,
-    start: req.body.start,
-    end: req.body.end,
-    isAllDay: req.body.isAllDay,
-    isRepeatable: req.body.isRepeatable,
-    frequency: req.body.frequency,
-    repetitions: req.body.repetitions,
-    place: req.body.place,
+    title: title,
+    description: description,
+    start: new Date(start),
+    end: new Date(end),
+    isAllDay: isAllDay,
+    // recurrence: TODO: eventi ricorrenti ?!?!?!
+    place: place,
     owner: req.user.username
   })
 
@@ -50,11 +59,12 @@ router.get('/', auth, async (req, res) => {
 
 // ottenere eventi in un intervallo di tempo dato
 // request template: .../interval?s={startDatetime}&e={endDatetime}
+// dove i datetime sono espressi in ISO string (UTC)
 router.get('/interval', auth, async (req, res) => {
   try {
     const intervalEvents = await Event.find({
-      start: { $gte: req.query.s },
-      end: { $lte: req.query.e },
+      start: { $gte: new Date(req.query.s) },
+      end: { $lte: new Date(req.query.e) },
       owner: req.user.username
     })
     // se non ne trova nessuno invia un oggetto vuoto
@@ -78,18 +88,27 @@ router.get('/:id', auth, async (req, res) => {
 })
 
 // modificare un evento specifico
-// la "ripetibilità" non è modificabile, si crea un nuovo evento
+// body.start e body.end sono datetime in ISO string (UTC)
+/* 
+body.recurrence = null per eventi non ripetibili
+body.recurrence = {
+  ... TODO: 
+} per eventi ripetibili
+*/
 router.put('/:id', auth, async (req, res) => {
   try {
     const toUpdate = await Event.findById(req.params.id)
     if (!toUpdate) return res.status(404).send(`No event found with id ${req.params.id}`)
     // modifiche
-    toUpdate.title = req.body.title || toUpdate.title
-    toUpdate.description = req.body.description || toUpdate.description
-    toUpdate.start = req.body.start || toUpdate.start
-    toUpdate.end = req.body.end || toUpdate.end
-    toUpdate.isAllDay = req.body.isAllDay || toUpdate.isAllDay
-    toUpdate.place = req.body.place || toUpdate.place
+    // TODO: analizzare recurrence per creare la stringa RRULE (funzione a parte?)
+    const { title, description, start, end, isAllDay, place } = req.body
+    toUpdate.title = title || toUpdate.title
+    toUpdate.description = description || toUpdate.description
+    toUpdate.start = start ? new Date(start) : toUpdate.start
+    toUpdate.end = end ? new Date(end) : toUpdate.end
+    toUpdate.isAllDay = isAllDay !== undefined ? isAllDay : toUpdate.isAllDay
+    // toUpdate.recurrence = TODO: eventi ricorrenti
+    toUpdate.place = place !== undefined ? place : toUpdate.place
     await toUpdate.save()
     return res.send('ok')
   } catch (err) {

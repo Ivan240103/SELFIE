@@ -9,7 +9,7 @@ const Task = require('../models/Task')
 const router = express.Router()
 
 // creazione nuovo task
-// body.deadline è una stringa rappresentante un datetime
+// body.deadline è un datetime in ISO string (UTC)
 router.post('/', auth, async (req, res) => {
   const newTask = new Task({
     title: req.body.title,
@@ -41,6 +41,7 @@ router.get('/', auth, async (req, res) => {
 
 // ottenere task in un intervallo di tempo dato
 // request template: .../interval?s={startDatetime}&e={endDatetime}
+// dove i datetime sono espressi in ISO string (UTC)
 router.get('/interval', auth, async (req, res) => {
   try {
     const intervalTasks = await Task.find({
@@ -86,15 +87,16 @@ router.get('/:id', auth, async (req, res) => {
 })
 
 // modificare un task specifico
-// body.deadline è una stringa rappresentante un datetime
+// body.deadline è un datetime in ISO string (UTC)
 router.put('/:id', auth, async (req, res) => {
   try {
     const toUpdate = await Task.findById(req.params.id)
     if (!toUpdate) return res.status(404).send(`No task found with id ${req.params.id}`)
     // modifiche
-    toUpdate.title = req.body.title || toUpdate.title
-    toUpdate.description = req.body.description || toUpdate.description
-    toUpdate.deadline = req.body.deadline ? new Date(req.body.deadline) : toUpdate.deadline
+    const { title, description, deadline } = req.body
+    toUpdate.title = title || toUpdate.title
+    toUpdate.description = description || toUpdate.description
+    toUpdate.deadline = deadline ? new Date(deadline) : toUpdate.deadline
     await toUpdate.save()
     return res.send('ok')
   } catch (err) {

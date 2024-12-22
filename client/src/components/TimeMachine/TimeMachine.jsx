@@ -19,13 +19,17 @@ function TimeMachine() {
    * @returns Stringa formattata da passare ad un <input>
    */
   const datetimeToString = (datetime) => {
-    const dd = datetime.getDate()
-    const mm = datetime.getMonth() + 1
-    const yyyy = datetime.getFullYear()
-    const h = datetime.getHours()
-    const m = datetime.getMinutes()
-    return `${yyyy}-${mm}-${dd}T${h}:${m}`
-  }
+    // aggiungo lo zero prima dei numeri a cifra singola
+    const pad = (num) => String(num).padStart(2, '0');
+    
+    const dd = pad(datetime.getDate());
+    const mm = pad(datetime.getMonth() + 1);
+    const yyyy = datetime.getFullYear();
+    const h = pad(datetime.getHours());
+    const m = pad(datetime.getMinutes());
+    
+    return `${yyyy}-${mm}-${dd}T${h}:${m}`;
+}
 
   /**
    * Sposta il tempo in avanti o indietro

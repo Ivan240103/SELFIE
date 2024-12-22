@@ -8,7 +8,6 @@ import Tomato from './components/Tomato/tomato';
 import Notes from './components/Notes'
 import Dashboard from './components/Dashboard';
 
-import Debug from './components/Debug';
 import Protected from './components/Protected';
 import Unauthorized from './components/Unauthorized';
 
@@ -28,7 +27,6 @@ function App() {
             <Route path="/Notes" element={<Notes />} />
             <Route path="/dashboard" element={<Dashboard/>} />
 
-            <Route path="/debug" element={<Debug />} />
             <Route path="/protected" element={<Protected />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
           </Routes>
