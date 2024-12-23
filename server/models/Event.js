@@ -32,7 +32,7 @@ const eventSchema = mongoose.Schema({
   RRULE:FREQ=f;INTERVAL=i;COUNT=c
   RRULE:FREQ=f;INTERVAL=i;UNTIL=u
   */
-  recurrence: {
+  rrule: {
     type: String,
     default: null
   },

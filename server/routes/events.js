@@ -24,7 +24,7 @@ const rruleToString = async (rrule) => {
   const r = new RRule({
     freq: freq,
     interval: rrule.interval || 1,
-    dtstart: rrule.dtstart || (await getTime()).substring(0, 16),
+    dtstart: rrule.dtstart ? new Date(rrule.dtstart) : new Date((await getTime())),
     until: rrule.until || undefined,
     count: rrule.count || undefined,
   })
@@ -54,17 +54,17 @@ const stringToRrule = (str) => {
 
 // creazione nuovo evento
 // body.start e body.end sono datetime in ISO string (UTC)
-// body.recurrence = null per eventi non ricorrenti
-// body.recurrence = oggetto rrule (FullCalendar) per eventi ricorrenti
+// body.rrule = null per eventi non ricorrenti
+// body.rrule = oggetto rrule (FullCalendar) per eventi ricorrenti
 router.post('/', auth, async (req, res) => {
-  const { title, description, start, end, isAllDay, recurrence, place } = req.body
+  const { title, description, start, end, isAllDay, rrule, place } = req.body
   const newEvent = new Event({
     title: title,
     description: description,
     start: new Date(start),
     end: new Date(end),
     isAllDay: isAllDay,
-    recurrence: recurrence ? rruleToString(recurrence) : null,
+    rrule: rrule ? await rruleToString(rrule) : null,
     place: place,
     owner: req.user.username
   })
@@ -96,7 +96,7 @@ router.get('/:id', auth, async (req, res) => {
     const event = await Event.findById(req.params.id)
     if (!event) return res.status(404).send(`No event found with id ${req.params.id}`)
     // per visualizzare un singolo evento serve la ricorrenza in formato json
-    event.recurrence = event.recurrence ? stringToRrule(event.recurrence) : null
+    event.rrule = event.rrule ? stringToRrule(event.rrule) : null
     return res.json(event)
   } catch (err) {
     console.error(err)
@@ -106,20 +106,20 @@ router.get('/:id', auth, async (req, res) => {
 
 // modificare un evento specifico
 // body.start e body.end sono datetime in ISO string (UTC)
-// body.recurrence = null per eventi non ricorrenti
-// body.recurrence = oggetto rrule (FullCalendar) per eventi ricorrenti
+// body.rrule = null per eventi non ricorrenti
+// body.rrule = oggetto rrule (FullCalendar) per eventi ricorrenti
 router.put('/:id', auth, async (req, res) => {
   try {
     const toUpdate = await Event.findById(req.params.id)
     if (!toUpdate) return res.status(404).send(`No event found with id ${req.params.id}`)
     // modifiche
-    const { title, description, start, end, isAllDay, recurrence, place } = req.body
+    const { title, description, start, end, isAllDay, rrule, place } = req.body
     toUpdate.title = title || toUpdate.title
     toUpdate.description = description || toUpdate.description
     toUpdate.start = start ? new Date(start) : toUpdate.start
     toUpdate.end = end ? new Date(end) : toUpdate.end
     toUpdate.isAllDay = isAllDay !== undefined ? isAllDay : toUpdate.isAllDay
-    toUpdate.recurrence = recurrence ? rruleToString(recurrence) : null
+    toUpdate.rrule = rrule ? rruleToString(rrule) : null
     toUpdate.place = place !== undefined ? place : toUpdate.place
     await toUpdate.save()
     return res.send('ok')

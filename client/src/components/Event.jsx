@@ -58,17 +58,17 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
             setEnd(event.end ? new Date(event.end) : time)
             setIsAllDay(event.isAllDay === false ? false : true)
             setPlace(event.place || "")
-            setIsRecurrent(event?.recurrence !== null)
-            setFreq(event?.recurrence?.freq || 'daily')
-            setInterval(event?.recurrence?.interval || 1)
-            if (event?.recurrence?.until) {
+            setIsRecurrent(event?.rrule !== null)
+            setFreq(event?.rrule?.freq || 'daily')
+            setInterval(event?.rrule?.interval || 1)
+            if (event?.rrule?.until) {
                 setTerm('u')
-                setUntil(event?.recurrence?.until)
+                setUntil(event?.rrule?.until)
                 setCount(1)
-            } else if (event?.recurrence?.count) {
+            } else if (event?.rrule?.count) {
                 setTerm('c')
                 setUntil(time.toISOString().substring(0, 10))
-                setCount(event?.recurrence?.count)
+                setCount(event?.rrule?.count)
             } else {
                 setTerm('n')
                 setUntil(time.toISOString().substring(0, 10))
@@ -110,14 +110,14 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
   }
     
   const handleSave = async () => {
-    const recurrence = isRecurrent ? createRRule() : null
+    const rrule = isRecurrent ? createRRule() : null
     const eventData = {
       title: title,
       description: description,
       start: start.toISOString(),
       end: end.toISOString(),
       isAllDay: isAllDay,
-      recurrence: recurrence,
+      rrule: rrule,
       place: place
     };
 
@@ -148,14 +148,14 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
       alert("Errore: ID evento non trovato.");
       return;
     }
-    const recurrence = isRecurrent ? createRRule() : null
+    const rrule = isRecurrent ? createRRule() : null
     const updatedEventData = {
         title: title,
         description: description,
         start: start.toISOString(),
         end: end.toISOString(),
         isAllDay: isAllDay,
-        recurrence: recurrence,
+        rrule: rrule,
         place: place
     };
 
