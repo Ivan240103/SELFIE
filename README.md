@@ -19,6 +19,9 @@ npm install
 npm start
 ```
 
+## Documentazione
+RRule: https://github.com/jkbrzt/rrule
+
 ## Authors
  - Ivan De Simone, ivan.desimone@studio.unibo.it
  - Payam Salarieh, payam.salarieh@studio.unibo.it

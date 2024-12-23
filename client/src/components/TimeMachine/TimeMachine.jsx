@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import Modal from 'react-modal'
 import { useTimeMachine } from "./TimeMachineContext"
+import { datetimeToString } from '../../services/dateServices'
 
 import '../../css/TimeMachine.css'
 
@@ -11,25 +12,6 @@ function TimeMachine() {
   const { time, updateTime, resetTime } = useTimeMachine()
   const [modalIsOpen, setModalIsOpen] = useState(false)
   const [selectedTime, setSelectedTime] = useState(time)
-
-  /**
-   * Converte un datetime in una stringa leggibile da un input
-   * di type="datetime-local"
-   * @param {Date} datetime datetime da convertire
-   * @returns Stringa formattata da passare ad un <input>
-   */
-  const datetimeToString = (datetime) => {
-    // aggiungo lo zero prima dei numeri a cifra singola
-    const pad = (num) => String(num).padStart(2, '0');
-    
-    const dd = pad(datetime.getDate());
-    const mm = pad(datetime.getMonth() + 1);
-    const yyyy = datetime.getFullYear();
-    const h = pad(datetime.getHours());
-    const m = pad(datetime.getMinutes());
-    
-    return `${yyyy}-${mm}-${dd}T${h}:${m}`;
-}
 
   /**
    * Sposta il tempo in avanti o indietro

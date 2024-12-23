@@ -1,25 +1,124 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useTimeMachine } from './TimeMachine/TimeMachineContext'
+import { 
+    datetimeToString,
+    datetimeToDateString
+} from '../services/dateServices';
 
 function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
-    const [title, setTitle] = useState(eventDetails?.title || "");
-    const [description, setDescription] = useState(eventDetails?.description || "");
-    const [start, setStart] = useState(eventDetails?.start || "");
-    const [end, setEnd] = useState(eventDetails?.end || "");
-    const [isAllDay, setIsAllDay] = useState(eventDetails?.isAllDay || true);
-    const [frequency, setFrequency] = useState(eventDetails?.frequency || "n");
-    const [place, setPlace] = useState(eventDetails?.place || "");
-    const [owner, setOwner] = useState(eventDetails?.owner || "pay");
+    // tempo in vigore per l'utente (fuso orario UTC)
+    const { time } = useTimeMachine();
+    const [event, setEvent] = useState({})
 
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [start, setStart] = useState(time); // di tipo Date
+    const [end, setEnd] = useState(time);   // di tipo Date
+    const [isAllDay, setIsAllDay] = useState(true);
+    const [place, setPlace] = useState("");
+
+    const [isRecurrent, setIsRecurrent] = useState(false);
+    const [freq, setFreq] = useState('daily');
+    const [interval, setInterval] = useState(1);
+    const [term, setTerm] = useState('n')
+    const [until, setUntil] = useState(time.toISOString().substring(0, 10))
+    const [count, setCount] = useState(1)
+
+    // recupera l'evento specifico dal backend
+    useEffect(() => {
+        const fetchEvent = async () => {
+            if (eventDetails) {
+                try {
+                    const response = await fetch(`http://localhost:8000/api/events/${eventDetails}`, {
+                        method: 'GET',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+                    const event = await response.json();
+                    setEvent(event)
+                } catch (error) {
+                    console.error(error)
+                }
+            } else {
+                setEvent({})
+            }
+        }
+
+        fetchEvent()
+    }, [eventDetails])
+
+    // popola i campi per riempire il form
+    useEffect(() => {
+        const setFields = () => {
+            setTitle(event.title || "")
+            setDescription(event.description || "")
+            setStart(event.start ? new Date(event.start) : time)
+            setEnd(event.end ? new Date(event.end) : time)
+            setIsAllDay(event.isAllDay === false ? false : true)
+            setPlace(event.place || "")
+            setIsRecurrent(event?.recurrence !== null)
+            setFreq(event?.recurrence?.freq || 'daily')
+            setInterval(event?.recurrence?.interval || 1)
+            if (event?.recurrence?.until) {
+                setTerm('u')
+                setUntil(event?.recurrence?.until)
+                setCount(1)
+            } else if (event?.recurrence?.count) {
+                setTerm('c')
+                setUntil(time.toISOString().substring(0, 10))
+                setCount(event?.recurrence?.count)
+            } else {
+                setTerm('n')
+                setUntil(time.toISOString().substring(0, 10))
+                setCount(1)
+            }
+        }
+        
+        setFields()
+    }, [event])
+
+  /**
+   * Crea un oggetto rrule che rispetti il formato per il
+   * plugin di FullCalendar, usando gli state
+   * 
+   * @returns oggetto rappresentante una RRule
+   */
+  const createRRule = () => {
+    if (term === 'n') {
+      return {
+        freq: freq,
+        interval: interval,
+        dtstart: start
+      }
+    } else if (term === 'u') {
+      return {
+        freq: freq,
+        interval: interval,
+        dtstart: start,
+        until: until
+      }
+    } else {
+      return {
+        freq: freq,
+        interval: interval,
+        dtstart: start,
+        count: count
+      }
+    }
+  }
+    
   const handleSave = async () => {
+    const recurrence = isRecurrent ? createRRule() : null
     const eventData = {
       title: title,
       description: description,
-      start: start,
-      end: end,
+      start: start.toISOString(),
+      end: end.toISOString(),
       isAllDay: isAllDay,
-      frequency: frequency,
-      place: place,
-      owner: owner,
+      recurrence: recurrence,
+      place: place
     };
 
     try {
@@ -32,36 +131,36 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
             body: JSON.stringify(eventData),
         });
         if (!response.ok) {
-            throw new Error(`Errore HTTP: ${response.status}`);
-          }
-      
-          const result = await response.text();
-          console.log('Evento salvato con successo:', result);
-          alert('Evento salvato con successo!');
-        } catch (err) {
-          console.error('Errore nel salvataggio dell\'evento:', err);
-          alert('Errore nel salvataggio dell\'evento.');
+            throw new Error(`Errore HTTP: ${response.text}`);
         }
+      
+        const result = await response.text();
+        console.log('Evento salvato con successo:', result);
+        alert('Evento salvato con successo!');
+    } catch (err) {
+        console.error('Errore nel salvataggio dell\'evento:', err);
+        alert('Errore nel salvataggio dell\'evento.');
+    }
   };
 
   const handleUpdate = async () => {
-    if (!eventDetails || !eventDetails.id) {
+    if (!eventDetails) {
       alert("Errore: ID evento non trovato.");
       return;
     }
+    const recurrence = isRecurrent ? createRRule() : null
     const updatedEventData = {
         title: title,
         description: description,
-        start: start,
-        end: end,
+        start: start.toISOString(),
+        end: end.toISOString(),
         isAllDay: isAllDay,
-        frequency: frequency,
-        place: place,
-        owner: owner,
+        recurrence: recurrence,
+        place: place
     };
 
     try {
-      const response = await fetch(`http://localhost:8000/api/events/${eventDetails.id}`, {
+      const response = await fetch(`http://localhost:8000/api/events/${eventDetails}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +172,8 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
       const result = await response.text();
       console.log('Evento aggiornato con successo:', result);
       alert('Evento aggiornato con successo!');
-      onUpdateEvent({ ...updatedEventData, id: eventDetails.id });
+      // TODO: non bisogna mappare _id ad id? (domanda eh)
+      onUpdateEvent({ ...updatedEventData, id: eventDetails });
     } catch (err) {
       console.error('Errore nell\'aggiornamento dell\'evento:', err);
       alert('Errore nell\'aggiornamento dell\'evento.');
@@ -81,25 +181,25 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
   };
 
   const handleDelete = async () => {
-    if (!eventDetails || !eventDetails.id) {
+    if (!eventDetails) {
       alert("Errore: ID evento non trovato.");
       return;
     }
     try {
-        const response = await fetch(`http://localhost:8000/api/events/${eventDetails.id}`, {
+        const response = await fetch(`http://localhost:8000/api/events/${eventDetails}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
-        console.log(eventDetails.id);
+        console.log('ID evento da eliminare:', eventDetails);
         if (!response.ok) {
           throw new Error(`Errore HTTP: ${response.status}`);
         }
   
         console.log('Evento cancellato con successo');
         alert('Evento cancellato con successo!');
-        onDeleteEvent(eventDetails.id);
+        onDeleteEvent(eventDetails);
       } catch (err) {
         console.error('Errore nella cancellazione dell\'evento:', err);
         alert('Errore nella cancellazione dell\'evento.');
@@ -108,7 +208,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
 
   return (
     <div className="event-form">
-        <h3>Crea un nuovo evento</h3>
+        <h3>{!eventDetails ? 'Crea' : 'Modifica'} evento</h3>
         <div>
             <label>
             Titolo:
@@ -130,26 +230,6 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
         </div>
         <div>
             <label>
-            Inizio:
-            <input
-                type="date"
-                value={start}
-                onChange={(e) => setStart(e.target.value)}
-            />
-            </label>
-        </div>
-        <div>
-            <label>
-            Fine:
-            <input
-                type="date"
-                value={end}
-                onChange={(e) => setEnd(e.target.value)}
-            />
-            </label>
-        </div>
-        <div>
-            <label>
             Evento per tutto il giorno:
             <input
                 type="checkbox"
@@ -158,20 +238,102 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
             />
             </label>
         </div>
+        <div hidden={!isAllDay}>
+            <label>
+            Giorno:
+            </label>
+            <input
+                type="date"
+                value={datetimeToDateString(start)}
+                onChange={(e) => {
+                    setStart(new Date(e.target.value))
+                    setEnd(new Date(e.target.value))
+                }}
+            />
+        </div>
+        <div hidden={isAllDay}>
+            <label>
+            Inizio:
+            <input
+                type="datetime-local"
+                value={datetimeToString(start)}
+                onChange={(e) => setStart(new Date(e.target.value))}
+            />
+            </label>
+        </div>
+        <div hidden={isAllDay}>
+            <label>
+            Fine:
+            <input
+                type="datetime-local"
+                value={datetimeToString(end)}
+                onChange={(e) => setEnd(new Date(e.target.value))}
+            />
+            </label>
+        </div>
         <div>
             <label>
-            Frequenza:
-            <select
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value)}
-            >
-                <option value="n">Nessuna</option>
-                <option value="d">Giornaliera</option>
-                <option value="w">Settimanale</option>
-                <option value="m">Mensile</option>
-                <option value="y">Annuale</option>
-            </select>
+            Evento ricorrente:
+            <input
+                type="checkbox"
+                checked={isRecurrent}
+                onChange={(e) => setIsRecurrent(e.target.checked)}
+            />
             </label>
+        </div>
+        <div hidden={!isRecurrent}>
+            <label>
+            Ripeti ogni:
+            </label>
+            <input
+                type="number"
+                min='1'
+                value={interval}
+                onChange={(e) => setInterval(e.target.value)}
+            />
+            <select
+                value={freq}
+                onChange={(e) => setFreq(e.target.value)}
+            >
+                <option value='daily'>{interval === 1 ? 'Giorno' : 'Giorni'}</option>
+                <option value='weekly'>{interval === 1 ? 'Settimana' : 'Settimane'}</option>
+                <option value='monthly'>{interval === 1 ? 'Mese' : 'Mesi'}</option>
+                <option value='yearly'>{interval === 1 ? 'Anno' : 'Anni'}</option>
+            </select>
+            <label>
+              Scade...
+            </label>
+            <input
+                type="radio"
+                name="end"
+                value='n'
+                checked={term === 'n'}
+                onChange={(e) => setTerm(e.target.value)}
+            /> Mai
+            <br />
+            <input
+                type="radio"
+                name="end"
+                value='u'
+                checked={term === 'u'}
+                onChange={(e) => setTerm(e.target.value)}
+            /> Il <input
+                  type="date"
+                  value={until}
+                  onChange={(e) => setUntil(e.target.value)}
+                />
+            <br />
+            <input
+                type="radio"
+                name="end"
+                value='c'
+                checked={term === 'c'}
+                onChange={(e) => setTerm(e.target.value)}
+            /> Dopo <input
+                  type="number"
+                  value={count}
+                  onChange={(e) => setCount(e.target.value)}
+                /> {count === 1 ? 'ripetizione' : 'ripetizioni'}
         </div>
         <div>
             <label>

@@ -4,14 +4,58 @@
 
 const express = require('express')
 const auth = require('../middleware/auth')
+const { RRule } = require('rrule')
+const { getTime } = require('../services/TimeMachine')
 const Event = require('../models/Event')
 
 const router = express.Router()
 
+/**
+ * Converte un oggetto rrule compatibile con FullCalendar in
+ * una stringa rappresentante una RRule
+ * 
+ * @param {JSON} rrule oggetto rrule compatibile con FullCalendar
+ * @returns regola RRule in formato stringa
+ */
+const rruleToString = async (rrule) => {
+  const freq = rrule.freq === 'daily' ? RRule.DAILY :
+               rrule.freq === 'weekly' ? RRule.WEEKLY :
+               rrule.freq === 'monthly' ? RRule.MONTHLY : RRule.YEARLY
+  const r = new RRule({
+    freq: freq,
+    interval: rrule.interval || 1,
+    dtstart: rrule.dtstart || (await getTime()).substring(0, 16),
+    until: rrule.until || undefined,
+    count: rrule.count || undefined,
+  })
+  return r.toString()
+}
+
+/**
+ * Converte una stringa rappresentante una RRule in un
+ * oggetto JSON compatibile con il plugin di FullCalendar
+ *  
+ * @param {String} str regola RRule in formato stringa
+ * @returns oggetto rrule compatibile con FullCalendar
+ */
+const stringToRrule = (str) => {
+  const rrule = RRule.fromString(str)
+  const freq = rrule.freq === RRule.DAILY ? 'daily' :
+               rrule.freq === RRule.WEEKLY ? 'weekly' :
+               rrule.freq === RRule.MONTHLY ? 'monthly' : 'yearly'
+  return {
+    freq: freq,
+    interval: rrule.interval,
+    dtstart: rrule.dtstart,
+    until: rrule.until || undefined,
+    count: rrule.count || undefined
+  }
+}
+
 // creazione nuovo evento
 // body.start e body.end sono datetime in ISO string (UTC)
 // body.recurrence = null per eventi non ricorrenti
-// body.recurrence = stringa RRule per eventi ricorrenti
+// body.recurrence = oggetto rrule (FullCalendar) per eventi ricorrenti
 router.post('/', auth, async (req, res) => {
   const { title, description, start, end, isAllDay, recurrence, place } = req.body
   const newEvent = new Event({
@@ -20,7 +64,7 @@ router.post('/', auth, async (req, res) => {
     start: new Date(start),
     end: new Date(end),
     isAllDay: isAllDay,
-    recurrence: recurrence,
+    recurrence: recurrence ? rruleToString(recurrence) : null,
     place: place,
     owner: req.user.username
   })
@@ -49,9 +93,11 @@ router.get('/', auth, async (req, res) => {
 // ottenere un evento specifico
 router.get('/:id', auth, async (req, res) => {
   try {
-    const singleEvent = await Event.findById(req.params.id)
-    if (!singleEvent) return res.status(404).send(`No event found with id ${req.params.id}`)
-    return res.json(singleEvent)
+    const event = await Event.findById(req.params.id)
+    if (!event) return res.status(404).send(`No event found with id ${req.params.id}`)
+    // per visualizzare un singolo evento serve la ricorrenza in formato json
+    event.recurrence = event.recurrence ? stringToRrule(event.recurrence) : null
+    return res.json(event)
   } catch (err) {
     console.error(err)
     return res.status(500).send('Error while getting specific event')
@@ -61,7 +107,7 @@ router.get('/:id', auth, async (req, res) => {
 // modificare un evento specifico
 // body.start e body.end sono datetime in ISO string (UTC)
 // body.recurrence = null per eventi non ricorrenti
-// body.recurrence = stringa RRule per eventi ricorrenti
+// body.recurrence = oggetto rrule (FullCalendar) per eventi ricorrenti
 router.put('/:id', auth, async (req, res) => {
   try {
     const toUpdate = await Event.findById(req.params.id)
@@ -73,7 +119,7 @@ router.put('/:id', auth, async (req, res) => {
     toUpdate.start = start ? new Date(start) : toUpdate.start
     toUpdate.end = end ? new Date(end) : toUpdate.end
     toUpdate.isAllDay = isAllDay !== undefined ? isAllDay : toUpdate.isAllDay
-    toUpdate.recurrence = recurrence !== undefined ? recurrence : toUpdate.recurrence
+    toUpdate.recurrence = recurrence ? rruleToString(recurrence) : null
     toUpdate.place = place !== undefined ? place : toUpdate.place
     await toUpdate.save()
     return res.send('ok')
