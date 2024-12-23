@@ -58,7 +58,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
             setEnd(event.end ? new Date(event.end) : time)
             setIsAllDay(event.isAllDay === false ? false : true)
             setPlace(event.place || "")
-            setIsRecurrent(event?.rrule !== null)
+            setIsRecurrent(event?.rrule ? true : false)
             setFreq(event?.rrule?.freq || 'daily')
             setInterval(event?.rrule?.interval || 1)
             if (event?.rrule?.until) {
@@ -172,7 +172,6 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
       const result = await response.text();
       console.log('Evento aggiornato con successo:', result);
       alert('Evento aggiornato con successo!');
-      // TODO: non bisogna mappare _id ad id? (domanda eh)
       onUpdateEvent({ ...updatedEventData, id: eventDetails });
     } catch (err) {
       console.error('Errore nell\'aggiornamento dell\'evento:', err);

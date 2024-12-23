@@ -40,15 +40,15 @@ const rruleToString = async (rrule) => {
  */
 const stringToRrule = (str) => {
   const rrule = RRule.fromString(str)
-  const freq = rrule.freq === RRule.DAILY ? 'daily' :
-               rrule.freq === RRule.WEEKLY ? 'weekly' :
-               rrule.freq === RRule.MONTHLY ? 'monthly' : 'yearly'
+  const freq = rrule.options.freq == RRule.DAILY ? 'daily' :
+               rrule.options.freq == RRule.WEEKLY ? 'weekly' :
+               rrule.options.freq == RRule.MONTHLY ? 'monthly' : 'yearly'
   return {
     freq: freq,
-    interval: rrule.interval,
-    dtstart: rrule.dtstart,
-    until: rrule.until || undefined,
-    count: rrule.count || undefined
+    interval: rrule.options.interval,
+    dtstart: rrule.options.dtstart,
+    until: rrule.options.until || undefined,
+    count: rrule.options.count || undefined
   }
 }
 
@@ -96,8 +96,9 @@ router.get('/:id', auth, async (req, res) => {
     const event = await Event.findById(req.params.id)
     if (!event) return res.status(404).send(`No event found with id ${req.params.id}`)
     // per visualizzare un singolo evento serve la ricorrenza in formato json
-    event.rrule = event.rrule ? stringToRrule(event.rrule) : null
-    return res.json(event)
+    const obj = event.toObject()
+    obj.rrule = obj.rrule ? stringToRrule(obj.rrule) : null
+    return res.json(obj)
   } catch (err) {
     console.error(err)
     return res.status(500).send('Error while getting specific event')
@@ -119,7 +120,7 @@ router.put('/:id', auth, async (req, res) => {
     toUpdate.start = start ? new Date(start) : toUpdate.start
     toUpdate.end = end ? new Date(end) : toUpdate.end
     toUpdate.isAllDay = isAllDay !== undefined ? isAllDay : toUpdate.isAllDay
-    toUpdate.rrule = rrule ? rruleToString(rrule) : null
+    toUpdate.rrule = rrule ? await rruleToString(rrule) : null
     toUpdate.place = place !== undefined ? place : toUpdate.place
     await toUpdate.save()
     return res.send('ok')

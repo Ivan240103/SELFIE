@@ -4,11 +4,16 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import rrulePlugin from '@fullcalendar/rrule';
+import { useTimeMachine } from './TimeMachine/TimeMachineContext';
 import Event from "./Event";
 import Task from "./Task";
 import TimeMachine from './TimeMachine/TimeMachine';
 
+// TODO: x ivan: aggiornare il calendario quando si attiva la time machine
+
 function Calendar() {
+  const { time, isTimeLoading } = useTimeMachine()
+
   const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [currentEvent, setCurrentEvent] = useState(null);
@@ -17,8 +22,8 @@ function Calendar() {
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
 
+  // Carica gli eventi dal backend
   useEffect(() => {
-    // Carica gli eventi dal backend
     async function fetchEvents() {
       try {
         const response = await fetch("http://localhost:8000/api/events/", {
@@ -46,8 +51,8 @@ function Calendar() {
     fetchEvents();
   }, []);
 
+  // Carica le task dal backend
   useEffect(() => {
-    // Carica le task dal backend
     async function fetchTasks() {
       try {
         const response = await fetch("http://localhost:8000/api/tasks/", {
@@ -124,6 +129,9 @@ function Calendar() {
     setCalendarEvents(calendarEvents.filter(event => event.id !== eventId));
   }
 
+  // carica il calendario solo quando il tempo è okay
+  if (isTimeLoading) return(<h2 className='calendar-loading'>Loading</h2>)
+
   return (
     <div className='demo-app'>
       <TimeMachine />
@@ -140,6 +148,7 @@ function Calendar() {
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
           }}
           initialView='dayGridMonth'
+          initialDate={time}
           editable={true}
           selectable={true}
           selectMirror={true}
@@ -153,6 +162,7 @@ function Calendar() {
           eventClick={(info) => {
             // Gestione del clic su un evento per aprire il form di modifica
             console.log('Evento cliccato:', info.event);
+            console.log('dati evento:', info.event.start)
             // Passa i dettagli dell'evento al componente Event per la modifica
             setCurrentEvent(info.event.id);
             const clickedTask = calendarTasks.find(task => task.id === info.event.id);
