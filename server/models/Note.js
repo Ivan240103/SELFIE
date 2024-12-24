@@ -15,15 +15,16 @@ const noteSchema = mongoose.Schema({
   },
   creation: {
     type: Date,
-    default: Date.now
+    required: true
   },
   modification: {
     type: Date,
-    default: Date.now
+    required: true
   },
+  // categorie separate da virgole ','
   categories: {
-    type: [String],
-    default: ['None']
+    type: String,
+    default: ''
   },
   textLength: {
     type: Number,

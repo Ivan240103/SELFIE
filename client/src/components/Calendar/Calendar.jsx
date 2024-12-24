@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
-import { useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import rrulePlugin from '@fullcalendar/rrule';
+import { useTimeMachine } from '../TimeMachine/TimeMachineContext';
 import Event from "./Event";
 import Task from "./Task";
+import TimeMachine from '../TimeMachine/TimeMachine';
+
+// TODO: x ivan: aggiornare il calendario quando si attiva la time machine
 
 function Calendar() {
+  const { time, isTimeLoading } = useTimeMachine()
+
   const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [currentEvent, setCurrentEvent] = useState(null);
@@ -15,6 +21,67 @@ function Calendar() {
   const [calendarTasks, setCalendarTasks] = useState([]);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
+
+  // Carica gli eventi dal backend
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const response = await fetch("http://localhost:8000/api/events/", {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const events = await response.json();
+          // Mappa _id come id
+          const mappedEvents = events.map(event => ({
+            ...event,
+            id: event._id // Mappa _id a id
+          }));
+          setCalendarEvents(mappedEvents);
+        } else {
+          console.error('Errore durante il caricamento degli eventi.');
+        }
+      } catch (error) {
+        console.error('Errore nel caricamento degli eventi:', error);
+      }
+    }
+    fetchEvents();
+  }, []);
+
+  // Carica le task dal backend
+  useEffect(() => {
+    async function fetchTasks() {
+      try {
+        const response = await fetch("http://localhost:8000/api/tasks/", {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const tasks = await response.json();
+          const mappedTasks = tasks.map(task => ({
+            id: task._id,
+            title: task.title,
+            start: task.deadline,
+            allDay: true, // FullCalendar richiede questa proprietà
+            color: 'yellow', // Colore specifico per le task
+            textColor: 'black' // Per visibilità
+          }));
+          setCalendarTasks(mappedTasks);
+        } else {
+          console.error('Errore durante il caricamento degli eventi.');
+        }
+      } catch (error) {
+        console.error('Errore nel caricamento degli eventi:', error);
+      }
+    }
+    fetchTasks();
+  }, []);
 
   function handleTaskSave(newTask) {
     setTasks([...tasks, newTask]);
@@ -62,85 +129,26 @@ function Calendar() {
     setCalendarEvents(calendarEvents.filter(event => event.id !== eventId));
   }
 
-
-
-  useEffect(() => {
-    // Carica gli eventi dal backend
-    async function fetchEvents() {
-      try {
-        const response = await fetch("http://localhost:8000/api/events/", {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        if (response.ok) {
-          const events = await response.json();
-           // Mappa _id come id
-           const mappedEvents = events.map(event => ({
-            ...event,
-            id: event._id // Mappa _id a id
-          }));
-          setCalendarEvents(mappedEvents);
-        } else {
-          console.error('Errore durante il caricamento degli eventi.');
-        }
-      } catch (error) {
-        console.error('Errore nel caricamento degli eventi:', error);
-        }
-    }
-    fetchEvents();
-  }, []);
-
-  useEffect(() => {
-    // Carica le task dal backend
-    async function fetchTasks() {
-      try {
-        const response = await fetch("http://localhost:8000/api/tasks/", {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        if (response.ok) {
-          const tasks = await response.json();
-        const mappedTasks = tasks.map(task => ({
-          id: task._id,
-          title: task.title,
-          start: task.deadline,
-          allDay: true, // FullCalendar richiede questa proprietà
-          color: 'yellow', // Colore specifico per le task
-          textColor: 'black' // Per visibilità
-        }));
-        setCalendarTasks(mappedTasks);
-        } else {
-          console.error('Errore durante il caricamento degli eventi.');
-        }
-      } catch (error) {
-        console.error('Errore nel caricamento degli eventi:', error);
-        }
-    }
-    fetchTasks();
-  }, []);
-
+  // carica il calendario solo quando il tempo è okay
+  if (isTimeLoading) return(<h2 className='calendar-loading'>Loading</h2>)
 
   return (
     <div className='demo-app'>
+      <TimeMachine />
       <Sidebar
         weekendsVisible={weekendsVisible}
         handleWeekendsToggle={handleWeekendsToggle}
       />
       <div className='demo-app-main'>
         <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
           headerToolbar={{
             left: 'prevYear,prev,today,next,nextYear',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
           }}
           initialView='dayGridMonth'
+          initialDate={time}
           editable={true}
           selectable={true}
           selectMirror={true}
@@ -154,16 +162,9 @@ function Calendar() {
           eventClick={(info) => {
             // Gestione del clic su un evento per aprire il form di modifica
             console.log('Evento cliccato:', info.event);
+            console.log('dati evento:', info.event.start)
             // Passa i dettagli dell'evento al componente Event per la modifica
-            setCurrentEvent({
-              id: info.event.id,
-              title: info.event.title,
-              start: info.event.start,
-              end: info.event.end,
-              isAllDay: info.event.allDay,
-              place: info.event.place,
-              owner: info.event.owner
-            });
+            setCurrentEvent(info.event.id);
             const clickedTask = calendarTasks.find(task => task.id === info.event.id);
             handleTaskClick(clickedTask);
           }}

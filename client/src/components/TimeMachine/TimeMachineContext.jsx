@@ -6,6 +6,7 @@ import axios from 'axios'
 
 const TimeMachineContext = createContext({
   time: new Date(),
+  isTimeLoading: true,
   updateTime: async () => {},
   resetTime: async () => {}
 })
@@ -13,6 +14,8 @@ const TimeMachineContext = createContext({
 export const TimeMachineProvider = ({ children }) => {
   // stato per il tempo in vigore
   const [time, setTime] = useState(new Date())
+  // stato per il caricamento del tempo dal backend
+  const [isTimeLoading, setIsTimeLoading] = useState(true)
 
   // recuperare il tempo in vigore dell'utente
   useEffect(() => {
@@ -22,6 +25,7 @@ export const TimeMachineProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
         setTime(new Date(response.data))
+        setIsTimeLoading(false)
       } catch (err) {
         console.error(err)
       }
@@ -78,7 +82,7 @@ export const TimeMachineProvider = ({ children }) => {
 
   return(
     <TimeMachineContext.Provider 
-      value={{ time, updateTime, resetTime }} >
+      value={{ time, isTimeLoading, updateTime, resetTime }} >
       {children}
     </TimeMachineContext.Provider>
   )

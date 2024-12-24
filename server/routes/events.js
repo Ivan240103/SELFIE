@@ -4,22 +4,68 @@
 
 const express = require('express')
 const auth = require('../middleware/auth')
+const { RRule } = require('rrule')
+const { getTime } = require('../services/TimeMachine')
 const Event = require('../models/Event')
 
 const router = express.Router()
 
+/**
+ * Converte un oggetto rrule compatibile con FullCalendar in
+ * una stringa rappresentante una RRule
+ * 
+ * @param {JSON} rrule oggetto rrule compatibile con FullCalendar
+ * @returns regola RRule in formato stringa
+ */
+const rruleToString = async (rrule) => {
+  const freq = rrule.freq === 'daily' ? RRule.DAILY :
+               rrule.freq === 'weekly' ? RRule.WEEKLY :
+               rrule.freq === 'monthly' ? RRule.MONTHLY : RRule.YEARLY
+  const r = new RRule({
+    freq: freq,
+    interval: rrule.interval || 1,
+    dtstart: rrule.dtstart ? new Date(rrule.dtstart) : new Date((await getTime())),
+    until: rrule.until || undefined,
+    count: rrule.count || undefined,
+  })
+  return r.toString()
+}
+
+/**
+ * Converte una stringa rappresentante una RRule in un
+ * oggetto JSON compatibile con il plugin di FullCalendar
+ *  
+ * @param {String} str regola RRule in formato stringa
+ * @returns oggetto rrule compatibile con FullCalendar
+ */
+const stringToRrule = (str) => {
+  const rrule = RRule.fromString(str)
+  const freq = rrule.options.freq == RRule.DAILY ? 'daily' :
+               rrule.options.freq == RRule.WEEKLY ? 'weekly' :
+               rrule.options.freq == RRule.MONTHLY ? 'monthly' : 'yearly'
+  return {
+    freq: freq,
+    interval: rrule.options.interval,
+    dtstart: rrule.options.dtstart,
+    until: rrule.options.until || undefined,
+    count: rrule.options.count || undefined
+  }
+}
+
 // creazione nuovo evento
+// body.start e body.end sono datetime in ISO string (UTC)
+// body.rrule = null per eventi non ricorrenti
+// body.rrule = oggetto rrule (FullCalendar) per eventi ricorrenti
 router.post('/', auth, async (req, res) => {
+  const { title, description, start, end, isAllDay, rrule, place } = req.body
   const newEvent = new Event({
-    title: req.body.title,
-    description: req.body.description,
-    start: req.body.start,
-    end: req.body.end,
-    isAllDay: req.body.isAllDay,
-    isRepeatable: req.body.isRepeatable,
-    frequency: req.body.frequency,
-    repetitions: req.body.repetitions,
-    place: req.body.place,
+    title: title,
+    description: description,
+    start: new Date(start),
+    end: new Date(end),
+    isAllDay: isAllDay,
+    rrule: rrule ? await rruleToString(rrule) : null,
+    place: place,
     owner: req.user.username
   })
 
@@ -44,29 +90,15 @@ router.get('/', auth, async (req, res) => {
   }
 })
 
-// ottenere eventi in un intervallo di tempo dato
-// request template: .../interval?s={startDatetime}&e={endDatetime}
-router.get('/interval', auth, async (req, res) => {
-  try {
-    const intervalEvents = await Event.find({
-      start: { $gte: req.query.s },
-      end: { $lte: req.query.e },
-      owner: req.user.username
-    })
-    // se non ne trova nessuno invia un oggetto vuoto
-    return res.json(intervalEvents)
-  } catch (err) {
-    console.error(err)
-    return res.status(500).send('Error while getting events in a time interval')
-  }
-})
-
 // ottenere un evento specifico
 router.get('/:id', auth, async (req, res) => {
   try {
-    const singleEvent = await Event.findById(req.params.id)
-    if (!singleEvent) return res.status(404).send(`No event found with id ${req.params.id}`)
-    return res.json(singleEvent)
+    const event = await Event.findById(req.params.id)
+    if (!event) return res.status(404).send(`No event found with id ${req.params.id}`)
+    // per visualizzare un singolo evento serve la ricorrenza in formato json
+    const obj = event.toObject()
+    obj.rrule = obj.rrule ? stringToRrule(obj.rrule) : null
+    return res.json(obj)
   } catch (err) {
     console.error(err)
     return res.status(500).send('Error while getting specific event')
@@ -74,18 +106,22 @@ router.get('/:id', auth, async (req, res) => {
 })
 
 // modificare un evento specifico
-// la "ripetibilità" non è modificabile, si crea un nuovo evento
+// body.start e body.end sono datetime in ISO string (UTC)
+// body.rrule = null per eventi non ricorrenti
+// body.rrule = oggetto rrule (FullCalendar) per eventi ricorrenti
 router.put('/:id', auth, async (req, res) => {
   try {
     const toUpdate = await Event.findById(req.params.id)
     if (!toUpdate) return res.status(404).send(`No event found with id ${req.params.id}`)
     // modifiche
-    toUpdate.title = req.body.title || toUpdate.title
-    toUpdate.description = req.body.description || toUpdate.description
-    toUpdate.start = req.body.start || toUpdate.start
-    toUpdate.end = req.body.end || toUpdate.end
-    toUpdate.isAllDay = req.body.isAllDay || toUpdate.isAllDay
-    toUpdate.place = req.body.place || toUpdate.place
+    const { title, description, start, end, isAllDay, rrule, place } = req.body
+    toUpdate.title = title || toUpdate.title
+    toUpdate.description = description || toUpdate.description
+    toUpdate.start = start ? new Date(start) : toUpdate.start
+    toUpdate.end = end ? new Date(end) : toUpdate.end
+    toUpdate.isAllDay = isAllDay !== undefined ? isAllDay : toUpdate.isAllDay
+    toUpdate.rrule = rrule ? await rruleToString(rrule) : null
+    toUpdate.place = place !== undefined ? place : toUpdate.place
     await toUpdate.save()
     return res.send('ok')
   } catch (err) {

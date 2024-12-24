@@ -4,31 +4,31 @@
 const User = require('../models/User')
 
 /**
- * Calcola il tempo in vigore per l'utente
+ * Calcola il tempo in vigore per l'utente al fuso orario UTC
  * 
  * @param {Number} offset millisecondi di sfasamento temporale
- * @returns tempo in vigore in formato ISO String
+ * @returns tempo in vigore in formato ISO string (UTC)
  */
-function calcDateString(offset) {
+function calcDateISOstring(offset) {
   return new Date(Date.now() + offset).toISOString()
 }
 
 /**
- * Ritorna il tempo in vigore per l'utente
+ * Ritorna il tempo in vigore per l'utente UTC
  * 
  * @param {String} username username dell'utente
- * @returns data a cui si trova l'utente in formato ISO string
- * @throws 404 in caso non trovi l'utente
- * @throws 500 in caso di fallimento db
+ * @returns datetime a cui si trova l'utente in ISO string (UTC)
+ * @throws getTime in caso di fallimento
  */
 const getTime = async (username) => {
   try {
     const user = await User.findOne({ username: username })
-    if (!user) throw 'getTime 404'
-    return calcDateString(user.offset)
+    if (!user) throw 'getTime'
+
+    return calcDateISOstring(user.offset)
   } catch (err) {
     console.error(`getTime error: ${err}`)
-    throw 'getTime 500'
+    throw 'getTime'
   }
 }
 
@@ -36,21 +36,21 @@ const getTime = async (username) => {
  * Modifica l'offset temporale di un utente
  * 
  * @param {String} username username dell'utente
- * @param {String} date data a cui ci si vuole spostare in formato ISO string
- * @returns data a cui si trova l'utente in formato ISO string
- * @throws 404 in caso non trovi l'utente
- * @throws 500 in caso di fallimento db
+ * @param {String} date datetime a cui si vuole spostare in ISO string (UTC)
+ * @returns datetime a cui si trova l'utente in ISO string (UTC)
+ * @throws setTime in caso di fallimento
  */
 const setTime = async (username, date) => {
   try {
     const user = await User.findOne({ username: username })
-    if (!user) throw 'setTime 404'
+    if (!user) throw 'setTime'
+
     user.offset = Date.parse(date) - Date.now()
     await user.save()
-    return calcDateString(user.offset)
+    return calcDateISOstring(user.offset)
   } catch (err) {
     console.error(`setTime error: ${err}`)
-    throw 'setTime 500'
+    throw 'setTime'
   }
 }
 
@@ -58,20 +58,20 @@ const setTime = async (username, date) => {
  * Resetta l'offset temporale
  * 
  * @param {String} username username dell'utente
- * @returns data a cui si trova l'utente in formato ISO string
- * @throws 404 in caso non trovi l'utente
- * @throws 500 in caso di fallimento db
+ * @returns datetime a cui si trova l'utente in ISO string (UTC)
+ * @throws resetTime in caso di fallimento
  */
 const resetTime = async (username) => {
   try {
     const user = await User.findOne({ username: username })
-    if (!user) throw 'resetTime 404'
+    if (!user) throw 'resetTime'
+
     user.offset = 0
     await user.save()
-    return calcDateString(user.offset)
+    return calcDateISOstring(user.offset)
   } catch (err) {
     console.error(`resetTime error: ${err}`)
-    throw 'resetTime 500'
+    throw 'resetTime'
   }
 }
 

@@ -9,11 +9,12 @@ const Task = require('../models/Task')
 const router = express.Router()
 
 // creazione nuovo task
+// body.deadline è un datetime in ISO string (UTC)
 router.post('/', auth, async (req, res) => {
   const newTask = new Task({
     title: req.body.title,
     description: req.body.description,
-    deadline: req.body.deadline,
+    deadline: new Date(req.body.deadline),
     owner: req.user.username
   })
 
@@ -35,22 +36,6 @@ router.get('/', auth, async (req, res) => {
   } catch (err) {
     console.error(err)
     return res.status(500).send('Error while getting all tasks')
-  }
-})
-
-// ottenere task in un intervallo di tempo dato
-// request template: .../interval?s={startDatetime}&e={endDatetime}
-router.get('/interval', auth, async (req, res) => {
-  try {
-    const intervalTasks = await Task.find({
-      deadline: { $gte: req.query.s, $lte: req.query.e },
-      owner: req.user.username
-    })
-    // se non ne trova nessuno invia un oggetto vuoto
-    return res.json(intervalTasks)
-  } catch (err) {
-    console.error(err)
-    return res.status(500).send('Error while getting tasks in a time interval')
   }
 })
 
@@ -82,14 +67,16 @@ router.get('/:id', auth, async (req, res) => {
 })
 
 // modificare un task specifico
+// body.deadline è un datetime in ISO string (UTC)
 router.put('/:id', auth, async (req, res) => {
   try {
     const toUpdate = await Task.findById(req.params.id)
     if (!toUpdate) return res.status(404).send(`No task found with id ${req.params.id}`)
     // modifiche
-    toUpdate.title = req.body.title || toUpdate.title
-    toUpdate.description = req.body.description || toUpdate.description
-    toUpdate.deadline = req.body.deadline || toUpdate.deadline
+    const { title, description, deadline } = req.body
+    toUpdate.title = title || toUpdate.title
+    toUpdate.description = description || toUpdate.description
+    toUpdate.deadline = deadline ? new Date(deadline) : toUpdate.deadline
     await toUpdate.save()
     return res.send('ok')
   } catch (err) {

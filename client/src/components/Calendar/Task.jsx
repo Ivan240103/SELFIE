@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import '../css/Task.css';
+import '../../css/Task.css';
+
+/* X PAYAM
+Fai una cosa come ho fatto in Event.jsx --> alla selezione del task
+passa l'id al componente. Nel componente metti uno useEffect che prende
+i dati dalla route specifica e un secondo useEffect che imposta i valori
+degli state (da creare uno per ogni campo del task ESCLUSO owner).
+
+Come in Event.jsx creare un <Modal> da 'react-modal' che abbia
+le stesse funzionalità, e in più solo in modalità visualizzazione 
+mettere un button per segnarlo come completato (usare la route)
+*/
 
 function Task({ onSaveTask, tasks, selectedTasks, taskToEdit }) {
     const [showModal, setShowModal] = useState(false);

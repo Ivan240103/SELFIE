@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import "./tomato.css";
+import "../../css/tomato.css";
 
 function Tomato() {
     const [buttonActivated, setButtonActivated] = useState(false);

@@ -5,7 +5,6 @@
 const express = require('express')
 const auth = require('../middleware/auth')
 const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
 require('dotenv').config()
 const User = require('../models/User')
 const tm = require('../services/TimeMachine')
@@ -13,16 +12,16 @@ const tm = require('../services/TimeMachine')
 const router = express.Router()
 
 // registrare un nuovo utente
+// body.birthday è una data in ISO string (UTC)
 router.post('/register', async (req, res) => {
   const { username, email, password, name, surname, birthday } = req.body
-  // FIXME: await bcrypt.hash(password, 10)
   const newUser = new User({
     username: username,
     email: email,
     password: password,
     name: name,
     surname: surname,
-    birthday: birthday
+    birthday: birthday ? new Date(birthday) : undefined
   })
 
   try {
@@ -40,12 +39,12 @@ router.post('/login', async (req, res) => {
   try {
     const user = await User.findOne({ username: username })
     if (!user) return res.status(400).send('Incorrect username')
-    // FIXME: const pswOk = await bcrypt.compare(password, user.password)
     const pswOk = password == user.password
     if (!pswOk) return res.status(400).send('Incorrect password')
 
     const tokenPayload = { userId: user._id, username: user.username }
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '24h' })
+    // DEBUG: token non scade mai
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET/*, { expiresIn: '24h' } */)
     return res.json(token)
   } catch (err) {
     console.error(err)
@@ -65,7 +64,7 @@ router.get('/', auth, async (req, res) => {
   }
 })
 
-// ottenere il tempo in vigore per un utente in formato ISO string
+// ottenere il tempo in vigore per un utente in ISO string (UTC)
 router.get('/time', auth, async (req, res) => {
   try {
     const time = await tm.getTime(req.user.username)
@@ -76,15 +75,17 @@ router.get('/time', auth, async (req, res) => {
 })
 
 // aggiornare i dati di un utente
+// body.birthday è una data in ISO string (UTC)
 router.put('/', auth, async (req, res) => {
   try {
     const toUpdate = await User.findOne({ username: req.user.username })
     if (!toUpdate) return res.status(404).send(`No user found with username ${req.sur.username}`)
     // modifiche
-    toUpdate.email = req.body.email || toUpdate.email
-    toUpdate.name = req.body.name || toUpdate.name
-    toUpdate.surname = req.body.surname || toUpdate.surname
-    toUpdate.birthday = req.body.birthday || toUpdate.birthday
+    const { email, name, surname, birthday } = req.body
+    toUpdate.email = email || toUpdate.email
+    toUpdate.name = name || toUpdate.name
+    toUpdate.surname = surname || toUpdate.surname
+    toUpdate.birthday = birthday ? new Date(birthday) : toUpdate.birthday
     await toUpdate.save()
     return res.json(toUpdate)
   } catch (err) {
@@ -94,7 +95,7 @@ router.put('/', auth, async (req, res) => {
 })
 
 // modificare l'offset di un utente
-// body.time = data a cui ci si vuole spostare in formato ISO string
+// body.time = datetime a cui ci si vuole spostare in ISO string (UTC)
 // senza body per resettare la data
 router.put('/time', auth, async (req, res) => {
   try {
