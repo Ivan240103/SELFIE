@@ -14,7 +14,7 @@ function Registration(){
     function handleRegister(e){
         e.preventDefault();
 
-        const URI = "http://localhost:8000/api/users/register";
+        const URI = `${window.location.origin}/api/users/register`;
         const requestBody = {
             username:usr,
             password:psw,

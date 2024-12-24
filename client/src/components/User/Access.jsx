@@ -12,7 +12,7 @@ function Access() {
     function createEvent(e){
         e.preventDefault();
 
-        const URI = `http://localhost:8000/api/users/login`;
+        const URI = `${window.location.origin}/api/users/login`;
         const requestBody = {
             username:usr,
             password:psw
@@ -50,7 +50,7 @@ function Access() {
         <div className="corpo">
             <div className="log">
                 <h1>Login</h1>
-                <form method="post" action="http://localhost:8000/login" onSubmit={createEvent}>
+                <form onSubmit={createEvent}>
                     <label for="username" id="username"><b>Username</b></label>
                     <input id="usr" type="text" placeholder="Enter Username" value={usr} onChange={(e) => setUsr(e.target.value)} required/>
                     <label for="password" id="password"><b>Password</b></label>

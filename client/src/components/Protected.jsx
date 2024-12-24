@@ -4,7 +4,7 @@ import axios from 'axios'
 import TimeMachine from './TimeMachine/TimeMachine'
 
 function Protected() {
-  const API = 'http://localhost:8000/api'
+  const API = `${window.location.origin}/api`
   const navigate = useNavigate()
   const [user, setUser] = useState({})
   const [note, setNote] = useState({})

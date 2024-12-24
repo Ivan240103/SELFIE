@@ -32,7 +32,7 @@ function Calendar() {
   useEffect(() => {
     async function fetchEvents() {
       try {
-        const response = await fetch("http://localhost:8000/api/events/", {
+        const response = await fetch(`${window.location.origin}/api/events/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ function Calendar() {
   useEffect(() => {
     async function fetchTasks() {
       try {
-        const response = await fetch("http://localhost:8000/api/tasks/", {
+        const response = await fetch(`${window.location.origin}/api/tasks/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

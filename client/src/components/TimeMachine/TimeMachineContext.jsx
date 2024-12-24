@@ -21,7 +21,7 @@ export const TimeMachineProvider = ({ children }) => {
   useEffect(() => {
     const fetchTime = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/users/time', {
+        const response = await axios.get(`${window.location.origin}/api/users/time`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
         setTime(new Date(response.data))
@@ -52,7 +52,7 @@ export const TimeMachineProvider = ({ children }) => {
    */
   const updateTime = async (newTime) => {
     try {
-      const response = await axios.put('http://localhost:8000/api/users/time', {
+      const response = await axios.put(`${window.location.origin}/api/users/time`, {
         time: newTime.toISOString()
       },
       {
@@ -70,7 +70,7 @@ export const TimeMachineProvider = ({ children }) => {
    */
   const resetTime = async () => {
     try {
-      const response = await axios.put('http://localhost:8000/api/users/time', {}, {
+      const response = await axios.put(`${window.location.origin}/api/users/time`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
 
