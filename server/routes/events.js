@@ -3,54 +3,13 @@
  */
 
 const express = require('express')
+
 const auth = require('../middleware/auth')
-const { RRule } = require('rrule')
-const { getTime } = require('../services/TimeMachine')
+const { stringToRrule, rruleToString } = require('../services/RRule')
+
 const Event = require('../models/Event')
 
 const router = express.Router()
-
-/**
- * Converte un oggetto rrule compatibile con FullCalendar in
- * una stringa rappresentante una RRule
- * 
- * @param {JSON} rrule oggetto rrule compatibile con FullCalendar
- * @returns regola RRule in formato stringa
- */
-const rruleToString = async (rrule) => {
-  const freq = rrule.freq === 'daily' ? RRule.DAILY :
-               rrule.freq === 'weekly' ? RRule.WEEKLY :
-               rrule.freq === 'monthly' ? RRule.MONTHLY : RRule.YEARLY
-  const r = new RRule({
-    freq: freq,
-    interval: rrule.interval || 1,
-    dtstart: rrule.dtstart ? new Date(rrule.dtstart) : new Date((await getTime())),
-    until: rrule.until || undefined,
-    count: rrule.count || undefined,
-  })
-  return r.toString()
-}
-
-/**
- * Converte una stringa rappresentante una RRule in un
- * oggetto JSON compatibile con il plugin di FullCalendar
- *  
- * @param {String} str regola RRule in formato stringa
- * @returns oggetto rrule compatibile con FullCalendar
- */
-const stringToRrule = (str) => {
-  const rrule = RRule.fromString(str)
-  const freq = rrule.options.freq == RRule.DAILY ? 'daily' :
-               rrule.options.freq == RRule.WEEKLY ? 'weekly' :
-               rrule.options.freq == RRule.MONTHLY ? 'monthly' : 'yearly'
-  return {
-    freq: freq,
-    interval: rrule.options.interval,
-    dtstart: rrule.options.dtstart,
-    until: rrule.options.until || undefined,
-    count: rrule.options.count || undefined
-  }
-}
 
 // creazione nuovo evento
 // body.start e body.end sono datetime in ISO string (UTC)
@@ -111,18 +70,18 @@ router.get('/:id', auth, async (req, res) => {
 // body.rrule = oggetto rrule (FullCalendar) per eventi ricorrenti
 router.put('/:id', auth, async (req, res) => {
   try {
-    const toUpdate = await Event.findById(req.params.id)
-    if (!toUpdate) return res.status(404).send(`No event found with id ${req.params.id}`)
+    const upd = await Event.findById(req.params.id)
+    if (!upd) return res.status(404).send(`No event found with id ${req.params.id}`)
     // modifiche
     const { title, description, start, end, isAllDay, rrule, place } = req.body
-    toUpdate.title = title || toUpdate.title
-    toUpdate.description = description || toUpdate.description
-    toUpdate.start = start ? new Date(start) : toUpdate.start
-    toUpdate.end = end ? new Date(end) : toUpdate.end
-    toUpdate.isAllDay = isAllDay !== undefined ? isAllDay : toUpdate.isAllDay
-    toUpdate.rrule = rrule ? await rruleToString(rrule) : null
-    toUpdate.place = place !== undefined ? place : toUpdate.place
-    await toUpdate.save()
+    upd.title = title || upd.title
+    upd.description = description || upd.description
+    upd.start = start ? new Date(start) : upd.start
+    upd.end = end ? new Date(end) : upd.end
+    upd.isAllDay = isAllDay !== undefined ? isAllDay : upd.isAllDay
+    upd.rrule = rrule ? await rruleToString(rrule) : null
+    upd.place = place !== undefined ? place : upd.place
+    await upd.save()
     return res.send('ok')
   } catch (err) {
     console.error(err)

@@ -1,0 +1,146 @@
+.profile-container {
+  max-width: 40vw;
+  margin: 80px auto;
+  padding: 40px;
+  background-color: #ffffff;
+  border-radius: 15px;
+  border: 1px solid #ddd;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  font-family: 'Roboto', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-header {
+  text-align: center;
+  font-size: 2.4em;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  z-index: 1;
+  position: relative;
+}
+
+.profile-pic-container {
+  margin: 40px auto;
+  max-width: fit-content;
+}
+
+.profile-pic {
+  width: 200px;
+  height: 200px;
+  border-radius: 20px;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  z-index: 1;
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.profile-form-group {
+  width: 80%;
+  margin-bottom: 20px;
+}
+
+.profile-label {
+  display: block;
+  font-weight: 600;
+  color: #34495e;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.profile-input {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 1.1em;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-sizing: border-box;
+  cursor: default;
+}
+
+textarea.profile-input {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1em;
+  min-height: 125px;
+}
+
+.profile-container button {
+  width: 80%;
+  padding: 12px;
+  margin-bottom: 20px;
+  font-size: 1.2em;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.profile-submit-button {
+  background-color: #3498db;
+  color: #ffffff;
+  border: 2px solid #3498db;
+}
+
+.profile-submit-button:hover {
+  background-color: #2980b9;
+}
+
+.profile-cancel-button {
+  background-color: #ffffff;
+  color: #3498db;
+  border: 2px solid #3498db;
+}
+
+.profile-cancel-button:hover {
+  background-color: #f9f9f9;
+}
+
+.profile-button-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  z-index: 1;
+  position: relative;
+}
+
+.profile-edit-button {
+  background-color: #ffffff;
+  color: #3498db;
+  border: 2px solid #3498db;
+}
+
+.profile-edit-button:hover {
+  background-color: #f9f9f9;
+}
+
+.profile-delete-button {
+  background-color: #e74c3c;
+  color: #ffffff;
+  border: 2px solid #e74c3c;
+}
+
+.profile-delete-button:hover {
+  background-color: #c54133;
+}
+
+/* EDIT MODE */
+
+.profile-editmode .profile-input {
+  cursor: auto;
+  transition: border-color 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.profile-editmode .profile-input:focus {
+  border-color: #3498db;
+  background-color: #ffffff;
+  outline: none;
+}

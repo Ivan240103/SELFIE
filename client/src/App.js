@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { TimeMachineProvider } from './components/TimeMachine/TimeMachineContext';
 import Access from './components/User/Access';
 import Registration from './components/User/Registration';
+import Profile from './components/User/Profile';
 import Calendar from './components/Calendar/Calendar';
 import Tomato from './components/Tomato/tomato';
 import Notes from './components/Notes/Notes'
@@ -26,6 +27,7 @@ function App() {
             <Route path="/tomato" element={<Tomato />} />
             <Route path="/Notes" element={<Notes />} />
             <Route path="/dashboard" element={<Dashboard/>} />
+            <Route path="/profile" element={<Profile/>} />
 
             <Route path="/protected" element={<Protected />} />
             <Route path="/unauthorized" element={<Unauthorized />} />

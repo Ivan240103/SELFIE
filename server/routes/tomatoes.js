@@ -3,7 +3,9 @@
  */
 
 const express = require('express')
+
 const auth = require('../middleware/auth')
+
 const Tomato = require('../models/Tomato')
 
 const router = express.Router()
@@ -41,13 +43,13 @@ router.get('/', auth, async (req, res) => {
 // modificare un pomodoro specifico
 router.put('/:id', auth, async (req, res) => {
   try {
-    const toUpdate = await Tomato.findById(req.params.id)
-    if (!toUpdate) return res.status(404).send(`No tomato found with id ${req.params.id}`)
+    const upd = await Tomato.findById(req.params.id)
+    if (!upd) return res.status(404).send(`No tomato found with id ${req.params.id}`)
     // modifiche
-    toUpdate.interrupted = req.body.interrupted || toUpdate.interrupted
-    toUpdate.remainingMinutes = req.body.remainingMinutes || toUpdate.remainingMinutes
-    toUpdate.remainingLoops = req.body.remainingLoops || toUpdate.remainingLoops
-    await toUpdate.save()
+    upd.interrupted = req.body.interrupted || upd.interrupted
+    upd.remainingMinutes = req.body.remainingMinutes || upd.remainingMinutes
+    upd.remainingLoops = req.body.remainingLoops || upd.remainingLoops
+    await upd.save()
     return res.send('ok')
   } catch (err) {
     console.error(err)

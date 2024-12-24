@@ -8,6 +8,7 @@ const passport = require('passport')
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt')
 const cors = require('cors')
 require('dotenv').config()
+
 const User = require('./models/User')
 
 const app = express()
@@ -22,6 +23,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 // per gestire l'autenticazione
 app.use(passport.initialize())
+// per mettere a disposizione del frontend le immagini del profilo
+app.use('/pics', express.static('./uploads/images'));
 
 // configurazione passport.js
 const opts = {

@@ -79,8 +79,10 @@
   - [x] eliminare una nota
 
 ### X Ivan
-- [ ] aggiungere profilo utente
-- [ ] preview dashboard
+- dashboard
+- compleanno utente in fase di creazione User
+- task in ritardo
+- sostituire le api base con window.location.origin
 
 ## Estensione 18-27
 - [ ] notifica per gli eventi a scelta (mail, SO, whatsapp...), con un certo anticipo e una certa ripetizione
