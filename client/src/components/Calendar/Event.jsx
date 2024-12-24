@@ -44,7 +44,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
         const fetchEvent = async () => {
             if (eventDetails) {
                 try {
-                    const response = await fetch(`${window.location.origin}/api/events/${eventDetails}`, {
+                    const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventDetails}`, {
                         method: 'GET',
                         headers: {
                           'Content-Type': 'application/json',
@@ -137,7 +137,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
     };
 
     try {
-        const response = await fetch(`${window.location.origin}/api/events/`, {
+        const response = await fetch(`${process.env.REACT_APP_API}/api/events/`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -175,7 +175,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
     };
 
     try {
-      const response = await fetch(`${window.location.origin}/api/events/${eventDetails}`, {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventDetails}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -200,7 +200,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
       return;
     }
     try {
-        const response = await fetch(`${window.location.origin}/api/events/${eventDetails}`, {
+        const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventDetails}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`

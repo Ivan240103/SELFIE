@@ -4,7 +4,7 @@ import axios from 'axios'
 import TimeMachine from './TimeMachine/TimeMachine'
 
 function Protected() {
-  const API = `${window.location.origin}/api`
+  const API = `${process.env.REACT_APP_API}/api`
   const navigate = useNavigate()
   const [user, setUser] = useState({})
   const [note, setNote] = useState({})

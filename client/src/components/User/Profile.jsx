@@ -28,7 +28,7 @@ function Profile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const profile = await axios.get(`${window.location.origin}/api/users/`, {
+        const profile = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
         setProfile(profile.data)
@@ -91,7 +91,7 @@ function Profile() {
     formData.append('pic', pic)
 
     try {
-      const response = await axios.put(`${window.location.origin}/api/users/`, formData, {
+      const response = await axios.put(`${process.env.REACT_APP_API}/api/users/`, formData, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
       setProfile(response.data)
@@ -108,7 +108,7 @@ function Profile() {
     const proceed = window.confirm('Sei assolutamente sicuro di voler eliminare il profilo?')
     if (proceed === true) {
       try {
-        await axios.delete(`${window.location.origin}/api/users/`, {
+        await axios.delete(`${process.env.REACT_APP_API}/api/users/`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
         setError('')
@@ -127,7 +127,7 @@ function Profile() {
         <h2 className='profile-header'>Ciao, {username}</h2>
         <div className='profile-pic-container'>
           <img
-            src={`${window.location.origin}/pics/${profile.picName}`}
+            src={`${process.env.REACT_APP_API}/pics/${profile.picName}`}
             className='profile-pic'
             hidden={editMode}
             alt='Profile' />

@@ -41,7 +41,7 @@ function Task({ onSaveTask, tasks, selectedTasks, taskToEdit }) {
     if (taskDetails.title && taskDetails.deadline) {
         try {
             // Preparazione della chiamata POST
-            const response = await fetch(`${window.location.origin}/api/tasks/`, {
+            const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ function Task({ onSaveTask, tasks, selectedTasks, taskToEdit }) {
   async function handleUpdateTask() {
     if (taskToEdit && taskDetails.title && taskDetails.deadline) {
         try {
-            const response = await fetch(`${window.location.origin}/api/tasks/${taskToEdit.id}`, {
+            const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskToEdit.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ function Task({ onSaveTask, tasks, selectedTasks, taskToEdit }) {
     if (selectedTasks.length > 0) {
         selectedTasks.forEach(async (taskId) => {
             try {
-            const response = await fetch(`${window.location.origin}/api/tasks/${taskId}`, {
+            const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

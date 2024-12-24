@@ -14,7 +14,7 @@ function Registration(){
     function handleRegister(e){
         e.preventDefault();
 
-        const URI = `${window.location.origin}/api/users/register`;
+        const URI = `${process.env.REACT_APP_API}/api/users/register`;
         const requestBody = {
             username:usr,
             password:psw,

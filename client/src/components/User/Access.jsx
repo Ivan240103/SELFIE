@@ -9,10 +9,12 @@ function Access() {
     const [err, setError] = useState("");
     const navigate = useNavigate(); // Inizializza useNavigate
 
+    console.log('url:', process.env.REACT_APP_API)
+
     function createEvent(e){
         e.preventDefault();
 
-        const URI = `${window.location.origin}/api/users/login`;
+        const URI = `${process.env.REACT_APP_API}/api/users/login`;
         const requestBody = {
             username:usr,
             password:psw
