@@ -42,6 +42,7 @@ function TimeMachine() {
         onAfterOpen={() => setSelectedTime(time)}
         onRequestClose={() => setModalIsOpen(false)}
         className='time-modal'
+        overlayClassName='time-overlay'
       >
         <h2>Time Machine</h2>
         <form

@@ -80,7 +80,6 @@
 
 ### X Ivan
 - dashboard
-- compleanno utente in fase di creazione User
 - task in ritardo
 - sostituire le api base con window.location.origin
 

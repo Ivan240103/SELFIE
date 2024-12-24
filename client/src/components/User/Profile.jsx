@@ -91,11 +91,6 @@ function Profile() {
     formData.append('pic', pic)
 
     try {
-      /* const response = await fetch(`${API_BASE_URL}/update`, {
-        method: 'PUT',
-        body: formData,
-      }) */
-
       const response = await axios.put('http://localhost:8000/api/users/', formData, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
