@@ -52,7 +52,6 @@
   - [x] ottenere tutti i task
   - [x] ottenere tutti i task non completati
   - [x] ottenere un task specifico
-  - [x] ottenere task in un intervallo di tempo dato
   - [x] modificare un task specifico
   - [x] segnare un task come completato o non
   - [x] eliminare un task specifico
@@ -78,6 +77,10 @@
   - [x] ottenere una nota specifica
   - [x] modificare una nota
   - [x] eliminare una nota
+
+### X Ivan
+- [ ] aggiungere profilo utente
+- [ ] preview dashboard
 
 ## Estensione 18-27
 - [ ] notifica per gli eventi a scelta (mail, SO, whatsapp...), con un certo anticipo e una certa ripetizione

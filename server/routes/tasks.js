@@ -39,26 +39,6 @@ router.get('/', auth, async (req, res) => {
   }
 })
 
-// ottenere task in un intervallo di tempo dato
-// request template: .../interval?s={startDatetime}&e={endDatetime}
-// dove i datetime sono espressi in ISO string (UTC)
-router.get('/interval', auth, async (req, res) => {
-  try {
-    const intervalTasks = await Task.find({
-      deadline: {
-        $gte: new Date(req.query.s),
-        $lte: new Date(req.query.e)
-      },
-      owner: req.user.username
-    })
-    // se non ne trova nessuno invia un oggetto vuoto
-    return res.json(intervalTasks)
-  } catch (err) {
-    console.error(err)
-    return res.status(500).send('Error while getting tasks in a time interval')
-  }
-})
-
 // ottenere tutti i task non completati
 router.get('/notdone', auth, async (req, res) => {
   try {
