@@ -4,10 +4,10 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import rrulePlugin from '@fullcalendar/rrule';
-import { useTimeMachine } from './TimeMachine/TimeMachineContext';
+import { useTimeMachine } from '../TimeMachine/TimeMachineContext';
 import Event from "./Event";
 import Task from "./Task";
-import TimeMachine from './TimeMachine/TimeMachine';
+import TimeMachine from '../TimeMachine/TimeMachine';
 
 // TODO: x ivan: aggiornare il calendario quando si attiva la time machine
 

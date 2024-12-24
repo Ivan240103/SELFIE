@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Importa useNavigate;
 import { Link } from "react-router-dom"; //Importa il linking per la registrazione dell'utente
-import "../css/Access.css";
+import "../../css/Access.css";
 
 function Access() {
     const [usr, setUsr] = useState("");

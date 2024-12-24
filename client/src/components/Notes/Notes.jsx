@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../css/Note.css';
+import '../../css/Note.css';
 
 function Notes({ onNoteSave }) {
   const [notes, setNotes] = useState([]);

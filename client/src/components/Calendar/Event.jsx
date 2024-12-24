@@ -1,9 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useTimeMachine } from './TimeMachine/TimeMachineContext'
+import { useTimeMachine } from '../TimeMachine/TimeMachineContext'
 import { 
     datetimeToString,
     datetimeToDateString
-} from '../services/dateServices';
+} from '../../services/dateServices';
+
+/* PER PAYAM
+Trasformare il componente ritornato in un <Modal> che mostri il form con i
+campi dell'evento (prendi spunto da TimeMachine.jsx se serve).
+Interazioni dell'utente (il form deve essere sempre lo stesso):
+- quando l'utente clicca su un evento si apre con i campi readOnly (già riempiti). Devono
+  esserci due bottoni: per entrare in modalità di modifica e per eliminare l'evento.
+- per la modalità di modifica consiglio uno useState boolean, il cui valore viene assegnato
+  negato agli attr readOnly, così gestisci i campi modificabili. In modifica ci devono
+  essere i button annulla e salva.
+- mettere una modalità su Calendar per creare un evento (bottone?, click sulle caselle?), che
+  fa aprire il Modal con i campi vuoti editabili e due bottoni per salvare o annullare.
+Quando il Modal viene chiuso in Calendar rimettere eventDetails a null, così che i campi
+tornino ai valori default.
+*/
 
 function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
     // tempo in vigore per l'utente (fuso orario UTC)

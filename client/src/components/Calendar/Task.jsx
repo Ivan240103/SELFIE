@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../css/Task.css';
+import '../../css/Task.css';
 
 function Task({ onSaveTask, tasks, selectedTasks, taskToEdit }) {
     const [showModal, setShowModal] = useState(false);
