@@ -57,8 +57,13 @@ function Dashboard(){
                         style={{ width: '100px', height: '100px' }} 
                     />
                 </div>
-                <Link to="/login">
-                    <button className="down"><b>Click here</b></button>
+                <Link to="/">
+                    <button
+                        className="down"
+                        onClick={() => localStorage.removeItem('token')}
+                    >
+                        <b>Click here</b>
+                    </button>
                 </Link>
             </div> 
         </div>

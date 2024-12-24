@@ -1,15 +1,15 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { TimeMachineProvider } from './components/TimeMachine/TimeMachineContext';
-import Access from './components/Access';
-import Registration from './components/Registration';
-import Calendar from './components/Calendar';
+import Access from './components/User/Access';
+import Registration from './components/User/Registration';
+import Calendar from './components/Calendar/Calendar';
 import Tomato from './components/Tomato/tomato';
-import Notes from './components/Notes'
+import Notes from './components/Notes/Notes'
 import Dashboard from './components/Dashboard';
 
 import Protected from './components/Protected';
-import Unauthorized from './components/Unauthorized';
+import Unauthorized from './components/User/Unauthorized';
 
 import './css/App.css'
 
