@@ -39,7 +39,7 @@ function Registration(){
                     setSurname("");
                     setEmail("");
                     setErr("")
-                    navigate("/");
+                    navigate("/login");
                 }
             })
             .catch((err) => {

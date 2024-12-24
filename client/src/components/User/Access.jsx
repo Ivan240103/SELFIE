@@ -35,11 +35,11 @@ function Access() {
                 if (typeof data === "string") {
                     console.log("Risposta come stringa:", data);
                     localStorage.setItem("token", data);
-                    navigate("/dashboard");
+                    navigate("/");
                 } else if (data.token) {
                     console.log("Token trovato nell'oggetto:", data.token);
                     localStorage.setItem("token", data.token);
-                    navigate("/dashboard");
+                    navigate("/");
                 }
             })
             .catch((err) => {

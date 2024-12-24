@@ -4,20 +4,20 @@
 
 ### Client
 - [x] memorizzare User nel localStorage per creare eventi, task...
-- [ ] view time machine
+- [x] view time machine
 - [ ] home dashboard
   - [ ] ultima nota modificata
   - [ ] ultima sessione pomodoro oppure crea nuova
   - [ ] 3 task a scadenza più ravvicinata
   - [ ] prossimo evento
 - [ ] eventi e task
-  - [ ] calendario month
-  - [ ] calendario week
-  - [ ] calendario day
-  - [ ] creazione evento
-  - [ ] visualizzazione evento specifico
-  - [ ] modifica di un evento
-  - [ ] eliminazione di un evento
+  - [x] calendario month
+  - [x] calendario week
+  - [x] calendario day
+  - [x] creazione evento
+  - [x] visualizzazione evento specifico
+  - [x] modifica di un evento
+  - [x] eliminazione di un evento
   - [ ] creazione task
   - [ ] visualizzazione task specifico
   - [ ] modifica task
@@ -32,8 +32,8 @@
   - [ ] ordinamento note ???
 - [ ] pomodoro
   - [ ] schermata timer pomodoro
-- [ ] profilo utente
-  - [ ] pagina del profilo personale
+- [x] profilo utente
+  - [x] pagina del profilo personale
 
 ### Server
 - [ ] criptare la password nel db

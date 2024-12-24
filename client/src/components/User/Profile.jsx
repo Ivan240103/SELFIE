@@ -112,7 +112,7 @@ function Profile() {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
         setError('')
-        navigate('/')
+        navigate('/login')
       } catch (err) {
         setError(err.response.data || 'Errore DELETE')
       }

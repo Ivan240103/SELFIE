@@ -18,7 +18,7 @@ function Protected() {
         setUser(response.data)
       } catch (error) {
         console.error('Error fetching user')
-        navigate('/unauthorized')
+        navigate('/login')
       }
     }
 
@@ -27,7 +27,7 @@ function Protected() {
 
   const logout = () => {
     localStorage.removeItem('token')
-    navigate('/')
+    navigate('/login')
   }
 
   // DEBUG:
