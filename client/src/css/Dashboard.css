@@ -1,46 +1,69 @@
-.card {
-  /* Add shadows to create the "card" effect */
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  transition: 0.3s;
-  border-radius: 5px;
-  width: 30%;
-  height: 300px;
-  width: 300px;
-  padding: 1.5em;
-  position: relative;
-}
-  
-  /* On mouse-over, add a deeper shadow */
-.card:hover {
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-}
-  
-  /* Add some padding inside the card container */
-.figure {
-  padding: 2px 16px;
-}
-img {
-  border-radius: 5px 5px 0 0;
-  width: 100%;
-}
-.cen {
+.dash-container {
+  width: 60vw;
+  margin: 60px auto 100px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Due colonne di uguale larghezza */
-  gap: 20px; /* Spaziatura tra le card */
-  justify-content: center; /* Centra il contenuto orizzontalmente */
-  align-content: center; /* Centra verticalmente se necessario */
-  padding: 20px;
-  margin-left: 270px;
-  margin-top: 100px;
+  grid-template-areas:
+    "profile profile"
+    "calendar note"
+    "task timer"
+    "logout logout";
+  gap: 40px;
 }
 
-.down{
-  background-color: black;
-  height: 50px;
-  width: 100px;
-  margin-left: 200px;
-  margin-top: 10px;
+#dash-profile {
+  grid-area: profile;
+  height: fit-content;
 }
-.down:hover{
-  background-color: red;
+
+#dash-calendar { grid-area: calendar; }
+
+#dash-note { grid-area: note; }
+
+#dash-task { grid-area: task; }
+
+#dash-tomato { grid-area: timer; }
+
+#dash-logout {
+  grid-area: logout;
+  height: fit-content;
+}
+
+.dash-card {
+  height: 400px;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 3px 4px 8px 3px rgba(0,0,0,0.2);
+  transition: box-shadow 0.4s ease;
+}
+
+.dash-card:hover {
+  box-shadow: 3px 4px 8px 3px rgba(255, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+.dash-card-header {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.dash-icon {
+  width: 60px;
+  height: 60px;
+  margin-left: 30px;
+  object-fit: cover;
+}
+
+#dash-profile .dash-icon {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+}
+
+.dash-card-header h2 {
+  margin: 10px 0 4px;
+}
+
+#dash-profile p:last-of-type {
+  color: #666666;
 }
