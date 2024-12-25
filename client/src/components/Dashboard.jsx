@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import TimeMachine from './TimeMachine/TimeMachine'
+import { useTimeMachine } from './TimeMachine/TimeMachineContext'
 
 import calendarIcon from "../images/calendar-icon.png";
 import notesIcon from "../images/notebook-pen-icon.png";
@@ -13,7 +14,9 @@ import "../css/Dashboard.css";
 
 function Dashboard() {
   const navigate = useNavigate()
+  const { time } = useTimeMachine()
   const [user, setUser] = useState({})
+  const [tasks, setTasks] = useState([])
 
   // verifica delle credenziali
   useEffect(() => {
@@ -31,6 +34,24 @@ function Dashboard() {
 
     fetchUser()
   }, [navigate])
+
+  // recupera i task dal backend
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (user?.username) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/tasks/notdone`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setTasks(response.data)
+        } catch (error) {
+          alert('Error while fetching tasks')
+        }
+      }
+    }
+
+    fetchTasks()
+  }, [user])
 
   return(
     <div>
@@ -107,7 +128,16 @@ function Dashboard() {
             </div>
           </div>
           <div className='dash-card-preview'>
-            {/* preview 3-5 task a scadenza più vicina */}
+            {tasks.length === 0 && <p>Nessun task previsto</p>}
+            {tasks.length > 0 && tasks.map((t) => (
+              <div
+                key={t._id}
+                className={`dash-task${Date.parse(t.deadline) < time.getTime() ? ' task-late' : ''}`}
+              >
+                <p><b>{t.title}</b> - {(new Date(t.deadline)).toLocaleString('it-IT')}</p>
+                <p>{t.description.substring(0, 45)}{t.description.length > 45 && '...'}</p>
+              </div>
+            ))}
           </div>
         </div>
         <div

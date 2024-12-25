@@ -41,13 +41,13 @@ router.get('/', auth, async (req, res) => {
   }
 })
 
-// ottenere tutti i task non completati
+// ottenere i 3 task non completati ordinati per scadenza
 router.get('/notdone', auth, async (req, res) => {
   try {
     const notdoneTask = await Task.find({
       isDone: { $eq: false },
       owner: req.user.username
-    })
+    }).sort({ deadline: 'asc' }).limit(3)
     // se non ne trova nessuno invia un oggetto vuoto
     return res.json(notdoneTask)
   } catch (err) {

@@ -7,6 +7,7 @@
     "calendar note"
     "task timer"
     "logout logout";
+  grid-template-columns: 50% 50%;
   gap: 40px;
 }
 
@@ -45,6 +46,7 @@
   display: flex;
   align-items: center;
   gap: 40px;
+  margin-bottom: 12px;
 }
 
 .dash-icon {
@@ -66,4 +68,15 @@
 
 #dash-profile p:last-of-type {
   color: #666666;
+}
+
+.dash-task {
+  padding: 1px 20px;
+  margin-bottom: 12px;
+  border-radius: 20px;
+  background-color: #b2ffc5;
+}
+
+.task-late {
+  background-color: #FF6F61;
 }
