@@ -7,12 +7,11 @@ function Registration(){
     const [psw, setPsw] = useState("");
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
-    const [date, setDate] = useState("");
     const [email, setEmail] = useState("");
-    const [err, setError] = useState("");
+    const [err, setErr] = useState("");
     const navigate = useNavigate();
 
-    function createEvent(e){
+    function handleRegister(e){
         e.preventDefault();
 
         const URI = `${process.env.REACT_APP_API}/api/users/register`;
@@ -21,7 +20,7 @@ function Registration(){
             password:psw,
             name: name,
             surname: surname,
-            birthday: date
+            email: email
         }
         
         const request = {
@@ -33,40 +32,37 @@ function Registration(){
         fetch(URI, request)
             .then((res) => {
                 if (res.ok){
-                    return res.json();
+                    console.log("Registration completed!");
+                    setUsr("");
+                    setPsw("");
+                    setName("");
+                    setSurname("");
+                    setEmail("");
+                    setErr("")
+                    navigate("/login");
                 }
-            })
-            .then((data) => {
-                console.log("Registration completed!");
-                navigate("/login");
-                setUsr("");
-                setPsw("");
-                setName("");
-                setSurname("");
-                setDate("");
             })
             .catch((err) => {
                 //messaggio di errore
-                setError("Registration failed: " + err.message);
+                setErr("Registration failed: " + err.message);
             });
     }
 
     return(
         <div className="log">
             <h1>Register</h1>
-            <form method="post" action="http://localhost:8000/register" onSubmit={createEvent}>
-                <label for="username" id="username"><b>Username</b></label>
+            <p>{err}</p>
+            <form onSubmit={handleRegister}>
+                <label htmlFor="username" id="username"><b>Username</b></label>
                 <input id="usr" type="text" placeholder="Enter Username" value={usr} onChange={(e) => setUsr(e.target.value)} required/>
-                <label for="password" id="password"><b>Password</b></label>
+                <label htmlFor="password" id="password"><b>Password</b></label>
                 <input id="psw" type="password" placeholder="Enter Password" value={psw} onChange={(e) => setPsw(e.target.value)} required/>
-                <label for="name"><b>Name</b></label>
+                <label htmlFor="name"><b>Name</b></label>
                 <input id="name" type="text" placeholder="Enter Name" value={name} onChange={(e) => setName(e.target.value)} />
-                <label for="surname"><b>Surname</b></label>
+                <label htmlFor="surname"><b>Surname</b></label>
                 <input id="surname" type="text" placeholder="Enter Surname" value={surname} onChange={(e) => setSurname(e.target.value)} />
-                <label for="email"><b>Email</b></label>
-                <input id="email" type="email" placeholder="Enter Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                <label for="date"><b>Date of birth</b></label>
-                <input id="date" type="date" placeholder="Enter date of birth" value={date} onChange={(e) => setDate(e.target.value)} />
+                <label htmlFor="email"><b>Email</b></label>
+                <input id="email" type="email" placeholder="Enter Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 <button type="submit">Register</button>
             </form>
         </div>

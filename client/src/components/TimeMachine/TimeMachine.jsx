@@ -35,13 +35,17 @@ function TimeMachine() {
       <button
         type="button"
         className="time-btn"
-        onClick={() => setModalIsOpen(true)}>{time.toLocaleString('it-IT')}</button>
+        onClick={() => setModalIsOpen(true)}
+      >
+        {time.toLocaleString('it-IT').slice(0, -3).replace(', ', ' - ')}
+      </button>
 
       <Modal
         isOpen={modalIsOpen}
         onAfterOpen={() => setSelectedTime(time)}
         onRequestClose={() => setModalIsOpen(false)}
         className='time-modal'
+        overlayClassName='time-overlay'
       >
         <h2>Time Machine</h2>
         <form

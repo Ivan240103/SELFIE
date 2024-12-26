@@ -4,7 +4,7 @@ import axios from 'axios'
 import TimeMachine from './TimeMachine/TimeMachine'
 
 function Protected() {
-  const API = 'http://localhost:8000/api'
+  const API = `${process.env.REACT_APP_API}/api`
   const navigate = useNavigate()
   const [user, setUser] = useState({})
   const [note, setNote] = useState({})
@@ -18,7 +18,7 @@ function Protected() {
         setUser(response.data)
       } catch (error) {
         console.error('Error fetching user')
-        navigate('/unauthorized')
+        navigate('/login')
       }
     }
 
@@ -27,7 +27,7 @@ function Protected() {
 
   const logout = () => {
     localStorage.removeItem('token')
-    navigate('/')
+    navigate('/login')
   }
 
   // DEBUG:

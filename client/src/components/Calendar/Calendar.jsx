@@ -9,7 +9,11 @@ import Event from "./Event";
 import Task from "./Task";
 import TimeMachine from '../TimeMachine/TimeMachine';
 
-// TODO: x ivan: aggiornare il calendario quando si attiva la time machine
+/* TODO: X PAYAM
+PER I TASK. CONFRONTARE DEADLINE CON time, SE PASSATA COLORARE DI ROSSO.
+I TASK IN ROSSO VANNO PROPOSTI TEMPORANEAMENTE ANCHE NEL GIORNO ATTUALE
+(OLTRE A QUELLO IN CUI AVEVANO LA DEADLINE)
+*/
 
 function Calendar() {
   const { time, isTimeLoading } = useTimeMachine()
@@ -39,7 +43,8 @@ function Calendar() {
           const mappedEvents = events.map(event => ({
             ...event,
             id: event._id, // Mappa _id a id
-            eventType: 'event'
+            eventType: 'event',
+            allDay: event.isAllDay
           }));
           setCalendarEvents(mappedEvents);
         } else {
@@ -139,94 +144,97 @@ function Calendar() {
     setCalendarEvents(calendarTasks.filter(task => task.id !== taskId));
   }
 
-  // carica il calendario solo quando il tempo è okay
-  if (isTimeLoading) return(<h2 className='calendar-loading'>Loading</h2>)
+  // TODO: USARE LA PROPRIETÀ EDITABLE PER MODIFICARE LA DATA DI EVENTI E TASK
+  // TRASCINANDOLI. Attualmente si può però la data resta invariata nel nuovo giorno.
+  // leggendo un po' la docs mi sembra si chiami eventDrop la proprietà necessaria.
 
   return (
-    <div className='demo-app'>
-      <TimeMachine />
-      <Sidebar
-        weekendsVisible={weekendsVisible}
-        handleWeekendsToggle={handleWeekendsToggle}
-      />
-      <div className='demo-app-main'>
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
-          headerToolbar={{
-            left: 'prevYear,prev,today,next,nextYear',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-          }}
-          initialView='dayGridMonth'
-          initialDate={time}
-          editable={true}
-          selectable={true}
-          selectMirror={true}
-          dayMaxEvents={true}
-          showNonCurrentDates={false}
-          weekends={weekendsVisible}
-          events={[
-            ...calendarEvents,
-            ...calendarTasks, // Assicurati di aggiungere le task qui
-          ]}
-          eventClick={(info) => {
-            const clickedEvent = info.event;
-
-            // Se l'evento cliccato è una task
-            if (clickedEvent.extendedProps.eventType === 'task') {
-              console.log('Task cliccata:', clickedEvent);
-              const clickedTask = calendarTasks.find(task => task.id === clickedEvent.id);
-              
-              // Passa la task da modificare al componente Task
-              if (clickedTask) {
-                setTaskToEdit(clickedTask); // Imposta la task da modificare
-              }
-            }
-            // Se l'evento cliccato è un evento (non una task)
-            else if (clickedEvent.extendedProps.eventType === 'event') {
-              console.log('Evento cliccato:', clickedEvent);
-              
-              // Passa i dettagli dell'evento al componente Event per la modifica
-              setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare
-            }
-          }}
-        />
-        <Event 
-          onSaveEvent={handleEventSave}
-          onUpdateEvent={handleEventUpdate} 
-          onDeleteEvent={handleEventDelete} 
-          eventDetails={currentEvent}
-        />
-        <div>
-          <h3>Lista Attività</h3>
-          <ul>
-            {calendarTasks.map(task => (
-                <li key={task.id}>
-                  <input
-                    type="checkbox"
-                    checked={selectedTasks.includes(task.id)}
-                    onChange={() => handleTaskSelect(task.id)}
-                  />
-                  {task.title} - Scadenza: {new Date(task.start).toLocaleDateString()}
-                </li>
-            ))}
-          </ul>
-          {/* Mostra il bottone di modifica solo se una singola task è selezionata */}
-          {selectedTasks.length === 1 && (
-            <button onClick={() => handleTaskClick(calendarTasks.find(task => task.id === selectedTasks[0]))}>
-              Modifica Task
-            </button>
-          )}
-        </div>
-        <Task 
-          onSaveTask={handleTaskSave} 
-          onUpdateTask={handleTaskUpdate}
-          onDeleteTask={handleTaskDelete}
-          taskDetails={taskToEdit} // Passiamo la task da modificare
-          selectedTasks={selectedTasks}
-        />
+      <div className='demo-app'>
+          <TimeMachine />
+          <Sidebar
+            weekendsVisible={weekendsVisible}
+            handleWeekendsToggle={handleWeekendsToggle}
+          />
+          <div className='demo-app-main'>
+            {!isTimeLoading && <FullCalendar
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
+              headerToolbar={{
+                left: 'prevYear,prev,today,next,nextYear',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+              }}
+              initialView='dayGridMonth'
+              locale='it'
+              initialDate={time}
+              scrollTime='07:00'
+              now={time}
+              nowIndicator={true}
+              editable={true}
+              selectable={true}
+              dayMaxEvents={true}
+              showNonCurrentDates={false}
+              weekends={weekendsVisible}
+              events={[
+                ...calendarEvents,
+                ...calendarTasks, // Assicurati di aggiungere le task qui
+              ]}
+              eventClick={(info) => {
+                const clickedEvent = info.event;
+                // Se l'evento cliccato è una task
+                if (clickedEvent.extendedProps.eventType === 'task') {
+                  console.log('Task cliccata:', clickedEvent);
+                  const clickedTask = calendarTasks.find(task => task.id === clickedEvent.id);
+                  
+                  // Passa la task da modificare al componente Task
+                  if (clickedTask) {
+                    setTaskToEdit(clickedTask); // Imposta la task da modificare
+                  }
+                }
+                // Se l'evento cliccato è un evento (non una task)
+                else if (clickedEvent.extendedProps.eventType === 'event') {
+                  console.log('Evento cliccato:', clickedEvent);
+                  
+                  // Passa i dettagli dell'evento al componente Event per la modifica
+                  setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare
+                }
+              }}
+            />}
+            <Event 
+              onSaveEvent={handleEventSave}
+              onUpdateEvent={handleEventUpdate} 
+              onDeleteEvent={handleEventDelete} 
+              eventDetails={currentEvent}
+            />
+            <div>
+              <h3>Lista Attività</h3>
+              <ul>
+                {calendarTasks.map(task => (
+                    <li key={task.id}>
+                      <input
+                        type="checkbox"
+                        checked={selectedTasks.includes(task.id)}
+                        onChange={() => handleTaskSelect(task.id)}
+                      />
+                      {task.title} - Scadenza: {new Date(task.start).toLocaleDateString()}
+                    </li>
+                ))}
+              </ul>
+              {/* Mostra il bottone di modifica solo se una singola task è selezionata */}
+              {selectedTasks.length === 1 && (
+                <button onClick={() => handleTaskClick(calendarTasks.find(task => task.id === selectedTasks[0]))}>
+                  Modifica Task
+                </button>
+              )}
+            </div>
+            <Task 
+              onSaveTask={handleTaskSave} 
+              onUpdateTask={handleTaskUpdate}
+              onDeleteTask={handleTaskDelete}
+              taskDetails={taskToEdit} // Passiamo la task da modificare
+              selectedTasks={selectedTasks}
+            />
+          </div>
       </div>
-    </div>
   );
 }
 
