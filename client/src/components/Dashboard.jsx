@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import FullCalendar from '@fullcalendar/react';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import rrulePlugin from '@fullcalendar/rrule';
 import TimeMachine from './TimeMachine/TimeMachine'
 import { useTimeMachine } from './TimeMachine/TimeMachineContext'
+import { datetimeToDateString } from '../services/dateServices';
 
 import calendarIcon from "../images/calendar-icon.png";
 import notesIcon from "../images/notebook-pen-icon.png";
@@ -12,11 +16,14 @@ import taskIcon from "../images/checklist-icon.png";
 
 import "../css/Dashboard.css";
 
-function Dashboard() {
+const Dashboard = () => {
   const navigate = useNavigate()
-  const { time } = useTimeMachine()
+  const { time, isTimeLoading } = useTimeMachine()
   const [user, setUser] = useState({})
+  const [events, setEvents] = useState([])
+  const [note, setNote] = useState({})
   const [tasks, setTasks] = useState([])
+  const [tomato, setTomato] = useState({})
 
   // verifica delle credenziali
   useEffect(() => {
@@ -35,6 +42,48 @@ function Dashboard() {
     fetchUser()
   }, [navigate])
 
+  // recupera gli eventi dal backend e li mappa
+  useEffect(() => {
+    const fetchEvents = async () => {
+      if (user?.username) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/events`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          const mapped = response.data.map(ev => ({
+            ...ev,
+            // color: #, TODO: impostare colore eventi nella preview
+            id: ev._id,
+            allDay: ev.isAllDay
+          }))
+          setEvents(mapped)
+        } catch (error) {
+          alert('Error while fetching events')
+        }
+      }
+    }
+
+    fetchEvents()
+  }, [user])
+
+  // recupera l'ultima nota modificata dal backend
+  useEffect(() => {
+    const fetchNote = async () => {
+      if (user?.username) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/notes/last`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setNote(response.data)
+        } catch (error) {
+          alert('Error while fetching note')
+        }
+      }
+    }
+
+    fetchNote()
+  }, [user])
+
   // recupera i task dal backend
   useEffect(() => {
     const fetchTasks = async () => {
@@ -51,6 +100,11 @@ function Dashboard() {
     }
 
     fetchTasks()
+  }, [user])
+
+  // recupera l'ultimo pomodoro dal backend
+  useEffect(() => {
+
   }, [user])
 
   return(
@@ -90,7 +144,17 @@ function Dashboard() {
             </div>
           </div>
           <div className='dash-card-preview'>
-            {/* preview calendario (vista settimanale o giornaliera) */}
+            {!isTimeLoading && <FullCalendar
+              plugins={[timeGridPlugin, rrulePlugin]}
+              headerToolbar={{left: '', center: '', right: ''}}
+              initialView='timeGridDay'
+              locale='it'
+              initialDate={time}
+              scrollTime='08:00'
+              now={time}
+              nowIndicator={true}
+              events={[...events]}
+            />}
           </div>
         </div>
         <div
@@ -109,7 +173,16 @@ function Dashboard() {
             </div>
           </div>
           <div className='dash-card-preview'>
-            {/* preview ultima nota modificata */}
+            {Object.keys(note).length === 0 ? (
+              <span className='dash-empty-prev'>Nessuna nota presente</span>
+            ) : (
+              // TODO: finire preview note
+              <div className='dash-note'>
+                <h3>{note.title}</h3>
+                <p>{note.text?.substring(0, 200)}{note.text?.length > 200 && '...'}</p>
+                <time>{(new Date(note.modification)).toLocaleString('it-IT')}</time>
+              </div>
+            )}
           </div>
         </div>
         <div
@@ -128,16 +201,21 @@ function Dashboard() {
             </div>
           </div>
           <div className='dash-card-preview'>
-            {tasks.length === 0 && <p>Nessun task previsto</p>}
-            {tasks.length > 0 && tasks.map((t) => (
-              <div
-                key={t._id}
-                className={`dash-task${Date.parse(t.deadline) < time.getTime() ? ' task-late' : ''}`}
-              >
-                <p><b>{t.title}</b> - {(new Date(t.deadline)).toLocaleString('it-IT')}</p>
-                <p>{t.description.substring(0, 45)}{t.description.length > 45 && '...'}</p>
-              </div>
-            ))}
+            {tasks.length === 0 ? (
+              <span className='dash-empty-prev'>Nessun task previsto</span>
+            ) : (
+              tasks.map((t) => (
+                <div
+                  key={t._id}
+                  className={`dash-task${Date.parse(t.deadline) < time.getTime() ? ' task-late' : ''}`}
+                >
+                  <p>
+                    <b>{t.title}</b> | <time>{datetimeToDateString(new Date(t.deadline))}</time>
+                  </p>
+                  <p>{t.description.substring(0, 45)}{t.description.length > 45 && '...'}</p>
+                </div>
+              ))
+            )}
           </div>
         </div>
         <div

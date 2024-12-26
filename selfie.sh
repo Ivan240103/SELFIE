@@ -5,7 +5,8 @@
 
 # termina i processi figli creati
 cleanup() {
-  echo "\nKilling client and server pew pew..."
+  echo ""
+  echo "Killing client and server pew pew..."
   kill 0
 }
 

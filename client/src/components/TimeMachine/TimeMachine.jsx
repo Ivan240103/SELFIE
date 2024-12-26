@@ -35,7 +35,10 @@ function TimeMachine() {
       <button
         type="button"
         className="time-btn"
-        onClick={() => setModalIsOpen(true)}>{time.toLocaleString('it-IT')}</button>
+        onClick={() => setModalIsOpen(true)}
+      >
+        {time.toLocaleString('it-IT').slice(0, -3).replace(', ', ' - ')}
+      </button>
 
       <Modal
         isOpen={modalIsOpen}

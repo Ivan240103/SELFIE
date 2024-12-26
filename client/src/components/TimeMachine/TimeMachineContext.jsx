@@ -27,20 +27,20 @@ export const TimeMachineProvider = ({ children }) => {
         setTime(new Date(response.data))
         setIsTimeLoading(false)
       } catch (err) {
-        console.error(err)
+        alert('Fetch time failed in context')
       }
     }
 
     fetchTime()
   }, [])
 
-  // interval per aggiornare il tempo
+  // interval per aggiornare il tempo ogni minuto
   useEffect(() => {
     const interval = setInterval(() => {
       setTime(prevTime => {
-        return new Date(prevTime.getTime() + 1000)
+        return new Date(prevTime.getTime() + 60000)
       })
-    }, 1000)
+    }, 59990)
 
     return () => clearInterval(interval)
   }, [])
@@ -52,6 +52,7 @@ export const TimeMachineProvider = ({ children }) => {
    */
   const updateTime = async (newTime) => {
     try {
+      setIsTimeLoading(true)
       const response = await axios.put(`${process.env.REACT_APP_API}/api/users/time`, {
         time: newTime.toISOString()
       },
@@ -60,8 +61,9 @@ export const TimeMachineProvider = ({ children }) => {
       })
 
       setTime(new Date(response.data))
+      setIsTimeLoading(false)
     } catch (error) {
-      console.error(error)
+      alert('Time update failed in context')
     }
   }
 
@@ -70,13 +72,15 @@ export const TimeMachineProvider = ({ children }) => {
    */
   const resetTime = async () => {
     try {
+      setIsTimeLoading(true)
       const response = await axios.put(`${process.env.REACT_APP_API}/api/users/time`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
 
       setTime(new Date(response.data))
+      setIsTimeLoading(false)
     } catch (error) {
-      console.error(error)
+      alert('Time reset failed in context')
     }
   }
 

@@ -4,6 +4,8 @@
 
 const mongoose = require('mongoose')
 
+// TODO: togliere il textLength
+
 const noteSchema = mongoose.Schema({
   title: {
     type: String,

@@ -4,6 +4,8 @@
 
 const mongoose = require('mongoose')
 
+// TODO: aggiungere campi creation, modification e stato 'f' per finished
+
 const tomatoSchema = mongoose.Schema({
   studyMinutes: {
     type: Number,
