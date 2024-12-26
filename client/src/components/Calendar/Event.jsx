@@ -4,6 +4,7 @@ import {
     datetimeToString,
     datetimeToDateString
 } from '../../services/dateServices';
+import Modal from 'react-modal'
 
 /* PER PAYAM
 Trasformare il componente ritornato in un <Modal> che mostri il form con i
@@ -24,6 +25,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
     // tempo in vigore per l'utente (fuso orario UTC)
     const { time } = useTimeMachine();
     const [event, setEvent] = useState({})
+    const [modalIsOpen, setModalIsOpen] = useState(false)
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -44,7 +46,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
         const fetchEvent = async () => {
             if (eventDetails) {
                 try {
-                    const response = await fetch(`http://localhost:8000/api/events/${eventDetails}`, {
+                    const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventDetails}`, {
                         method: 'GET',
                         headers: {
                           'Content-Type': 'application/json',
@@ -137,7 +139,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
     };
 
     try {
-        const response = await fetch("http://localhost:8000/api/events/", {
+        const response = await fetch(`${process.env.REACT_APP_API}/api/events/`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -175,7 +177,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
     };
 
     try {
-      const response = await fetch(`http://localhost:8000/api/events/${eventDetails}`, {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventDetails}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -200,7 +202,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
       return;
     }
     try {
-        const response = await fetch(`http://localhost:8000/api/events/${eventDetails}`, {
+        const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventDetails}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -223,6 +225,12 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
   return (
     <div className="event-form">
         <h3>{!eventDetails ? 'Crea' : 'Modifica'} evento</h3>
+        <button onClick={() => setModalIsOpen(true)}> Crea</button>
+        <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={() => setModalIsOpen(false)}
+        className='time-modal'
+      >
         <div>
             <label>
             Titolo:
@@ -367,6 +375,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
           <button onClick={handleDelete}>Elimina Evento</button>
         </>
       )}
+      </Modal>
     </div>
   );
 }

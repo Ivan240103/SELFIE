@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTimeMachine } from '../TimeMachine/TimeMachineContext'
+import { 
+    datetimeToString,
+    datetimeToDateString
+} from '../../services/dateServices';
+
 import '../../css/Task.css';
 
 /* X PAYAM
@@ -12,103 +18,110 @@ le stesse funzionalità, e in più solo in modalità visualizzazione
 mettere un button per segnarlo come completato (usare la route)
 */
 
-function Task({ onSaveTask, tasks, selectedTasks, taskToEdit }) {
+function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTasks }) {
+    const { time } = useTimeMachine();
     const [showModal, setShowModal] = useState(false);
-    const [taskDetails, setTaskDetails] = useState({
-        title: '',
-        deadline: '',
-        completed: false
-    });
+    const [task, setTask] = useState({});
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [deadline, setDeadline] = useState(time);
+    const [isDone, setIsDone] = useState(false);
 
-// Carica i dati della task selezionata per la modifica
     useEffect(() => {
-        if (taskToEdit) {
-        setTaskDetails({
-            title: taskToEdit.title,
-            deadline: taskToEdit.start.split('T')[0], // Formatta la data come 'YYYY-MM-DD'
-            completed: taskToEdit.completed || false,
-        });
-        setShowModal(true);
+      const fetchTask = async () => {
+          if (taskDetails) {
+              try {
+                  const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskDetails}`, {
+                      method: 'GET',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                      }
+                  });
+                  const task = await response.json();
+                  setTask(task)
+              } catch (error) {
+                  console.error(error)
+              }
+          } else {
+              setTask({})
+          }
+      }
+
+      fetchTask()
+  }, [taskDetails])
+
+  // popola i campi per riempire il form
+  useEffect(() => {
+      const setFields = () => {
+        if (taskDetails) {
+          setTitle(taskDetails.title || "")
+          setDescription(taskDetails.description || "")
+          setDeadline(taskDetails.deadline ? new Date(taskDetails.deadline) : time)
         }
-    }, [taskToEdit]);  
+      }
+      
+      setFields()
+  }, [task])
 
   function handleInputChange(e) {
     const { name, value } = e.target;
-    setTaskDetails({ ...taskDetails, [name]: value });
+    setTask({ ...task, [name]: value });
   }
 
-  async function handleSaveTask() {
-    if (taskDetails.title && taskDetails.deadline) {
-        try {
-            // Preparazione della chiamata POST
-            const response = await fetch('http://localhost:8000/api/tasks/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}` // Se necessario
-                },
-                body: JSON.stringify({
-                    title: taskDetails.title,
-                    deadline: taskDetails.deadline,
-                    completed: taskDetails.completed,
-                })
-            });
+  const handleSaveTask = async () => {
+    const taskData = {
+      title: title,
+      description: description,
+      deadline: deadline.toISOString(),
+    };
+    try {
+      // Preparazione della chiamata POST
+      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}` // Se necessario
+          },
+          body: JSON.stringify(taskData)
+      });
 
-            if (response.ok) {
-                const newTask = await response.json();
-                // Aggiungi la task al calendario
-                onSaveTask({ ...newTask, color: 'yellow' });
-                setTaskDetails({ title: '', deadline: '', completed: false });
-                setShowModal(false);
-                return
-            } else {
-                alert('Errore durante il salvataggio della task!');
-            }
-      } catch (error) {
-        console.error('Errore nella chiamata POST:', error);
-      }
-    } else {
-        alert('Titolo e scadenza sono obbligatori!');
+      const result = await response.json();
+      setShowModal(false);
+    } catch (error) {
+      console.error('Errore nella chiamata POST:', error);
     }
   }
 
   async function handleUpdateTask() {
-    if (taskToEdit && taskDetails.title && taskDetails.deadline) {
-        try {
-            const response = await fetch(`http://localhost:8000/api/tasks/${taskToEdit.id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({
-                title: taskDetails.title,
-                deadline: taskDetails.deadline,
-                completed: taskDetails.completed,
-            })
-            });
-
-            if (response.ok) {
-                const updatedTask = await response.json();
-                alert('Task aggiornata con successo!');
-            // Puoi chiamare un metodo per aggiornare le task nella lista
-            } else {
-                alert('Errore durante l\'aggiornamento della task!');
-            }
-      } catch (error) {
-        console.error('Errore nella chiamata PUT:', error);
-        alert('Errore nella connessione al server.');
-      }
-    } else {
-        alert('Titolo e scadenza sono obbligatori!');
+    const updatedTask = {
+      title: title,
+      description: description,
+      deadline: deadline.toISOString(),
+    };
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskDetails.id}`, {
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(updatedTask)
+      });
+      const result = await response.json();
+      alert('Task aggiornata con successo!');
+      onUpdateTask({ ...updatedTask, id: taskDetails });
+    } catch (error) {
+      console.error('Errore nella chiamata PUT:', error);
+      alert('Errore nella connessione al server.');
     }
   }
 
-  async function handleDeleteSelectedTasks() {
+  async function handleDeleteTask() {
     if (selectedTasks.length > 0) {
         selectedTasks.forEach(async (taskId) => {
             try {
-            const response = await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
+            const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskDetails.id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -118,6 +131,7 @@ function Task({ onSaveTask, tasks, selectedTasks, taskToEdit }) {
 
             if (response.ok) {
                 alert(`Task con ID ${taskId} eliminata con successo!`);
+                onDeleteTask(taskDetails);
                 // Puoi inviare una richiesta GET per aggiornare la lista delle task
             } else {
                 alert('Errore durante l\'eliminazione delle task!');
@@ -130,6 +144,29 @@ function Task({ onSaveTask, tasks, selectedTasks, taskToEdit }) {
     }
   }
   
+  async function handleCompleteTask() {
+    const completedTask = {
+      title: title,
+      description: description,
+      deadline: deadline.toISOString(),
+    };
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/toggle/${taskDetails.id}`, {
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(completedTask)
+      });
+      const result = await response.json();
+      alert('Task completata!');
+      setIsDone(true);
+    } catch (error) {
+      console.error('Errore nella chiamata PUT:', error);
+      alert('Errore nella connessione al server.');
+    }
+  }
 
   return (
     <div>
@@ -138,50 +175,41 @@ function Task({ onSaveTask, tasks, selectedTasks, taskToEdit }) {
       {showModal && (
         <div className="modal">
           <div className="modal-content">
-            <h2>{taskToEdit ? 'Modifica Task' : 'Crea una nuova Task'}</h2>
+            <h2>{taskDetails ? 'Modifica Task' : 'Crea una nuova Task'}</h2>
             <form>
               <label>
                 Titolo:
                 <input
                   type="text"
-                  name="title"
-                  value={taskDetails.title}
-                  onChange={handleInputChange}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                 />
               </label>
               <label>
                 Scadenza:
                 <input
-                  type="date"
-                  name="deadline"
-                  value={taskDetails.deadline}
-                  onChange={handleInputChange}
+                  type="datetime-local"
+                  value={datetimeToString(deadline)}
+                  onChange={(e) => setDeadline(new Date(e.target.value))}
+                />
+              </label>
+              <label>
+                Descrizione:
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
               </label>
             </form>
-            {taskToEdit ? (
-              <button onClick={handleUpdateTask}>Aggiorna Task</button>
-            ) : (
-              <button onClick={handleSaveTask}>Salva Task</button>
-            )}
+            <button onClick={taskDetails ? handleUpdateTask : handleSaveTask}>
+              {taskDetails ? 'Aggiorna Task' : 'Salva Task'}
+            </button>
             <button onClick={() => setShowModal(false)}>Chiudi</button>
           </div>
         </div>
       )}
-
-      <h3>Task</h3>
-      <ul>
-        {tasks.map(task => (
-          <li key={task.id}>
-            {task.title} - Scadenza: {new Date(task.start).toLocaleDateString()}
-          </li>
-        ))}
-      </ul>
-
       {selectedTasks.length > 0 && (
-        <button onClick={handleDeleteSelectedTasks}>
-          Elimina {selectedTasks.length} task selezionate
-        </button>
+        <button onClick={handleDeleteTask}>Elimina Task Selezionate</button>
       )}
     </div>
   );

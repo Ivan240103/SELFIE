@@ -15,7 +15,7 @@ function Registration(){
     function createEvent(e){
         e.preventDefault();
 
-        const URI = "http://localhost:8000/api/users/register";
+        const URI = `${process.env.REACT_APP_API}/api/users/register`;
         const requestBody = {
             username:usr,
             password:psw,

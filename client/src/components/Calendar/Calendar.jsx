@@ -26,7 +26,7 @@ function Calendar() {
   useEffect(() => {
     async function fetchEvents() {
       try {
-        const response = await fetch("http://localhost:8000/api/events/", {
+        const response = await fetch(`${process.env.REACT_APP_API}/api/events/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -38,7 +38,8 @@ function Calendar() {
           // Mappa _id come id
           const mappedEvents = events.map(event => ({
             ...event,
-            id: event._id // Mappa _id a id
+            id: event._id, // Mappa _id a id
+            eventType: 'event'
           }));
           setCalendarEvents(mappedEvents);
         } else {
@@ -55,7 +56,7 @@ function Calendar() {
   useEffect(() => {
     async function fetchTasks() {
       try {
-        const response = await fetch("http://localhost:8000/api/tasks/", {
+        const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -70,14 +71,15 @@ function Calendar() {
             start: task.deadline,
             allDay: true, // FullCalendar richiede questa proprietà
             color: 'yellow', // Colore specifico per le task
-            textColor: 'black' // Per visibilità
+            textColor: 'black', // Per visibilità
+            eventType: 'task'
           }));
           setCalendarTasks(mappedTasks);
         } else {
-          console.error('Errore durante il caricamento degli eventi.');
+          console.error('Errore durante il caricamento delle task.');
         }
       } catch (error) {
-        console.error('Errore nel caricamento degli eventi:', error);
+        console.error('Errore nel caricamento delle task:', error);
       }
     }
     fetchTasks();
@@ -129,6 +131,14 @@ function Calendar() {
     setCalendarEvents(calendarEvents.filter(event => event.id !== eventId));
   }
 
+  function handleTaskUpdate(updatedTask) {
+    setCalendarEvents(calendarTasks.map(task => task.id === updatedTask.id ? updatedTask : task));
+  }
+
+  function handleTaskDelete(taskId) {
+    setCalendarEvents(calendarTasks.filter(task => task.id !== taskId));
+  }
+
   // carica il calendario solo quando il tempo è okay
   if (isTimeLoading) return(<h2 className='calendar-loading'>Loading</h2>)
 
@@ -160,13 +170,25 @@ function Calendar() {
             ...calendarTasks, // Assicurati di aggiungere le task qui
           ]}
           eventClick={(info) => {
-            // Gestione del clic su un evento per aprire il form di modifica
-            console.log('Evento cliccato:', info.event);
-            console.log('dati evento:', info.event.start)
-            // Passa i dettagli dell'evento al componente Event per la modifica
-            setCurrentEvent(info.event.id);
-            const clickedTask = calendarTasks.find(task => task.id === info.event.id);
-            handleTaskClick(clickedTask);
+            const clickedEvent = info.event;
+
+            // Se l'evento cliccato è una task
+            if (clickedEvent.extendedProps.eventType === 'task') {
+              console.log('Task cliccata:', clickedEvent);
+              const clickedTask = calendarTasks.find(task => task.id === clickedEvent.id);
+              
+              // Passa la task da modificare al componente Task
+              if (clickedTask) {
+                setTaskToEdit(clickedTask); // Imposta la task da modificare
+              }
+            }
+            // Se l'evento cliccato è un evento (non una task)
+            else if (clickedEvent.extendedProps.eventType === 'event') {
+              console.log('Evento cliccato:', clickedEvent);
+              
+              // Passa i dettagli dell'evento al componente Event per la modifica
+              setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare
+            }
           }}
         />
         <Event 
@@ -198,9 +220,10 @@ function Calendar() {
         </div>
         <Task 
           onSaveTask={handleTaskSave} 
-          tasks={calendarTasks}
-          selectedTasks={selectedTasks}  // Passa le task selezionate qui
-          taskToEdit={taskToEdit}  // Passa la task da modificare qui
+          onUpdateTask={handleTaskUpdate}
+          onDeleteTask={handleTaskDelete}
+          taskDetails={taskToEdit} // Passiamo la task da modificare
+          selectedTasks={selectedTasks}
         />
       </div>
     </div>
