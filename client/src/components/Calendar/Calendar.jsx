@@ -70,7 +70,7 @@ function Calendar() {
             title: task.title,
             start: task.deadline,
             allDay: true, // FullCalendar richiede questa proprietà
-            color: 'yellow', // Colore specifico per le task
+            color: task.isDone ? 'green' : 'yellow', // Colore specifico per le task
             textColor: 'black', // Per visibilità
             eventType: 'task'
           }));
@@ -112,7 +112,7 @@ function Calendar() {
 
   function handleTaskClick(task) {
     // Impostiamo la task da modificare quando l'utente la seleziona per modificarla
-    setTaskToEdit(task);
+    setTaskToEdit(task.id);
   }
 
   function handleWeekendsToggle() {

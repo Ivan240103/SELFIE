@@ -51,14 +51,25 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
       fetchTask()
   }, [taskDetails])
 
+  useEffect(() => {
+    if (taskDetails) {
+      setShowModal(true); // Apri il Modal automaticamente quando c'è un task selezionato
+    }
+  }, [taskDetails]);
+
   // popola i campi per riempire il form
   useEffect(() => {
       const setFields = () => {
-        if (taskDetails) {
-          setTitle(taskDetails.title || "")
-          setDescription(taskDetails.description || "")
-          setDeadline(taskDetails.deadline ? new Date(taskDetails.deadline) : time)
+        if (task) {
+          setTitle(task.title || "")
+          setDescription(task.description || "")
+          setDeadline(task.deadline ? new Date(task.deadline) : time)
+        } else{
+          setTitle("");
+          setDescription("");
+          setDeadline(time);
         }
+        
       }
       
       setFields()
@@ -121,7 +132,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
     if (selectedTasks.length > 0) {
         selectedTasks.forEach(async (taskId) => {
             try {
-            const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskDetails.id}`, {
+            const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -146,25 +157,30 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
   
   async function handleCompleteTask() {
     const completedTask = {
-      title: title,
-      description: description,
-      deadline: deadline.toISOString(),
+      isDone: isDone
     };
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/toggle/${taskDetails.id}`, {
-      method: 'PUT',
-      headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(completedTask)
+    if (selectedTasks.length > 0) {
+      selectedTasks.forEach(async (taskId) => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/toggle/${taskId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(completedTask)
+            });
+            if (response.ok) {
+              const result = await response.json();
+              // Aggiorna il colore e lo stato della task localmente
+              onUpdateTask({id:taskId, color: 'green', isDone: true})
+              alert('Task completata con successo!');
+            }
+        } catch (error) {
+          console.error('Errore nella chiamata PUT:', error);
+          alert('Errore nella connessione al server.');
+        }
       });
-      const result = await response.json();
-      alert('Task completata!');
-      setIsDone(true);
-    } catch (error) {
-      console.error('Errore nella chiamata PUT:', error);
-      alert('Errore nella connessione al server.');
     }
   }
 
@@ -209,7 +225,10 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
         </div>
       )}
       {selectedTasks.length > 0 && (
-        <button onClick={handleDeleteTask}>Elimina Task Selezionate</button>
+        <div>
+          <button onClick={handleDeleteTask}>Elimina Task Selezionate</button>
+          <button onClick={handleCompleteTask}>Task Completata</button>
+        </div>
       )}
     </div>
   );

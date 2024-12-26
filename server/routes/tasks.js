@@ -88,7 +88,9 @@ router.put('/:id', auth, async (req, res) => {
 // segnare un task come completato o non
 router.put('/toggle/:id', auth, async (req, res) => {
   try {
-    const toggle = await Task.findByIdAndUpdate(req.params.id, { isDone: !isDone })
+    const toggle = await Task.findByIdAndUpdate(req.params.id, { 
+      $set: { isDone: !req.body.isDone } 
+    })
     if (!toggle) return res.status(404).send(`No task found with id ${req.params.id}`)
     return res.send('ok')
   } catch (err) {

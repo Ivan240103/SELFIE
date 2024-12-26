@@ -4,6 +4,7 @@ import {
     datetimeToString,
     datetimeToDateString
 } from '../../services/dateServices';
+import '../../css/Event.css';
 import Modal from 'react-modal'
 
 /* PER PAYAM
@@ -225,11 +226,11 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
   return (
     <div className="event-form">
         <h3>{!eventDetails ? 'Crea' : 'Modifica'} evento</h3>
-        <button onClick={() => setModalIsOpen(true)}> Crea</button>
+        <button onClick={() => setModalIsOpen(true)}> Aggiungi/Modifica Evento</button>
         <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
-        className='time-modal'
+        className='event-modal'
       >
         <div>
             <label>
