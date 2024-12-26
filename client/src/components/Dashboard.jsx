@@ -104,7 +104,20 @@ const Dashboard = () => {
 
   // recupera l'ultimo pomodoro dal backend
   useEffect(() => {
+    const fetchTomato = async () => {
+      if (user?.username) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/tomatoes/last`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setTomato(response.data)
+        } catch (error) {
+          alert('Error while fetching tomato')
+        }
+      }
+    }
 
+    fetchTomato()
   }, [user])
 
   return(
@@ -179,6 +192,7 @@ const Dashboard = () => {
               // TODO: finire preview note
               <div className='dash-note'>
                 <h3>{note.title}</h3>
+                <small>Tags: {note.categories.split(',').map(n => '#'+n+',')}</small>
                 <p>{note.text?.substring(0, 200)}{note.text?.length > 200 && '...'}</p>
                 <time>{(new Date(note.modification)).toLocaleString('it-IT')}</time>
               </div>
@@ -210,7 +224,7 @@ const Dashboard = () => {
                   className={`dash-task${Date.parse(t.deadline) < time.getTime() ? ' task-late' : ''}`}
                 >
                   <p>
-                    <b>{t.title}</b> | <time>{datetimeToDateString(new Date(t.deadline))}</time>
+                    <strong>{t.title}</strong> | <time>{datetimeToDateString(new Date(t.deadline))}</time>
                   </p>
                   <p>{t.description.substring(0, 45)}{t.description.length > 45 && '...'}</p>
                 </div>
@@ -234,7 +248,21 @@ const Dashboard = () => {
             </div>
           </div>
           <div className='dash-card-preview'>
-            {/* preview ultima sessione avviata */}
+            {Object.keys(tomato).length === 0 ? (
+              <span className='dash-empty-prev'>Nessun timer presente</span>
+            ) : (
+              // TODO: finire preview pomodoro
+              <div className='dash-tomato'>
+                <h3>Ultima sessione</h3>
+                <h4>{tomato.loops} {tomato.loops === 1 ? 'ciclo' : 'cicli'} di</h4>
+                <p><strong>Tempo di studio:</strong> {tomato.studyMinutes}
+                 {tomato.studyMinutes === 1 ? 'minuto' : 'minuti'}</p>
+                <p><strong>Tempo di pausa:</strong> {tomato.pauseMinutes}
+                 {tomato.pauseMinutes === 1 ? 'minuto' : 'minuti'}</p>
+                <p><strong>Stato:</strong> {tomato.interrupted === 'n' ? 'da iniziare' :
+                  tomato.interrupted === 'f' ? 'concluso' : 'da concludere'}</p>
+              </div>
+            )}
           </div>
         </div>
         <div

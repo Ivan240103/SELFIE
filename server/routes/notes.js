@@ -21,7 +21,6 @@ router.post('/', auth, async (req, res) => {
     creation: new Date(await getTime(req.user.username)),
     modification: new Date(await getTime(req.user.username)),
     categories: categories.trim(),
-    textLength: text.length,
     owner: req.user.username    
   })
 
@@ -81,7 +80,6 @@ router.put('/:id', auth, async (req, res) => {
     upd.title = title || upd.title
     upd.text = text || upd.text
     upd.modification = new Date(await getTime(req.user.username))
-    upd.textLength = text.length || upd.textLength
     upd.categories = categories !== undefined ? categories.trim() : upd.categories
     await upd.save()
     return res.send('ok')

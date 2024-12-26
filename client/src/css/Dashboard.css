@@ -93,9 +93,13 @@
   max-height: 30%;
   padding: 5px 20px;
   border-radius: 20px;
-  background-color: #b2ffc5;
+  background-color: #fffc31;
 }
 
 .task-late {
   background-color: #FF6F61;
+}
+
+.dash-tomato h4 {
+  text-align: center;
 }

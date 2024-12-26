@@ -4,8 +4,6 @@
 
 const mongoose = require('mongoose')
 
-// TODO: aggiungere campi creation, modification e stato 'f' per finished
-
 const tomatoSchema = mongoose.Schema({
   studyMinutes: {
     type: Number,
@@ -22,7 +20,8 @@ const tomatoSchema = mongoose.Schema({
     min: 1,
     required: true
   },
-  // 'n' = not interrupted, 's' = interrupted during study time, 'p' = interrupted during pause time
+  // 'n' = not interrupted, 's' = interrupted during study time,
+  // 'p' = interrupted during pause time, 'f' = finished
   interrupted: {
     type: String,
     default: 'n'
@@ -36,6 +35,11 @@ const tomatoSchema = mongoose.Schema({
   remainingLoops: {
     type: Number,
     default: -1
+  },
+  // ultima modifica al timer
+  modification: {
+    type: Date,
+    required: true
   },
   // username dell'utente che ha creato il timer
   owner: {

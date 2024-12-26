@@ -4,8 +4,6 @@
 
 const mongoose = require('mongoose')
 
-// TODO: togliere il textLength
-
 const noteSchema = mongoose.Schema({
   title: {
     type: String,
@@ -27,10 +25,6 @@ const noteSchema = mongoose.Schema({
   categories: {
     type: String,
     default: ''
-  },
-  textLength: {
-    type: Number,
-    default: -1
   },
   // username dell'utente che ha creato la nota
   owner: {

@@ -5,6 +5,7 @@
 const express = require('express')
 
 const auth = require('../middleware/auth')
+const { getTime } = require('../services/TimeMachine')
 
 const Tomato = require('../models/Tomato')
 
@@ -16,6 +17,7 @@ router.post('/', auth, async (req, res) => {
     studyMinutes: req.body.studyMinutes,
     pauseMinutes: req.body.pauseMinutes,
     loops: req.body.loops,
+    modification: new Date(await getTime(req.user.username)),
     owner: req.user.username
   })
 
@@ -28,11 +30,25 @@ router.post('/', auth, async (req, res) => {
   }
 })
 
-// prendere i dati del pomodoro dell'utente
-router.get('/', auth, async (req, res) => {
+// prendere i dati dell'ultimo pomodoro dell'utente
+router.get('/last', auth, async (req, res) => {
   try {
-    const timer = await Tomato.findOne({ username: req.user.username })
-    if (!timer) return res.status(404).send(`No tomato found for username ${req.user.username}`)
+    const timer = await Tomato.find({
+      username: req.user.username
+    }).sort({ modification: 'desc' }).limit(1)
+    // se non ne trova nessuno invia un oggetto vuoto
+    return res.json(timer)
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send('Error while getting last tomato')
+  }
+})
+
+// prendere i dati di un pomodoro specifico
+router.get('/:id', auth, async (req, res) => {
+  try {
+    const timer = await Tomato.findById(req.params.id)
+    if (!timer) return res.status(404).send(`No tomato found with id ${req.params.id}`)
     return res.json(timer)
   } catch (err) {
     console.error(err)
@@ -49,6 +65,7 @@ router.put('/:id', auth, async (req, res) => {
     upd.interrupted = req.body.interrupted || upd.interrupted
     upd.remainingMinutes = req.body.remainingMinutes || upd.remainingMinutes
     upd.remainingLoops = req.body.remainingLoops || upd.remainingLoops
+    upd.modification = new Date(await getTime(req.user.username))
     await upd.save()
     return res.send('ok')
   } catch (err) {

@@ -6,10 +6,10 @@
 - [x] memorizzare User nel localStorage per creare eventi, task...
 - [x] view time machine
 - [ ] home dashboard
-  - [ ] ultima nota modificata
+  - [x] ultima nota modificata
   - [ ] ultima sessione pomodoro oppure crea nuova
-  - [ ] 3 task a scadenza più ravvicinata
-  - [ ] prossimo evento
+  - [x] 3 task a scadenza più ravvicinata
+  - [x] prossimo evento
 - [ ] eventi e task
   - [x] calendario month
   - [x] calendario week
