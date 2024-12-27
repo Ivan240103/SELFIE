@@ -8,7 +8,6 @@ const auth = require('../middleware/auth')
 const { getTime } = require('../services/TimeMachine')
 
 const Note = require('../models/Note')
-const tm = require('../services/TimeMachine')
 
 const router = express.Router()
 

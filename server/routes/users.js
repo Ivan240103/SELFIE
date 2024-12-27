@@ -54,7 +54,6 @@ const createBdayEvent = async (bday, username) => {
 }
 
 // registrare un nuovo utente
-// body.birthday è una data in ISO string (UTC)
 router.post('/register', async (req, res) => {
   const { username, email, password, name, surname } = req.body
   const newUser = new User({

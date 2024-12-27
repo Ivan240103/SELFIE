@@ -1,8 +1,7 @@
 .time-container {
   width: 100vw;
   padding: 8px 0px;
-  /* background-color: #c8ffff; */
-  background-color: blue;
+  background-color: #c8ffff;
   display: flex;
   justify-content: center;
 }
