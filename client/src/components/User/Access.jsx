@@ -36,7 +36,7 @@ function Access() {
             })
             .catch((err) => {
                 //messaggio di errore
-                setError("Login failed: " + err.response.data);
+                setError("Login failed: " + err.response.data || 'no response');
             });
     }
 

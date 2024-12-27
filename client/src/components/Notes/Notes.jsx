@@ -84,7 +84,7 @@ function Notes({ onNoteSave }) {
       await navigator.clipboard.writeText(note.text);
       alert('Contenuto copiato negli appunti!');
     } catch (error) {
-      alert('Errore nella copia:', error.response.data);
+      alert('Errore nella copia:', error.response.data || 'no response');
     }
   }
 
@@ -92,7 +92,7 @@ function Notes({ onNoteSave }) {
     navigator.clipboard.readText().then((clipText) => {
       setText(clipText);
     }).catch((error) => {
-      alert('Errore nella lettura degli appunti:', error.response.data);
+      alert('Errore nella lettura degli appunti:', error.response.data || 'no response');
     });
   }
 

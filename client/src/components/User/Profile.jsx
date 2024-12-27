@@ -121,8 +121,8 @@ function Profile() {
   return (
     <div>
       <TimeMachine />
-      <div className='profile-container' id='profile-toplevel'>
-        <p className='error'>{error}</p>
+      <p className='error'>{error}</p>
+      {!error && <div className='profile-container' id='profile-toplevel'>
         <h2 className='profile-header'>Ciao, {username}</h2>
         <div className='profile-pic-container'>
           <img
@@ -191,6 +191,7 @@ function Profile() {
               onChange={(e) => setBirthday(e.target.value)}
               readOnly={!editMode} />
           </div>
+          {/* TODO: MODIFICA DELLA PSW */}
           <button
             type='button'
             className='profile-cancel-btn'
@@ -213,7 +214,7 @@ function Profile() {
             onClick={deleteProfile}
             hidden={editMode}>Elimina profilo</button>
         </div>
-      </div>
+      </div>}
     </div>
   )
 }

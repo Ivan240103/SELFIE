@@ -41,7 +41,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
                   const task = await response.json();
                   setTask(task)
               } catch (error) {
-                  alert(error.response.data)
+                  alert(error.response.data || 'no response')
               }
           } else {
               setTask({})
@@ -100,7 +100,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
       const result = await response.json();
       setShowModal(false);
     } catch (error) {
-      alert('Errore nella chiamata POST:', error.response.data);
+      alert('Errore nella chiamata POST:', error.response.data || 'no response');
     }
   }
 
@@ -123,7 +123,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
       alert('Task aggiornata con successo!');
       onUpdateTask({ ...updatedTask, id: taskDetails });
     } catch (error) {
-      alert('Errore nella chiamata PUT:', error.response.data);
+      alert('Errore nella chiamata PUT:', error.response.data || 'no response');
     }
   }
 
@@ -147,7 +147,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
                 alert('Errore durante l\'eliminazione delle task!');
             }
             } catch (error) {
-                alert('Errore nella chiamata DELETE:', error.response.data);
+                alert('Errore nella chiamata DELETE:', error.response.data || 'no response');
             }
         });
     }
@@ -175,7 +175,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
               alert('Task completata con successo!');
             }
         } catch (error) {
-          alert('Errore nella chiamata PUT:', error.response.data);
+          alert('Errore nella chiamata PUT:', error.response.data || 'no response');
         }
       });
     }

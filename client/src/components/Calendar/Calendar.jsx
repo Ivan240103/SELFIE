@@ -51,7 +51,7 @@ function Calendar() {
           alert('Errore durante il caricamento degli eventi.');
         }
       } catch (error) {
-        alert('Errore nel caricamento degli eventi:', error.response.data);
+        alert('Errore nel caricamento degli eventi:', error.response.data || 'no response');
       }
     }
     fetchEvents();
@@ -84,7 +84,7 @@ function Calendar() {
           alert('Errore durante il caricamento delle task.');
         }
       } catch (error) {
-        alert('Errore nel caricamento delle task:', error.response.data);
+        alert('Errore nel caricamento delle task:', error.response.data || 'no response');
       }
     }
     fetchTasks();
