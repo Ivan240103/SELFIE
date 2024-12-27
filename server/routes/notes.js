@@ -15,12 +15,13 @@ const router = express.Router()
 // passare title, text, categories
 router.post('/', auth, async (req, res) => {
   const { title, text, categories } = req.body
+  const categoriesString = Array.isArray(categories) ? categories.join(', ') : categories;
   const newNote = new Note({
     title: title,
     text: text,    
     creation: new Date(await getTime(req.user.username)),
     modification: new Date(await getTime(req.user.username)),
-    categories: categories.trim(),
+    categories: categoriesString.trim(),
     owner: req.user.username    
   })
 
@@ -80,7 +81,14 @@ router.put('/:id', auth, async (req, res) => {
     upd.title = title || upd.title
     upd.text = text || upd.text
     upd.modification = new Date(await getTime(req.user.username))
-    upd.categories = categories !== undefined ? categories.trim() : upd.categories
+    if (categories !== undefined) {
+      // Se categories è un array, lo trasformiamo in una stringa
+      if (Array.isArray(categories)) {
+        upd.categories = categories.join(', ').trim(); // Convertiamo l'array in una stringa separata da virgola
+      } else if (typeof categories === 'string') {
+        upd.categories = categories.trim(); // Se è già una stringa, la trimmamo
+      }
+    }
     await upd.save()
     return res.send('ok')
   } catch (err) {
