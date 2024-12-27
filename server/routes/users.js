@@ -53,6 +53,7 @@ const createBdayEvent = async (bday, username) => {
 }
 
 // registrare un nuovo utente
+// della password passare l'hash SHA1
 router.post('/register', async (req, res) => {
   const { username, email, password, name, surname } = req.body
   const newUser = new User({
@@ -72,6 +73,7 @@ router.post('/register', async (req, res) => {
 })
 
 // login dell'utente
+// della password passare l'hash SHA1
 router.post('/login', async (req, res) => {
   const { username, password } = req.body
   try {

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Importa useNavigate;
 import { Link } from "react-router-dom"; //Importa il linking per la registrazione dell'utente
+import CryptoJS from 'crypto-js'
+
 import "../../css/Access.css";
 
 function Access() {
@@ -14,8 +16,8 @@ function Access() {
 
         const URI = `${process.env.REACT_APP_API}/api/users/login`;
         const requestBody = {
-            username:usr,
-            password:psw
+            username: usr,
+            password: CryptoJS.SHA1(psw).toString(CryptoJS.enc.Hex)
         }
         
         const request = {

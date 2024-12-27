@@ -67,7 +67,6 @@ function Profile() {
     setEditMode(!editMode)
     setUsername(profile.username)
     setEmail(profile.email)
-    setPassword(profile.password)
     setName(profile.name)
     setSurname(profile.surname)
     setBirthday(profile.birthday ? datetimeToDateString(new Date(profile.birthday)) : '')

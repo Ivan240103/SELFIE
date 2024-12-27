@@ -23,7 +23,7 @@
   - [ ] modifica task
   - [ ] eliminazione task
 - [ ] solo task
-  - [ ] task scaduti
+  - [ ] GESTIRE I TASK OLTRE LA SCADENZA
 - [ ] note
   - [ ] tutte le note
   - [ ] nota specifica
@@ -36,8 +36,8 @@
   - [x] pagina del profilo personale
 
 ### Server
-- [ ] criptare la password nel db
-- [ ] criptare la password nel tragitto c <---> s
+- [x] criptare la password nel db
+- [x] criptare la password nel tragitto c <---> s
 - [x] time machine
 - [x] route per eventi
   - [x] creazione nuovo evento
@@ -77,10 +77,6 @@
   - [x] ottenere una nota specifica
   - [x] modificare una nota
   - [x] eliminare una nota
-
-### X Ivan
-- task in ritardo
-- criptare psw
 
 ## Estensione 18-27
 - [ ] notifica per gli eventi a scelta (mail, SO, whatsapp...), con un certo anticipo e una certa ripetizione

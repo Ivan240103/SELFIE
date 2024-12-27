@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // hash SHA1 della password
   password: {
     type: String,
     required: true
