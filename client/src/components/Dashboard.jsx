@@ -163,7 +163,7 @@ const Dashboard = () => {
               initialView='timeGridDay'
               locale='it'
               initialDate={time}
-              scrollTime='08:00'
+              scrollTime={`${String(time.getHours() - 2).padStart(2, '0')}:00`}
               now={time}
               nowIndicator={true}
               events={[...events]}

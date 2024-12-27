@@ -5,9 +5,9 @@
 ### Client
 - [x] memorizzare User nel localStorage per creare eventi, task...
 - [x] view time machine
-- [ ] home dashboard
+- [x] home dashboard
   - [x] ultima nota modificata
-  - [ ] ultima sessione pomodoro oppure crea nuova
+  - [x] ultima sessione pomodoro oppure crea nuova
   - [x] 3 task a scadenza più ravvicinata
   - [x] prossimo evento
 - [ ] eventi e task
@@ -79,8 +79,9 @@
   - [x] eliminare una nota
 
 ### X Ivan
-- dashboard
 - task in ritardo
+- levare i console.*
+- criptare psw
 
 ## Estensione 18-27
 - [ ] notifica per gli eventi a scelta (mail, SO, whatsapp...), con un certo anticipo e una certa ripetizione

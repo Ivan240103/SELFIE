@@ -243,12 +243,11 @@ function Sidebar({ weekendsVisible, handleWeekendsToggle }) {
     <div className='demo-app-sidebar'>
       <nav className="navbar">
           <div className="navbar-container">
-              <a href="#" className="navbar-logo">MyLogo</a>
               <ul className="navbar-menu">
-                  <li className="navbar-item"><a href="#" className="navbar-link">Calendario</a></li>
-                  <li className="navbar-item"><a href="#" className="navbar-link">Note</a></li>
-                  <li className="navbar-item"><a href="#" className="navbar-link">Pomodoro</a></li>
-                  <li className="navbar-item"><a href="#" className="navbar-link">Contatti</a></li>
+                  <li className="navbar-item">Calendario</li>
+                  <li className="navbar-item">Note</li>
+                  <li className="navbar-item">Pomodoro</li>
+                  <li className="navbar-item">Contatti</li>
               </ul>
           </div>
       </nav>
