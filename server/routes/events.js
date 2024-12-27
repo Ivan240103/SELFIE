@@ -32,7 +32,6 @@ router.post('/', auth, async (req, res) => {
     await newEvent.save()
     return res.send('ok')
   } catch(err) {
-    console.error(err)
     return res.status(500).send('Error while creating the event')
   }
 })
@@ -44,7 +43,6 @@ router.get('/', auth, async (req, res) => {
     // se non ne trova nessuno invia un oggetto vuoto
     return res.json(allEvents)
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while getting all events')
   }
 })
@@ -59,7 +57,6 @@ router.get('/:id', auth, async (req, res) => {
     obj.rrule = obj.rrule ? stringToRrule(obj.rrule) : null
     return res.json(obj)
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while getting specific event')
   }
 })
@@ -84,7 +81,6 @@ router.put('/:id', auth, async (req, res) => {
     await upd.save()
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while updating event')
   }
 })
@@ -96,7 +92,6 @@ router.delete('/:id', auth, async (req, res) => {
     if (!deletion) return res.status(404).send(`No event found with id ${req.params.id}`)
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     res.status(500).send('Error while deleting event')
   }
 })

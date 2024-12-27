@@ -41,7 +41,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
                   const task = await response.json();
                   setTask(task)
               } catch (error) {
-                  console.error(error)
+                  alert(error.response.data)
               }
           } else {
               setTask({})
@@ -100,7 +100,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
       const result = await response.json();
       setShowModal(false);
     } catch (error) {
-      console.error('Errore nella chiamata POST:', error);
+      alert('Errore nella chiamata POST:', error.response.data);
     }
   }
 
@@ -123,8 +123,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
       alert('Task aggiornata con successo!');
       onUpdateTask({ ...updatedTask, id: taskDetails });
     } catch (error) {
-      console.error('Errore nella chiamata PUT:', error);
-      alert('Errore nella connessione al server.');
+      alert('Errore nella chiamata PUT:', error.response.data);
     }
   }
 
@@ -148,8 +147,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
                 alert('Errore durante l\'eliminazione delle task!');
             }
             } catch (error) {
-                console.error('Errore nella chiamata DELETE:', error);
-                alert('Errore nella connessione al server.');
+                alert('Errore nella chiamata DELETE:', error.response.data);
             }
         });
     }
@@ -169,7 +167,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             body: JSON.stringify(completedTask)
-            });
+          });
             if (response.ok) {
               const result = await response.json();
               // Aggiorna il colore e lo stato della task localmente
@@ -177,8 +175,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
               alert('Task completata con successo!');
             }
         } catch (error) {
-          console.error('Errore nella chiamata PUT:', error);
-          alert('Errore nella connessione al server.');
+          alert('Errore nella chiamata PUT:', error.response.data);
         }
       });
     }

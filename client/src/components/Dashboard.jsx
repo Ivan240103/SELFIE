@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [note, setNote] = useState({})
   const [tasks, setTasks] = useState([])
   const [tomato, setTomato] = useState({})
+  const [error, setError] = useState('')
 
   // verifica delle credenziali
   useEffect(() => {
@@ -33,9 +34,12 @@ const Dashboard = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
         setUser(response.data)
+        setError('')
       } catch (error) {
-        console.error('Error fetching user')
-        navigate('/login')
+        setError(error.response.data || 'Utente non autorizzato')
+        setTimeout(() => {
+          navigate('/login')
+        }, 3000)
       }
     }
 
@@ -123,7 +127,8 @@ const Dashboard = () => {
   return(
     <div>
       <TimeMachine />
-      <div className='dash-container'>
+      <p>{error}</p>
+      {!error && <div className='dash-container'>
         <div
           className='dash-card'
           id='dash-profile'
@@ -284,7 +289,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }

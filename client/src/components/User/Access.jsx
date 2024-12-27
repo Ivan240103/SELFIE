@@ -6,10 +6,8 @@ import "../../css/Access.css";
 function Access() {
     const [usr, setUsr] = useState("");
     const [psw, setPsw] = useState("");
-    const [err, setError] = useState("");
+    const [error, setError] = useState("");
     const navigate = useNavigate(); // Inizializza useNavigate
-
-    console.log('url:', process.env.REACT_APP_API)
 
     function createEvent(e){
         e.preventDefault();
@@ -30,21 +28,13 @@ function Access() {
             .then((res) => {
                 if (res.ok) return res.json();
             })
-            //Avevo messo un console.log per vedere cosa mi diceva il server
             .then((data) => {
-                if (typeof data === "string") {
-                    console.log("Risposta come stringa:", data);
-                    localStorage.setItem("token", data);
-                    navigate("/");
-                } else if (data.token) {
-                    console.log("Token trovato nell'oggetto:", data.token);
-                    localStorage.setItem("token", data.token);
-                    navigate("/");
-                }
+                localStorage.setItem("token", data);
+                navigate("/");
             })
             .catch((err) => {
                 //messaggio di errore
-                setError("Login failed: " + err.message);
+                setError("Login failed: " + err.response.data);
             });
     }
 
@@ -52,6 +42,7 @@ function Access() {
         <div className="corpo">
             <div className="log">
                 <h1>Login</h1>
+                <p>{error}</p>
                 <form onSubmit={createEvent}>
                     <label for="username" id="username"><b>Username</b></label>
                     <input id="usr" type="text" placeholder="Enter Username" value={usr} onChange={(e) => setUsr(e.target.value)} required/>

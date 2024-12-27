@@ -80,7 +80,6 @@
 
 ### X Ivan
 - task in ritardo
-- levare i console.*
 - criptare psw
 
 ## Estensione 18-27

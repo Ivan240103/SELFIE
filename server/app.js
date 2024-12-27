@@ -59,10 +59,6 @@ app.use('/api/notes', noteRoutes)
 const u = process.env.DB_USER
 const p = process.env.DB_PSW
 const mongoURL = `mongodb+srv://${u}:${p}@selfie.qv0gx.mongodb.net/?retryWrites=true&w=majority&appName=SELFIE`
-mongoose.connect(mongoURL).then(() => {
-  console.log('MongoDB connected')
-})
+mongoose.connect(mongoURL)
 
-app.listen(port, () => {
-  console.log(`Server online on port ${port}`)
-})
+app.listen(port)

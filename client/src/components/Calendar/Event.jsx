@@ -57,7 +57,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
                     const event = await response.json();
                     setEvent(event)
                 } catch (error) {
-                    console.error(error)
+                    alert(error.response.data)
                 }
             } else {
                 setEvent({})
@@ -153,11 +153,9 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
         }
       
         const result = await response.text();
-        console.log('Evento salvato con successo:', result);
-        alert('Evento salvato con successo!');
+        alert('Evento salvato con successo:', result);
     } catch (err) {
-        console.error('Errore nel salvataggio dell\'evento:', err);
-        alert('Errore nel salvataggio dell\'evento.');
+        alert('Errore nel salvataggio dell\'evento:', err.response.data);
     }
   };
 
@@ -188,12 +186,10 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
       });
 
       const result = await response.text();
-      console.log('Evento aggiornato con successo:', result);
-      alert('Evento aggiornato con successo!');
+      alert('Evento aggiornato con successo:', result);
       onUpdateEvent({ ...updatedEventData, id: eventDetails });
     } catch (err) {
-      console.error('Errore nell\'aggiornamento dell\'evento:', err);
-      alert('Errore nell\'aggiornamento dell\'evento.');
+      alert('Errore nell\'aggiornamento dell\'evento:', err.response.data);
     }
   };
 
@@ -209,17 +205,15 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
-        console.log('ID evento da eliminare:', eventDetails);
+        alert('ID evento da eliminare:', eventDetails);
         if (!response.ok) {
           throw new Error(`Errore HTTP: ${response.status}`);
         }
   
-        console.log('Evento cancellato con successo');
         alert('Evento cancellato con successo!');
         onDeleteEvent(eventDetails);
       } catch (err) {
-        console.error('Errore nella cancellazione dell\'evento:', err);
-        alert('Errore nella cancellazione dell\'evento.');
+        alert('Errore nella cancellazione dell\'evento:', err.response.data);
       }
   };
 

@@ -48,7 +48,6 @@ const createBdayEvent = async (bday, username) => {
     })
     await bdayEvent.save()
   } catch (err) {
-    console.error(err)
     throw 'Error while creating birthday event'
   }
 }
@@ -68,7 +67,6 @@ router.post('/register', async (req, res) => {
     await newUser.save()
     return res.send('ok')
   } catch(err) {
-    console.error(err)
     return res.status(500).send('Error while registering new user')
   }
 })
@@ -87,7 +85,6 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET/*, { expiresIn: '24h' } */)
     return res.json(token)
   } catch (err) {
-    console.error(err)
     res.status(500).send('Error during login')
   }
 })
@@ -99,7 +96,6 @@ router.get('/', auth, async (req, res) => {
     if (!user) return res.status(404).send(`No user found with username ${req.user.username}`)
     return res.json(user)
   } catch (err) {
-    console.error(err)
     res.status(500).send('Error while getting specific user')
   }
 })
@@ -140,7 +136,6 @@ router.put('/', [auth, upload.single('pic')], async (req, res) => {
     await upd.save()
     return res.json(upd)
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while updating user info')
   }
 })
@@ -178,7 +173,6 @@ router.delete('/', auth, async (req, res) => {
     await Tomato.deleteMany({ owner: req.user.username })
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while deleting user')
   }
 })

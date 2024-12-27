@@ -8,6 +8,7 @@ function Protected() {
   const navigate = useNavigate()
   const [user, setUser] = useState({})
   const [note, setNote] = useState({})
+  const [error, setError] = useState('')
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -16,14 +17,17 @@ function Protected() {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
         setUser(response.data)
+        setError('')
       } catch (error) {
-        console.error('Error fetching user')
-        navigate('/login')
+        setError(error.response.data || 'Utente non autorizzato')
+        setTimeout(() => {
+          navigate('/login')
+        }, 2000)
       }
     }
 
     fetchUser()
-  }, [navigate])
+  }, [navigate, API])
 
   const logout = () => {
     localStorage.removeItem('token')
@@ -61,6 +65,7 @@ function Protected() {
   return(
     <div>
       <TimeMachine />
+      <p>{error}</p>
       <p>Nome: {user.name || ''}</p>
       <p>Cognome: {user.surname || ''}</p>
       <br />

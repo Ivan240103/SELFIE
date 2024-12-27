@@ -27,7 +27,6 @@ const getTime = async (username) => {
 
     return calcDateISOstring(user.offset)
   } catch (err) {
-    console.error(`getTime error: ${err}`)
     throw 'getTime'
   }
 }
@@ -49,7 +48,6 @@ const setTime = async (username, date) => {
     await user.save()
     return calcDateISOstring(user.offset)
   } catch (err) {
-    console.error(`setTime error: ${err}`)
     throw 'setTime'
   }
 }
@@ -70,7 +68,6 @@ const resetTime = async (username) => {
     await user.save()
     return calcDateISOstring(user.offset)
   } catch (err) {
-    console.error(`resetTime error: ${err}`)
     throw 'resetTime'
   }
 }

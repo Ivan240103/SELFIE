@@ -24,8 +24,7 @@ router.post('/', auth, async (req, res) => {
     await newTask.save()
     return res.send('ok')
   } catch(err) {
-    console.error(err)
-    return res.status(500).send('Error while creating the task')
+    return res.status(500).send('Error while creating task')
   }
 })
 
@@ -36,7 +35,6 @@ router.get('/', auth, async (req, res) => {
     // se non ne trova nessuno invia un oggetto vuoto
     return res.json(allTasks)
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while getting all tasks')
   }
 })
@@ -51,7 +49,6 @@ router.get('/notdone', auth, async (req, res) => {
     // se non ne trova nessuno invia un oggetto vuoto
     return res.json(notdoneTask)
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while getting tasks not done')
   }
 })
@@ -63,7 +60,6 @@ router.get('/:id', auth, async (req, res) => {
     if (!singleTask) return res.status(404).send(`No task found with id ${req.params.id}`)
     return res.json(singleTask)
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while getting specific task')
   }
 })
@@ -82,7 +78,6 @@ router.put('/:id', auth, async (req, res) => {
     await upd.save()
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while updating task')
   }
 })
@@ -96,7 +91,6 @@ router.put('/toggle/:id', auth, async (req, res) => {
     if (!toggle) return res.status(404).send(`No task found with id ${req.params.id}`)
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while toggling task')
   }
 })
@@ -108,7 +102,6 @@ router.delete('/:id', auth, async (req, res) => {
     if (!deletion) return res.status(404).send(`No task found with id ${req.params.id}`)
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while deleting task')
   }
 })

@@ -26,9 +26,7 @@ export const TimeMachineProvider = ({ children }) => {
         })
         setTime(new Date(response.data))
         setIsTimeLoading(false)
-      } catch (err) {
-        alert('Fetch time failed in context')
-      }
+      } catch (err) { }
     }
 
     fetchTime()

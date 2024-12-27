@@ -48,10 +48,10 @@ function Calendar() {
           }));
           setCalendarEvents(mappedEvents);
         } else {
-          console.error('Errore durante il caricamento degli eventi.');
+          alert('Errore durante il caricamento degli eventi.');
         }
       } catch (error) {
-        console.error('Errore nel caricamento degli eventi:', error);
+        alert('Errore nel caricamento degli eventi:', error.response.data);
       }
     }
     fetchEvents();
@@ -81,10 +81,10 @@ function Calendar() {
           }));
           setCalendarTasks(mappedTasks);
         } else {
-          console.error('Errore durante il caricamento delle task.');
+          alert('Errore durante il caricamento delle task.');
         }
       } catch (error) {
-        console.error('Errore nel caricamento delle task:', error);
+        alert('Errore nel caricamento delle task:', error.response.data);
       }
     }
     fetchTasks();
@@ -182,7 +182,7 @@ function Calendar() {
                 const clickedEvent = info.event;
                 // Se l'evento cliccato è una task
                 if (clickedEvent.extendedProps.eventType === 'task') {
-                  console.log('Task cliccata:', clickedEvent);
+                  alert('Task cliccata:', clickedEvent);
                   const clickedTask = calendarTasks.find(task => task.id === clickedEvent.id);
                   
                   // Passa la task da modificare al componente Task
@@ -192,7 +192,7 @@ function Calendar() {
                 }
                 // Se l'evento cliccato è un evento (non una task)
                 else if (clickedEvent.extendedProps.eventType === 'event') {
-                  console.log('Evento cliccato:', clickedEvent);
+                  alert('Evento cliccato:', clickedEvent);
                   
                   // Passa i dettagli dell'evento al componente Event per la modifica
                   setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare

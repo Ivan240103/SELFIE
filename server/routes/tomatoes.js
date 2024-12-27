@@ -25,7 +25,6 @@ router.post('/', auth, async (req, res) => {
     await newTomato.save()
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while saving new tomato')
   }
 })
@@ -39,7 +38,6 @@ router.get('/last', auth, async (req, res) => {
     // se non ne trova nessuno invia un oggetto vuoto
     return res.json(timer)
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while getting last tomato')
   }
 })
@@ -51,8 +49,7 @@ router.get('/:id', auth, async (req, res) => {
     if (!timer) return res.status(404).send(`No tomato found with id ${req.params.id}`)
     return res.json(timer)
   } catch (err) {
-    console.error(err)
-    return res.status(500).send('Error while getting tomato')
+    return res.status(500).send('Error while getting specific tomato')
   }
 })
 
@@ -69,7 +66,6 @@ router.put('/:id', auth, async (req, res) => {
     await upd.save()
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while updating tomato')
   }  
 })
@@ -81,7 +77,6 @@ router.delete('/:id', auth, async (req, res) => {
     if (!deletion) return res.status(404).send(`No tomato found with id ${req.params.id}`)
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while deleting tomato')
   }
 })

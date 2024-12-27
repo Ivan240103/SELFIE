@@ -32,7 +32,7 @@ function Registration(){
         fetch(URI, request)
             .then((res) => {
                 if (res.ok){
-                    console.log("Registration completed!");
+                    alert("Registration completed!");
                     setUsr("");
                     setPsw("");
                     setName("");
@@ -44,7 +44,7 @@ function Registration(){
             })
             .catch((err) => {
                 //messaggio di errore
-                setErr("Registration failed: " + err.message);
+                setErr("Registration failed: " + err.response.data);
             });
     }
 
