@@ -3,7 +3,10 @@
  */
 
 const express = require('express')
+
 const auth = require('../middleware/auth')
+const { getTime } = require('../services/TimeMachine')
+
 const Note = require('../models/Note')
 const tm = require('../services/TimeMachine')
 
@@ -16,10 +19,9 @@ router.post('/', auth, async (req, res) => {
   const newNote = new Note({
     title: title,
     text: text,    
-    creation: new Date(await tm.getTime(req.user.username)),
-    modification: new Date(await tm.getTime(req.user.username)),
+    creation: new Date(await getTime(req.user.username)),
+    modification: new Date(await getTime(req.user.username)),
     categories: categories.trim(),
-    textLength: text.length,
     owner: req.user.username    
   })
 
@@ -72,16 +74,15 @@ router.get('/:id', auth, async (req, res) => {
 // passare title, text, categories
 router.put('/:id', auth, async (req, res) => {
   try {
-    const toUpdate = await Note.findById(req.params.id)
-    if (!toUpdate) return res.status(404).send(`No note found with id ${req.params.id}`)
+    const upd = await Note.findById(req.params.id)
+    if (!upd) return res.status(404).send(`No note found with id ${req.params.id}`)
     // modifiche
     const { title, text, categories } = req.body
-    toUpdate.title = title || toUpdate.title
-    toUpdate.text = text || toUpdate.text
-    toUpdate.modification = new Date(await tm.getTime(req.user.username))
-    toUpdate.textLength = text.length || toUpdate.textLength
-    toUpdate.categories = categories !== undefined ? categories.trim() : toUpdate.categories
-    await toUpdate.save()
+    upd.title = title || upd.title
+    upd.text = text || upd.text
+    upd.modification = new Date(await getTime(req.user.username))
+    upd.categories = categories !== undefined ? categories.trim() : upd.categories
+    await upd.save()
     return res.send('ok')
   } catch (err) {
     console.error(err)

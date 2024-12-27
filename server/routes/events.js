@@ -3,9 +3,10 @@
  */
 
 const express = require('express')
+
 const auth = require('../middleware/auth')
-const { RRule } = require('rrule')
-const { getTime } = require('../services/TimeMachine')
+const { stringToRrule, rruleToString } = require('../services/RRule')
+
 const Event = require('../models/Event')
 
 const router = express.Router()
@@ -111,18 +112,18 @@ router.get('/:id', auth, async (req, res) => {
 // body.rrule = oggetto rrule (FullCalendar) per eventi ricorrenti
 router.put('/:id', auth, async (req, res) => {
   try {
-    const toUpdate = await Event.findById(req.params.id)
-    if (!toUpdate) return res.status(404).send(`No event found with id ${req.params.id}`)
+    const upd = await Event.findById(req.params.id)
+    if (!upd) return res.status(404).send(`No event found with id ${req.params.id}`)
     // modifiche
     const { title, description, start, end, isAllDay, rrule, place } = req.body
-    toUpdate.title = title || toUpdate.title
-    toUpdate.description = description || toUpdate.description
-    toUpdate.start = start ? new Date(start) : toUpdate.start
-    toUpdate.end = end ? new Date(end) : toUpdate.end
-    toUpdate.isAllDay = isAllDay !== undefined ? isAllDay : toUpdate.isAllDay
-    toUpdate.rrule = rrule ? await rruleToString(rrule) : null
-    toUpdate.place = place !== undefined ? place : toUpdate.place
-    await toUpdate.save()
+    upd.title = title || upd.title
+    upd.description = description || upd.description
+    upd.start = start ? new Date(start) : upd.start
+    upd.end = end ? new Date(end) : upd.end
+    upd.isAllDay = isAllDay !== undefined ? isAllDay : upd.isAllDay
+    upd.rrule = rrule ? await rruleToString(rrule) : null
+    upd.place = place !== undefined ? place : upd.place
+    await upd.save()
     return res.send('ok')
   } catch (err) {
     console.error(err)

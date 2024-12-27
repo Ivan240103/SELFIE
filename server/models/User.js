@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema({
   birthday: {
     type: Date
   },
+  picName: {
+    type: String,
+    default: 'default.png'
+  },
   // spostamento del datetime
   offset: {
     type: Number,

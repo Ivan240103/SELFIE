@@ -3,25 +3,66 @@
  */
 
 const express = require('express')
-const auth = require('../middleware/auth')
 const jwt = require('jsonwebtoken')
+const { RRule } = require('rrule')
+const fs = require('fs')
+const path = require('path')
 require('dotenv').config()
-const User = require('../models/User')
+
+const auth = require('../middleware/auth')
+const upload = require('../middleware/multer')
 const tm = require('../services/TimeMachine')
 
+const User = require('../models/User')
+const Event = require('../models/Event')
+const Task = require('../models/Task')
+const Note = require('../models/Note')
+const Tomato = require('../models/Tomato')
+
 const router = express.Router()
+
+/**
+ * Crea un evento per il compleanno dell'utente
+ * 
+ * @param {Date} bday data di nascita dell'utente
+ * @param {String} username username dell'utente
+ */
+const createBdayEvent = async (bday, username) => {
+  try {
+    // cerca il compleanno precedente e lo elimina
+    await Event.findOneAndDelete({ owner: username, title: 'Compleanno' })
+    // crea un nuovo evento compleanno
+    const rep = new RRule({
+      freq: RRule.YEARLY,
+      interval: 1,
+      dtstart: bday
+    })
+    const bdayEvent = new Event({
+      title: 'Compleanno',
+      description: `Oggi è il compleanno di ${username}!`,
+      start: bday,
+      end: bday,
+      isAllDay: true,
+      rrule: rep.toString(),
+      owner: username
+    })
+    await bdayEvent.save()
+  } catch (err) {
+    console.error(err)
+    throw 'Error while creating birthday event'
+  }
+}
 
 // registrare un nuovo utente
 // body.birthday è una data in ISO string (UTC)
 router.post('/register', async (req, res) => {
-  const { username, email, password, name, surname, birthday } = req.body
+  const { username, email, password, name, surname } = req.body
   const newUser = new User({
     username: username,
     email: email,
     password: password,
     name: name,
-    surname: surname,
-    birthday: birthday ? new Date(birthday) : undefined
+    surname: surname
   })
 
   try {
@@ -76,18 +117,29 @@ router.get('/time', auth, async (req, res) => {
 
 // aggiornare i dati di un utente
 // body.birthday è una data in ISO string (UTC)
-router.put('/', auth, async (req, res) => {
+router.put('/', [auth, upload.single('pic')], async (req, res) => {
   try {
-    const toUpdate = await User.findOne({ username: req.user.username })
-    if (!toUpdate) return res.status(404).send(`No user found with username ${req.sur.username}`)
+    const upd = await User.findOne({ username: req.user.username })
+    if (!upd) return res.status(404).send(`No user found with username ${req.sur.username}`)
     // modifiche
     const { email, name, surname, birthday } = req.body
-    toUpdate.email = email || toUpdate.email
-    toUpdate.name = name || toUpdate.name
-    toUpdate.surname = surname || toUpdate.surname
-    toUpdate.birthday = birthday ? new Date(birthday) : toUpdate.birthday
-    await toUpdate.save()
-    return res.json(toUpdate)
+    upd.email = email || upd.email
+    upd.name = name || upd.name
+    upd.surname = surname || upd.surname
+    // se cambia la data di nascita crea un nuovo evento di compleanno
+    if (birthday && (upd.birthday === undefined || birthday !== upd.birthday.toISOString().substring(0, 10))) {
+      upd.birthday = new Date(birthday)
+      await createBdayEvent(new Date(birthday), req.user.username)
+    }
+    // elimina la vecchia foto quando viene rimpiazzata
+    if (req.file?.filename) {
+      if (upd.picName !== 'default.png') {
+        fs.unlink(path.resolve(__dirname, `../uploads/images/${upd.picName}`), () => {})
+      }
+      upd.picName = req.file.filename
+    }
+    await upd.save()
+    return res.json(upd)
   } catch (err) {
     console.error(err)
     return res.status(500).send('Error while updating user info')
@@ -114,8 +166,17 @@ router.put('/time', auth, async (req, res) => {
 // eliminare un utente
 router.delete('/', auth, async (req, res) => {
   try {
-    const deletion = await User.findOneAndDelete({ username: req.user.username })
-    if (!deletion) return res.status(404).send(`No user found with username ${req.user.username}`)
+    const del = await User.findOne({ username: req.user.username })
+    if (!del) return res.status(404).send(`No user found with username ${req.user.username}`)
+    // elimina a cascata tutte le risorse dell'utente
+    if (del.picName !== 'default.png') {
+      fs.unlink(path.resolve(__dirname, `../uploads/images/${del.picName}`), () => {})
+    }
+    await del.deleteOne()
+    await Event.deleteMany({ owner: req.user.username })
+    await Task.deleteMany({ owner: req.user.username })
+    await Note.deleteMany({ owner: req.user.username })
+    await Tomato.deleteMany({ owner: req.user.username })
     return res.send('ok')
   } catch (err) {
     console.error(err)

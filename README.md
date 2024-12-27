@@ -5,19 +5,14 @@ Progetto di Tecnologie Web 2024 - Unibo
 Il server a cui vengono inoltrate le richieste è realizzato con Node.js sfruttando Express. Esso apre una connessione sulla porta 8000 e si appoggia ad un database NoSQL MongoDB. Il client è realizzato con React.js e permette di interagire con il server.
 
 ## Running in debug
-Per avviare il server:
+Per avviare server e client è realizzato uno script unico:
 ```bash
-cd server
-npm install
-npx nodemon app.js
+./selfie.sh
 ```
 
-Per avviare il client:
-```bash
-cd client
-npm install
-npm start
-```
+## Documentazione
+FullCalendar: https://fullcalendar.io/docs
+RRule: https://github.com/jkbrzt/rrule
 
 ## Authors
  - Ivan De Simone, ivan.desimone@studio.unibo.it

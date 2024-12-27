@@ -26,10 +26,6 @@ const noteSchema = mongoose.Schema({
     type: String,
     default: ''
   },
-  textLength: {
-    type: Number,
-    default: -1
-  },
   // username dell'utente che ha creato la nota
   owner: {
     type: String,

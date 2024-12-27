@@ -3,7 +3,9 @@
  */
 
 const express = require('express')
+
 const auth = require('../middleware/auth')
+
 const Task = require('../models/Task')
 
 const router = express.Router()
@@ -39,13 +41,13 @@ router.get('/', auth, async (req, res) => {
   }
 })
 
-// ottenere tutti i task non completati
+// ottenere i 3 task non completati ordinati per scadenza
 router.get('/notdone', auth, async (req, res) => {
   try {
     const notdoneTask = await Task.find({
       isDone: { $eq: false },
       owner: req.user.username
-    })
+    }).sort({ deadline: 'asc' }).limit(3)
     // se non ne trova nessuno invia un oggetto vuoto
     return res.json(notdoneTask)
   } catch (err) {
@@ -70,14 +72,14 @@ router.get('/:id', auth, async (req, res) => {
 // body.deadline è un datetime in ISO string (UTC)
 router.put('/:id', auth, async (req, res) => {
   try {
-    const toUpdate = await Task.findById(req.params.id)
-    if (!toUpdate) return res.status(404).send(`No task found with id ${req.params.id}`)
+    const upd = await Task.findById(req.params.id)
+    if (!upd) return res.status(404).send(`No task found with id ${req.params.id}`)
     // modifiche
     const { title, description, deadline } = req.body
-    toUpdate.title = title || toUpdate.title
-    toUpdate.description = description || toUpdate.description
-    toUpdate.deadline = deadline ? new Date(deadline) : toUpdate.deadline
-    await toUpdate.save()
+    upd.title = title || upd.title
+    upd.description = description || upd.description
+    upd.deadline = deadline ? new Date(deadline) : upd.deadline
+    await upd.save()
     return res.send('ok')
   } catch (err) {
     console.error(err)
