@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import "../../css/tomato.css";
 
+// TODO: AUTENTICAZIONEEE!!!
+
 function Tomato() {
     const [buttonActivated, setButtonActivated] = useState(false);
     const [buttonPaused, setButtonPaused] = useState(true);

@@ -7,6 +7,8 @@ import {
   datetimeToDateString
 } from '../../services/dateServices';
 
+// TODO: AUTENTICAZIONE !!!
+
 function Notes({ onNoteSave }) {
   const { time } = useTimeMachine();
   const [notes, setNotes] = useState([]);
@@ -161,7 +163,43 @@ function Notes({ onNoteSave }) {
     setSelectedNoteIndex(index);
   }
 
-  // Funzione per gestire l'ordinamento delle note
+  /* function handleDeleteNote(index) {
+    const updatedNotes = notes.filter((_, i) => i !== index);
+    setNotes(updatedNotes);
+    onNoteSave && onNoteSave(updatedNotes);
+  }
+
+  function handleDuplicateNote(index) {
+    const note = notes[index];
+    const now = new Date().toISOString();
+    const duplicatedNote = {
+      ...note,
+      creationDate: now,
+      lastModifiedDate: now,
+    };
+    const updatedNotes = [...notes, duplicatedNote];
+    setNotes(updatedNotes);
+    onNoteSave && onNoteSave(updatedNotes);
+  }
+
+  async function handleCopyContent(index) {
+    const note = notes[index];
+    try {
+      await navigator.clipboard.writeText(note.text);
+      alert('Contenuto copiato negli appunti!');
+    } catch (error) {
+      alert('Errore nella copia:', error.response.data || 'no response');
+    }
+  }
+
+  function handlePasteContent() {
+    navigator.clipboard.readText().then((clipText) => {
+      setText(clipText);
+    }).catch((error) => {
+      alert('Errore nella lettura degli appunti:', error.response.data || 'no response');
+    });
+  } */
+
   function handleSortChange(e) {
     setSortCriteria(e.target.value);
   }

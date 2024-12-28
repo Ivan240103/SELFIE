@@ -1,8 +1,10 @@
 /**
+ * Context per la gestione del tempo
  * USO DI Claude PER LA GENERAZIONE DEL CONTEXT TEMPLATE
  */
 import React, { createContext, useState, useEffect, useContext } from "react"
 import axios from 'axios'
+import { useAuth } from "../Auth/AuthenticationContext"
 
 const TimeMachineContext = createContext({
   time: new Date(),
@@ -12,6 +14,7 @@ const TimeMachineContext = createContext({
 })
 
 export const TimeMachineProvider = ({ children }) => {
+  const { isAuthenticated } = useAuth()
   // stato per il tempo in vigore
   const [time, setTime] = useState(new Date())
   // stato per il caricamento del tempo dal backend
@@ -20,19 +23,22 @@ export const TimeMachineProvider = ({ children }) => {
   // recuperare il tempo in vigore dell'utente
   useEffect(() => {
     const fetchTime = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API}/api/users/time`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        setTime(new Date(response.data))
-        setIsTimeLoading(false)
-      } catch (err) {
-        alert('Fetch time failed in context')
+      if (isAuthenticated) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/users/time`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setTime(new Date(response.data))
+          setIsTimeLoading(false)
+        } catch (err) {
+          setIsTimeLoading(false)
+          alert('fetchTime failed in context')
+        }
       }
     }
 
     fetchTime()
-  }, [])
+  }, [isAuthenticated])
 
   // interval per aggiornare il tempo ogni minuto
   useEffect(() => {
@@ -63,6 +69,7 @@ export const TimeMachineProvider = ({ children }) => {
       setTime(new Date(response.data))
       setIsTimeLoading(false)
     } catch (error) {
+      setIsTimeLoading(false)
       alert('Time update failed in context')
     }
   }
@@ -80,6 +87,7 @@ export const TimeMachineProvider = ({ children }) => {
       setTime(new Date(response.data))
       setIsTimeLoading(false)
     } catch (error) {
+      setIsTimeLoading(false)
       alert('Time reset failed in context')
     }
   }

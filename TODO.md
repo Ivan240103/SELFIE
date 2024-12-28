@@ -5,9 +5,9 @@
 ### Client
 - [x] memorizzare User nel localStorage per creare eventi, task...
 - [x] view time machine
-- [ ] home dashboard
+- [x] home dashboard
   - [x] ultima nota modificata
-  - [ ] ultima sessione pomodoro oppure crea nuova
+  - [x] ultima sessione pomodoro oppure crea nuova
   - [x] 3 task a scadenza più ravvicinata
   - [x] prossimo evento
 - [ ] eventi e task
@@ -23,7 +23,7 @@
   - [ ] modifica task
   - [ ] eliminazione task
 - [ ] solo task
-  - [ ] task scaduti
+  - [ ] GESTIRE I TASK OLTRE LA SCADENZA
 - [ ] note
   - [ ] tutte le note
   - [ ] nota specifica
@@ -36,8 +36,8 @@
   - [x] pagina del profilo personale
 
 ### Server
-- [ ] criptare la password nel db
-- [ ] criptare la password nel tragitto c <---> s
+- [x] criptare la password nel db
+- [x] criptare la password nel tragitto c <---> s
 - [x] time machine
 - [x] route per eventi
   - [x] creazione nuovo evento
@@ -55,15 +55,14 @@
   - [x] modificare un task specifico
   - [x] segnare un task come completato o non
   - [x] eliminare un task specifico
-- [ ] route per utenti
+- [x] route per utenti
   - [x] controllare funzionamento di Passport
   - [x] registrare un nuovo utente
   - [x] login dell'utente
   - [x] logout dell'utente
   - [x] ottenere i dati di un utente specifico
   - [x] aggiornare i dati di un utente
-  - [ ] modificare la password
-  - [ ] recupero della password
+  - [x] modificare la password
   - [x] eliminare un utente
 - [x] route per pomodoro (ogni user max 1 pomodoro salvato)
   - [x] salvare nuovo pomodoro
@@ -78,9 +77,11 @@
   - [x] modificare una nota
   - [x] eliminare una nota
 
-### X Ivan
-- dashboard
-- task in ritardo
+## Nice to have
+- [ ] recupero della password tramite mail
+- [ ] drag and drop eventi e task
+- [ ] doppio click per creare evento/task
+- [ ] button per mostrare la psw in chiaro
 
 ## Estensione 18-27
 - [ ] notifica per gli eventi a scelta (mail, SO, whatsapp...), con un certo anticipo e una certa ripetizione

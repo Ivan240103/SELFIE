@@ -29,7 +29,6 @@ router.post('/', auth, async (req, res) => {
     await newNote.save()
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while creating note')
   }
 })
@@ -41,7 +40,6 @@ router.get('/', auth, async (req, res) => {
     // se non ne trova nessuna invia un oggetto vuoto
     return res.json(allNotes)
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while getting all notes')
   }
 })
@@ -53,7 +51,6 @@ router.get('/last', auth, async (req, res) => {
     // se non ne trova nessuna invia un oggetto vuoto
     return res.json(lastNote)
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while getting last modified note')
   }
 })
@@ -65,7 +62,6 @@ router.get('/:id', auth, async (req, res) => {
     if (!note) return res.status(404).send(`No note found with id ${req.params.id}`)
     return res.json(note)
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while getting specific note')
   }
 })
@@ -92,7 +88,6 @@ router.put('/:id', auth, async (req, res) => {
     await upd.save()
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while updating note')
   }
 })
@@ -104,7 +99,6 @@ router.delete('/:id', auth, async (req, res) => {
     if (!deletion) return res.status(404).send(`No note found with id ${req.params.id}`)
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while deleting note')
   }
 })

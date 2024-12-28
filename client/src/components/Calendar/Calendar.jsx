@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import rrulePlugin from '@fullcalendar/rrule';
+import { useAuth } from '../Auth/AuthenticationContext';
 import { useTimeMachine } from '../TimeMachine/TimeMachineContext';
 import Event from "./Event";
 import Task from "./Task";
@@ -16,7 +18,9 @@ I TASK IN ROSSO VANNO PROPOSTI TEMPORANEAMENTE ANCHE NEL GIORNO ATTUALE
 */
 
 function Calendar() {
+  const { isAuthenticated } = useAuth()
   const { time, isTimeLoading } = useTimeMachine()
+  const navigate = useNavigate()
 
   const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);
@@ -25,6 +29,13 @@ function Calendar() {
   const [calendarTasks, setCalendarTasks] = useState([]);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
+
+  // verifica l'autenticazione
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login')
+    }
+  }, [isAuthenticated, navigate])
 
   // Carica gli eventi dal backend
   useEffect(() => {
@@ -48,10 +59,10 @@ function Calendar() {
           }));
           setCalendarEvents(mappedEvents);
         } else {
-          console.error('Errore durante il caricamento degli eventi.');
+          alert('Errore durante il caricamento degli eventi.');
         }
       } catch (error) {
-        console.error('Errore nel caricamento degli eventi:', error);
+        alert('Errore nel caricamento degli eventi:', error.message || 'no response');
       }
     }
     fetchEvents();
@@ -81,10 +92,10 @@ function Calendar() {
           }));
           setCalendarTasks(mappedTasks);
         } else {
-          console.error('Errore durante il caricamento delle task.');
+          alert('Errore durante il caricamento delle task.');
         }
       } catch (error) {
-        console.error('Errore nel caricamento delle task:', error);
+        alert('Errore nel caricamento delle task:', error.message || 'no response');
       }
     }
     fetchTasks();
@@ -150,6 +161,7 @@ function Calendar() {
 
   return (
       <div className='demo-app'>
+        {isAuthenticated && <>
           <TimeMachine />
           <Sidebar
             weekendsVisible={weekendsVisible}
@@ -182,7 +194,7 @@ function Calendar() {
                 const clickedEvent = info.event;
                 // Se l'evento cliccato è una task
                 if (clickedEvent.extendedProps.eventType === 'task') {
-                  console.log('Task cliccata:', clickedEvent);
+                  alert('Task cliccata:', clickedEvent);
                   const clickedTask = calendarTasks.find(task => task.id === clickedEvent.id);
                   
                   // Passa la task da modificare al componente Task
@@ -192,7 +204,7 @@ function Calendar() {
                 }
                 // Se l'evento cliccato è un evento (non una task)
                 else if (clickedEvent.extendedProps.eventType === 'event') {
-                  console.log('Evento cliccato:', clickedEvent);
+                  alert('Evento cliccato:', clickedEvent);
                   
                   // Passa i dettagli dell'evento al componente Event per la modifica
                   setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare
@@ -234,6 +246,7 @@ function Calendar() {
               selectedTasks={selectedTasks}
             />
           </div>
+        </>}
       </div>
   );
 }
@@ -243,12 +256,11 @@ function Sidebar({ weekendsVisible, handleWeekendsToggle }) {
     <div className='demo-app-sidebar'>
       <nav className="navbar">
           <div className="navbar-container">
-              <a href="#" className="navbar-logo">MyLogo</a>
               <ul className="navbar-menu">
-                  <li className="navbar-item"><a href="#" className="navbar-link">Calendario</a></li>
-                  <li className="navbar-item"><a href="#" className="navbar-link">Note</a></li>
-                  <li className="navbar-item"><a href="#" className="navbar-link">Pomodoro</a></li>
-                  <li className="navbar-item"><a href="#" className="navbar-link">Contatti</a></li>
+                  <li className="navbar-item">Calendario</li>
+                  <li className="navbar-item">Note</li>
+                  <li className="navbar-item">Pomodoro</li>
+                  <li className="navbar-item">Contatti</li>
               </ul>
           </div>
       </nav>

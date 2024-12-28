@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Importa useNavigate;
+import CryptoJS from 'crypto-js'
 
+import '../../css/Registration.css'
 
 function Registration(){
     const [usr, setUsr] = useState("");
@@ -16,8 +18,8 @@ function Registration(){
 
         const URI = `${process.env.REACT_APP_API}/api/users/register`;
         const requestBody = {
-            username:usr,
-            password:psw,
+            username: usr,
+            password: CryptoJS.SHA1(psw).toString(CryptoJS.enc.Hex),
             name: name,
             surname: surname,
             email: email
@@ -32,7 +34,7 @@ function Registration(){
         fetch(URI, request)
             .then((res) => {
                 if (res.ok){
-                    console.log("Registration completed!");
+                    alert("Registration completed!");
                     setUsr("");
                     setPsw("");
                     setName("");
@@ -44,26 +46,72 @@ function Registration(){
             })
             .catch((err) => {
                 //messaggio di errore
-                setErr("Registration failed: " + err.message);
+                setErr("Registration failed: " + err.message || 'no response');
             });
     }
 
     return(
-        <div className="log">
-            <h1>Register</h1>
+        <div className="register-container">
+            <h1>Registrazione</h1>
             <p>{err}</p>
-            <form onSubmit={handleRegister}>
-                <label htmlFor="username" id="username"><b>Username</b></label>
-                <input id="usr" type="text" placeholder="Enter Username" value={usr} onChange={(e) => setUsr(e.target.value)} required/>
-                <label htmlFor="password" id="password"><b>Password</b></label>
-                <input id="psw" type="password" placeholder="Enter Password" value={psw} onChange={(e) => setPsw(e.target.value)} required/>
-                <label htmlFor="name"><b>Name</b></label>
-                <input id="name" type="text" placeholder="Enter Name" value={name} onChange={(e) => setName(e.target.value)} />
-                <label htmlFor="surname"><b>Surname</b></label>
-                <input id="surname" type="text" placeholder="Enter Surname" value={surname} onChange={(e) => setSurname(e.target.value)} />
-                <label htmlFor="email"><b>Email</b></label>
-                <input id="email" type="email" placeholder="Enter Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                <button type="submit">Register</button>
+            <form onSubmit={handleRegister} className="register-form">
+                <div className="register-group">
+                    <label htmlFor="username" className="register-label">
+                        <b>Username</b>
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="Inserisci l'username"
+                        className="register-input"
+                        value={usr}
+                        onChange={(e) => setUsr(e.target.value)}
+                        required/>
+                </div>
+                <div className="register-group">
+                    <label htmlFor="password" className="register-label">
+                        <b>Password</b>
+                    </label>
+                    <input
+                        type="password"
+                        placeholder="Inserisci la password"
+                        className="register-input"
+                        value={psw}
+                        onChange={(e) => setPsw(e.target.value)} required/>
+                </div>
+                <div className="register-group">
+                    <label htmlFor="name" className="register-label">
+                        <b>Nome</b>
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="Inserisci il nome"
+                        className="register-input"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)} />
+                </div>
+                <div className="register-group">
+                    <label htmlFor="surname" className="register-label">
+                        <b>Cognome</b>
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="Inserisci il cognome"
+                        className="register-input"
+                        value={surname}
+                        onChange={(e) => setSurname(e.target.value)} />
+                </div>
+                <div className="register-group">
+                    <label htmlFor="email" className="register-label">
+                        <b>Email</b>
+                    </label>
+                    <input
+                        type="email"
+                        placeholder="Inserisci l'email"
+                        className="register-input"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)} required />
+                </div>
+                <button type="submit">Registrami!</button>
             </form>
         </div>
     )

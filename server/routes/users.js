@@ -48,12 +48,12 @@ const createBdayEvent = async (bday, username) => {
     })
     await bdayEvent.save()
   } catch (err) {
-    console.error(err)
     throw 'Error while creating birthday event'
   }
 }
 
 // registrare un nuovo utente
+// della password passare l'hash SHA1
 router.post('/register', async (req, res) => {
   const { username, email, password, name, surname } = req.body
   const newUser = new User({
@@ -68,12 +68,12 @@ router.post('/register', async (req, res) => {
     await newUser.save()
     return res.send('ok')
   } catch(err) {
-    console.error(err)
     return res.status(500).send('Error while registering new user')
   }
 })
 
 // login dell'utente
+// della password passare l'hash SHA1
 router.post('/login', async (req, res) => {
   const { username, password } = req.body
   try {
@@ -87,7 +87,6 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET/*, { expiresIn: '24h' } */)
     return res.json(token)
   } catch (err) {
-    console.error(err)
     res.status(500).send('Error during login')
   }
 })
@@ -99,7 +98,6 @@ router.get('/', auth, async (req, res) => {
     if (!user) return res.status(404).send(`No user found with username ${req.user.username}`)
     return res.json(user)
   } catch (err) {
-    console.error(err)
     res.status(500).send('Error while getting specific user')
   }
 })
@@ -115,14 +113,24 @@ router.get('/time', auth, async (req, res) => {
 })
 
 // aggiornare i dati di un utente
+// delle password passare l'hash SHA1
 // body.birthday è una data in ISO string (UTC)
 router.put('/', [auth, upload.single('pic')], async (req, res) => {
   try {
     const upd = await User.findOne({ username: req.user.username })
     if (!upd) return res.status(404).send(`No user found with username ${req.sur.username}`)
     // modifiche
-    const { email, name, surname, birthday } = req.body
+    const { email, oldPsw, newPsw, name, surname, birthday } = req.body
     upd.email = email || upd.email
+    if (oldPsw) {
+      if (upd.password != oldPsw) {
+        return res.status(400).send('Old password incorrect')
+      } else if (newPsw) {
+        upd.password = newPsw
+      } else {
+        return res.status(400).send('New password undefined')
+      }
+    }
     upd.name = name || upd.name
     upd.surname = surname || upd.surname
     // se cambia la data di nascita crea un nuovo evento di compleanno
@@ -140,7 +148,6 @@ router.put('/', [auth, upload.single('pic')], async (req, res) => {
     await upd.save()
     return res.json(upd)
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while updating user info')
   }
 })
@@ -178,7 +185,6 @@ router.delete('/', auth, async (req, res) => {
     await Tomato.deleteMany({ owner: req.user.username })
     return res.send('ok')
   } catch (err) {
-    console.error(err)
     return res.status(500).send('Error while deleting user')
   }
 })
