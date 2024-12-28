@@ -39,14 +39,16 @@ const Dashboard = () => {
   // recupera il profilo utente
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        setUser(response.data)
-        setError('')
-      } catch (error) {
-        setError(error.response.data || 'Error fetchUser')
+      if (isAuthenticated) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setUser(response.data)
+          setError('')
+        } catch (error) {
+          setError(error.response.data || 'Error fetchUser')
+        }
       }
     }
 
@@ -56,20 +58,22 @@ const Dashboard = () => {
   // recupera gli eventi dal backend e li mappa
   useEffect(() => {
     const fetchEvents = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API}/api/events`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        const mapped = response.data.map(ev => ({
-          ...ev,
-          // color: #, TODO: impostare colore eventi nella preview
-          id: ev._id,
-          allDay: ev.isAllDay
-        }))
-        setEvents(mapped)
-      } catch (error) {
-        setError('Error while fetching events')
-        setEvents([])
+      if (isAuthenticated) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/events`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          const mapped = response.data.map(ev => ({
+            ...ev,
+            // color: #, TODO: impostare colore eventi nella preview
+            id: ev._id,
+            allDay: ev.isAllDay
+          }))
+          setEvents(mapped)
+        } catch (error) {
+          setError('Error while fetching events')
+          setEvents([])
+        }
       }
     }
 
@@ -79,14 +83,16 @@ const Dashboard = () => {
   // recupera l'ultima nota modificata dal backend
   useEffect(() => {
     const fetchNote = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API}/api/notes/last`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        setNote(response.data)
-      } catch (error) {
-        setError('Error while fetching note')
-        setNote({})
+      if (isAuthenticated) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/notes/last`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setNote(response.data)
+        } catch (error) {
+          setError('Error while fetching note')
+          setNote({})
+        }
       }
     }
 
@@ -96,14 +102,16 @@ const Dashboard = () => {
   // recupera i task dal backend
   useEffect(() => {
     const fetchTasks = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API}/api/tasks/notdone`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        setTasks(response.data)
-      } catch (error) {
-        setError('Error while fetching tasks')
-        setTasks([])
+      if (isAuthenticated) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/tasks/notdone`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setTasks(response.data)
+        } catch (error) {
+          setError('Error while fetching tasks')
+          setTasks([])
+        }
       }
     }
 
@@ -113,14 +121,16 @@ const Dashboard = () => {
   // recupera l'ultimo pomodoro dal backend
   useEffect(() => {
     const fetchTomato = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API}/api/tomatoes/last`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        setTomato(response.data)
-      } catch (error) {
-        setError('Error while fetching tomato')
-        setTomato({})
+      if (isAuthenticated) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/tomatoes/last`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setTomato(response.data)
+        } catch (error) {
+          setError('Error while fetching tomato')
+          setTomato({})
+        }
       }
     }
 
