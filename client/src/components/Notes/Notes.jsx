@@ -1,43 +1,62 @@
 import React, { useState, useEffect } from 'react';
-import '../../css/Note.css';
-import { useTimeMachine } from '../TimeMachine/TimeMachineContext'
+import { useAuth } from '../Auth/AuthenticationContext';
 import TimeMachine from '../TimeMachine/TimeMachine';
-import { 
-  datetimeToString,
-  datetimeToDateString
-} from '../../services/dateServices';
+
+import '../../css/Note.css';
 
 // TODO: AUTENTICAZIONE !!!
 
-function Notes({ onNoteSave }) {
-  const { time } = useTimeMachine();
+function Notes() {
+  const { isAuthenticated } = useAuth();
+
   const [notes, setNotes] = useState([]);
   const [title, setTitle] = useState('');
-  const [categories, setCategories] = useState('');
   const [text, setText] = useState('');
+  const [categories, setCategories] = useState('');
   const [selectedNoteIndex, setSelectedNoteIndex] = useState(null);
   const [sortCriteria, setSortCriteria] = useState('title');
-
-  const now = new Date().toISOString(); // Data attuale in formato ISO
+  const [fetchNotes, setFetchNotes] = useState(0) // per segnalare la necessità di un get
+  const [error, setError] = useState('')
 
   // Caricare le note al montaggio del componente
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API}/api/notes/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`, // Includi il token se necessario
-      },
-    })
+    if (isAuthenticated) {
+      fetch(`${process.env.REACT_APP_API}/api/notes/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`, // Includi il token se necessario
+        },
+      })
       .then((response) => {
         if (!response.ok) {
           throw new Error('Errore nel recupero delle note');
         }
         return response.json();
       })
-      .then((data) => setNotes(data))
-      .catch((error) => console.error('Errore:', error));
-  }, []);
+      .then((data) => {
+        setNotes(data)
+        setError('')
+      })
+      .catch((error) => setError('Errore:', error.message));
+    }
+  }, [isAuthenticated, fetchNotes]);
+
+  // cambia l'ordinamento delle note
+  // TODO: quando viene inserita una nuova nota si trova in disordine
+  useEffect(() => {
+    if (notes.length > 0) {
+      let sortedNotes = [...notes];
+      if (sortCriteria === 'title') {
+        sortedNotes.sort((a, b) => a.title.localeCompare(b.title));
+      } else if (sortCriteria === 'date') {
+        sortedNotes.sort((a, b) => new Date(a.creation) - new Date(b.creation));
+      } else if (sortCriteria === 'length') {
+        sortedNotes.sort((a, b) => a.text.length - b.text.length);
+      }
+      setNotes(sortedNotes);
+    }
+  }, [sortCriteria]);
 
   // Funzione per salvare una nuova nota
   async function handleSaveNote() {
@@ -45,11 +64,10 @@ function Notes({ onNoteSave }) {
       alert('Il titolo non può essere vuoto!');
       return;
     }
+    const cleanCat = categories.split(',').map((c) => c.trim()).filter((c) => c !== '').join(',')
     const payload = {
       title: title.trim(),
-      categories: categories.split(',').map((cat) => cat.trim()).filter(Boolean),
-      creation: now,
-      modification: null,
+      categories: cleanCat,
       text: text
     };
 
@@ -66,10 +84,10 @@ function Notes({ onNoteSave }) {
       if (!response.ok) throw new Error('Errore nella creazione della nota');
 
       // Aggiorna le note dopo la modifica
-      await fetchNotes();
+      setFetchNotes(prev => prev + 1)
       resetForm();
     } catch (error) {
-      console.error('Errore:', error);
+      setError('Errore:', error.message);
     }
   }
 
@@ -80,10 +98,10 @@ function Notes({ onNoteSave }) {
       return;
     }
     const noteId = notes[index]._id; // Assumi che ogni nota abbia un campo _id
+    const cleanCat = categories.split(',').map((c) => c.trim()).filter((c) => c !== '').join(',')
     const payload = {
       title: title.trim(),
-      categories: categories.split(',').map((cat) => cat.trim()).filter(Boolean),
-      modification: now,
+      categories: cleanCat,
       text: text,
     };
 
@@ -100,10 +118,10 @@ function Notes({ onNoteSave }) {
       if (!response.ok) throw new Error('Errore nell\'aggiornamento della nota');
 
       // Aggiorna le note dopo la modifica
-      await fetchNotes();
+      setFetchNotes(prev => prev + 1)
       resetForm();
     } catch (error) {
-      console.error('Errore:', error);
+      setError('Errore:', error.message);
     }
   }
 
@@ -120,29 +138,9 @@ function Notes({ onNoteSave }) {
       if (!response.ok) throw new Error('Errore nell\'eliminazione della nota');
 
       // Aggiorna le note dopo l'eliminazione
-      await fetchNotes();
+      setFetchNotes(prev => prev + 1)
     } catch (error) {
-      console.error('Errore nell\'eliminazione della nota:', error);
-    }
-  }
-
-  // Funzione per aggiornare le note dal server
-  async function fetchNotes() {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/notes/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // Includi il token se necessario
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Errore nel recupero delle note');
-      }
-      const data = await response.json();
-      setNotes(data);
-    } catch (error) {
-      console.error('Errore:', error);
+      setError('Errore nell\'eliminazione della nota:', error.message);
     }
   }
 
@@ -156,19 +154,13 @@ function Notes({ onNoteSave }) {
 
   // Funzione per gestire la modifica di una nota esistente (apre il form con i dati della nota)
   function handleStartEdit(index) {
-    const note = notes[index];
-    setTitle(note.title);
-    setCategories(Array.isArray(note.categories) ? note.categories.join(', ') : note.categories || '');
-    setText(note.text);
+    setTitle(notes[index].title);
+    setCategories(notes[index].categories);
+    setText(notes[index].text);
     setSelectedNoteIndex(index);
   }
 
-  /* function handleDeleteNote(index) {
-    const updatedNotes = notes.filter((_, i) => i !== index);
-    setNotes(updatedNotes);
-    onNoteSave && onNoteSave(updatedNotes);
-  }
-
+  /* TODO: copia e incolla del contenuto + duplicazione
   function handleDuplicateNote(index) {
     const note = notes[index];
     const now = new Date().toISOString();
@@ -200,47 +192,33 @@ function Notes({ onNoteSave }) {
     });
   } */
 
-  function handleSortChange(e) {
-    setSortCriteria(e.target.value);
-  }
-
-  useEffect(() => {
-    let sortedNotes = [...notes];
-    if (sortCriteria === 'title') {
-      sortedNotes.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortCriteria === 'date') {
-      sortedNotes.sort((a, b) => new Date(a.creationDate) - new Date(b.creationDate));
-    } else if (sortCriteria === 'length') {
-      sortedNotes.sort((a, b) => a.text.length - b.text.length);
-    }
-    setNotes(sortedNotes);
-  }, [sortCriteria]);
-
   return (
     <div>
       <TimeMachine />
       <div className="notes-container">
         <h1 className="notes-header">Note</h1>
-
+        <p>{error}</p>
         <div className="notes-form">
           <h4>{selectedNoteIndex === null ? 'Crea Nuova Nota' : 'Modifica Nota'}</h4>
+          {/* TODO: trasformare textarea in input text */}
           <textarea
             placeholder="Titolo..."
+            className="note-form-textarea"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="note-form-textarea"
           />
+          {/* TODO: campo input con bottone per aggiungerle alla stringa? */}
           <textarea
             placeholder="Categorie (separate da virgola)..."
+            className="note-form-textarea"
             value={categories}
             onChange={(e) => setCategories(e.target.value)}
-            className="note-form-textarea"
           />
           <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
             placeholder="Scrivi il contenuto della nota qui..."
             className="note-form-textarea"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
           />
           <button
             onClick={() => (selectedNoteIndex === null ? handleSaveNote() : handleEditNote(selectedNoteIndex))}
@@ -252,7 +230,11 @@ function Notes({ onNoteSave }) {
 
         <div className="notes-sort-controls">
           <label>Ordina per: </label>
-          <select value={sortCriteria} onChange={handleSortChange} className="notes-sort-select">
+          <select
+            className="notes-sort-select"
+            value={sortCriteria}
+            onChange={(e) => setSortCriteria(e.target.value)}
+          >
             <option value="title">Titolo (Alfabetico)</option>
             <option value="date">Data di Creazione</option>
             <option value="length">Lunghezza del Contenuto</option>
@@ -260,28 +242,24 @@ function Notes({ onNoteSave }) {
         </div>
 
         <ul className="notes-list">
-          {notes.map((note, index) => {
-            const categoriesDisplay = Array.isArray(note.categories)
-            ? note.categories.join(', ')
-            : note.categories || ''; // Se categories non è un array, mostra una stringa
-            const preview = note.text.length > 200 ? note.text.slice(0, 200) + '...' : note.text;
+          {notes.map((n, index) => {
+            const preview = n.text.length > 200 ? n.text.slice(0, 200) + '...' : n.text;
+            const showTime = (d) => d.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ')
             return (
-              <li key={index} className="note-item">
+              <li key={n._id} className="note-item">
                 <div>
-                  <strong>Titolo:</strong> {note.title}
+                  <strong>{n.title}</strong>
                 </div>
                 <div>
-                  <strong>Categorie:</strong> {categoriesDisplay}
+                  <p>Categorie: {n.categories}</p>
                 </div>
                 <div>
-                  <strong>Creata il:</strong> {note.creation}
+                  <p>Creata il: {showTime(n.creation)}</p>
                 </div>
                 <div>
-                  <strong>Ultima modifica:</strong> {note.modification}
+                  <p>Ultima modifica: {showTime(n.modification)}</p>
                 </div>
-                <p>
-                  <strong>Anteprima:</strong> {preview}
-                </p>
+                <p>{preview}</p>
                 <button onClick={() => handleStartEdit(index)}>Modifica</button>
                 <button onClick={() => handleDeleteNote(index)}>Elimina</button>
               </li>

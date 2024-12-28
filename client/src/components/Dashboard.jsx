@@ -150,7 +150,7 @@ const Dashboard = () => {
           >
             <div className='dash-card-header'>
               <img
-                src={`${process.env.REACT_APP_API}/pics/${user.picName}`}
+                src={`${process.env.REACT_APP_API}/pics/${user.picName || 'default.png'}`}
                 alt='icona del profilo'
                 className='dash-icon' />
               <div className='dash-text'>
@@ -211,9 +211,13 @@ const Dashboard = () => {
                 // TODO: finire preview note
                 <div className='dash-note'>
                   <h3>{note.title}</h3>
-                  <small>Tags: {note.categories.split(',').map(n => '#'+n+',')}</small>
-                  <p>{note.text?.substring(0, 200)}{note.text?.length > 200 && '...'}</p>
-                  <time>{(new Date(note.modification)).toLocaleString('it-IT')}</time>
+                  <small>
+                    Tags: {note.categories.split(',').map(n => `#${n}`).join(' ')}
+                  </small>
+                  <p>{note.text.substring(0, 200)}{note.text?.length > 200 && '...'}</p>
+                  <time>
+                    {note.modification.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ')}
+                  </time>
                 </div>
               )}
             </div>

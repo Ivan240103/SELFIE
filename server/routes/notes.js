@@ -15,13 +15,12 @@ const router = express.Router()
 // passare title, text, categories
 router.post('/', auth, async (req, res) => {
   const { title, text, categories } = req.body
-  const categoriesString = Array.isArray(categories) ? categories.join(', ') : categories;
   const newNote = new Note({
     title: title,
     text: text,    
     creation: new Date(await getTime(req.user.username)),
     modification: new Date(await getTime(req.user.username)),
-    categories: categoriesString.trim(),
+    categories: categories,
     owner: req.user.username    
   })
 
@@ -49,7 +48,7 @@ router.get('/last', auth, async (req, res) => {
   try {
     const lastNote = await Note.find({ owner: req.user.username }).sort({ modification: 'desc' }).limit(1)
     // se non ne trova nessuna invia un oggetto vuoto
-    return res.json(lastNote)
+    return res.json(lastNote[0])
   } catch (err) {
     return res.status(500).send('Error while getting last modified note')
   }
@@ -77,14 +76,7 @@ router.put('/:id', auth, async (req, res) => {
     upd.title = title || upd.title
     upd.text = text || upd.text
     upd.modification = new Date(await getTime(req.user.username))
-    if (categories !== undefined) {
-      // Se categories è un array, lo trasformiamo in una stringa
-      if (Array.isArray(categories)) {
-        upd.categories = categories.join(', ').trim(); // Convertiamo l'array in una stringa separata da virgola
-      } else if (typeof categories === 'string') {
-        upd.categories = categories.trim(); // Se è già una stringa, la trimmamo
-      }
-    }
+    upd.categories = categories !== undefined ? categories : upd.categories
     await upd.save()
     return res.send('ok')
   } catch (err) {
