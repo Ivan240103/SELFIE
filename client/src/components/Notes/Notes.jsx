@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Auth/AuthenticationContext';
 import TimeMachine from '../TimeMachine/TimeMachine';
 
 import '../../css/Note.css';
 
-// TODO: AUTENTICAZIONE !!!
-
 function Notes() {
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate()
 
   const [notes, setNotes] = useState([]);
   const [title, setTitle] = useState('');
@@ -17,6 +17,13 @@ function Notes() {
   const [sortCriteria, setSortCriteria] = useState('title');
   const [fetchNotes, setFetchNotes] = useState(0) // per segnalare la necessità di un get
   const [error, setError] = useState('')
+
+  // verifica l'autenticazione
+    useEffect(() => {
+      if (!isAuthenticated) {
+        navigate('/login')
+      }
+    }, [isAuthenticated, navigate])
 
   // Caricare le note al montaggio del componente
   useEffect(() => {
@@ -194,79 +201,81 @@ function Notes() {
 
   return (
     <div>
-      <TimeMachine />
-      <div className="notes-container">
-        <h1 className="notes-header">Note</h1>
-        <p>{error}</p>
-        <div className="notes-form">
-          <h4>{selectedNoteIndex === null ? 'Crea Nuova Nota' : 'Modifica Nota'}</h4>
-          {/* TODO: trasformare textarea in input text */}
-          <textarea
-            placeholder="Titolo..."
-            className="note-form-textarea"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          {/* TODO: campo input con bottone per aggiungerle alla stringa? */}
-          <textarea
-            placeholder="Categorie (separate da virgola)..."
-            className="note-form-textarea"
-            value={categories}
-            onChange={(e) => setCategories(e.target.value)}
-          />
-          <textarea
-            placeholder="Scrivi il contenuto della nota qui..."
-            className="note-form-textarea"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <button
-            onClick={() => (selectedNoteIndex === null ? handleSaveNote() : handleEditNote(selectedNoteIndex))}
-            className="note-save-button"
-          >
-            {selectedNoteIndex === null ? 'Salva Nota' : 'Aggiorna Nota'}
-          </button>
-        </div>
+      {isAuthenticated && <>
+        <TimeMachine />
+        <div className="notes-container">
+          <h1 className="notes-header">Note</h1>
+          <p>{error}</p>
+          <div className="notes-form">
+            <h4>{selectedNoteIndex === null ? 'Crea Nuova Nota' : 'Modifica Nota'}</h4>
+            {/* TODO: trasformare textarea in input text */}
+            <textarea
+              placeholder="Titolo..."
+              className="note-form-textarea"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            {/* TODO: campo input con bottone per aggiungerle alla stringa? */}
+            <textarea
+              placeholder="Categorie (separate da virgola)..."
+              className="note-form-textarea"
+              value={categories}
+              onChange={(e) => setCategories(e.target.value)}
+            />
+            <textarea
+              placeholder="Scrivi il contenuto della nota qui..."
+              className="note-form-textarea"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+            <button
+              onClick={() => (selectedNoteIndex === null ? handleSaveNote() : handleEditNote(selectedNoteIndex))}
+              className="note-save-button"
+            >
+              {selectedNoteIndex === null ? 'Salva Nota' : 'Aggiorna Nota'}
+            </button>
+          </div>
 
-        <div className="notes-sort-controls">
-          <label>Ordina per: </label>
-          <select
-            className="notes-sort-select"
-            value={sortCriteria}
-            onChange={(e) => setSortCriteria(e.target.value)}
-          >
-            <option value="title">Titolo (Alfabetico)</option>
-            <option value="date">Data di Creazione</option>
-            <option value="length">Lunghezza del Contenuto</option>
-          </select>
-        </div>
+          <div className="notes-sort-controls">
+            <label>Ordina per: </label>
+            <select
+              className="notes-sort-select"
+              value={sortCriteria}
+              onChange={(e) => setSortCriteria(e.target.value)}
+            >
+              <option value="title">Titolo (Alfabetico)</option>
+              <option value="date">Data di Creazione</option>
+              <option value="length">Lunghezza del Contenuto</option>
+            </select>
+          </div>
 
-        <ul className="notes-list">
-          {notes.map((n, index) => {
-            const preview = n.text.length > 200 ? n.text.slice(0, 200) + '...' : n.text;
-            const showTime = (d) => d.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ')
-            return (
-              <li key={n._id} className="note-item">
-                <div>
-                  <strong>{n.title}</strong>
-                </div>
-                <div>
-                  <p>Categorie: {n.categories}</p>
-                </div>
-                <div>
-                  <p>Creata il: {showTime(n.creation)}</p>
-                </div>
-                <div>
-                  <p>Ultima modifica: {showTime(n.modification)}</p>
-                </div>
-                <p>{preview}</p>
-                <button onClick={() => handleStartEdit(index)}>Modifica</button>
-                <button onClick={() => handleDeleteNote(index)}>Elimina</button>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+          <ul className="notes-list">
+            {notes.map((n, index) => {
+              const preview = n.text.length > 200 ? n.text.slice(0, 200) + '...' : n.text;
+              const showTime = (d) => d.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ')
+              return (
+                <li key={n._id} className="note-item">
+                  <div>
+                    <strong>{n.title}</strong>
+                  </div>
+                  <div>
+                    <p>Categorie: {n.categories}</p>
+                  </div>
+                  <div>
+                    <p>Creata il: {showTime(n.creation)}</p>
+                  </div>
+                  <div>
+                    <p>Ultima modifica: {showTime(n.modification)}</p>
+                  </div>
+                  <p>{preview}</p>
+                  <button onClick={() => handleStartEdit(index)}>Modifica</button>
+                  <button onClick={() => handleDeleteNote(index)}>Elimina</button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </>}
     </div>
   );
 }
