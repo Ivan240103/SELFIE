@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../../css/Note.css';
 
+// TODO: AUTENTICAZIONE !!!
+
 function Notes({ onNoteSave }) {
   const [notes, setNotes] = useState([]);
   const [title, setTitle] = useState('');

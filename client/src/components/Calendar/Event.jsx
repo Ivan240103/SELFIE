@@ -4,8 +4,12 @@ import {
     datetimeToString,
     datetimeToDateString
 } from '../../services/dateServices';
-import '../../css/Event.css';
 import Modal from 'react-modal'
+
+import '../../css/Event.css';
+
+// per accessibilità, scritto nella documentazione
+Modal.setAppElement('#root');
 
 /* PER PAYAM
 Trasformare il componente ritornato in un <Modal> che mostri il form con i
@@ -25,6 +29,7 @@ tornino ai valori default.
 function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
     // tempo in vigore per l'utente (fuso orario UTC)
     const { time } = useTimeMachine();
+
     const [event, setEvent] = useState({})
     const [modalIsOpen, setModalIsOpen] = useState(false)
 

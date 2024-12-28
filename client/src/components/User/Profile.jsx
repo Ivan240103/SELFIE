@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import CryptoJS from 'crypto-js'
+import { useAuth } from '../Auth/AuthenticationContext'
 import TimeMachine from '../TimeMachine/TimeMachine'
 
 import { datetimeToDateString } from '../../services/dateServices'
@@ -10,6 +11,7 @@ import '../../css/Profile.css'
 
 function Profile() {
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
 
   const [profile, setProfile] = useState({})
   // modalità di modifica del form
@@ -25,6 +27,13 @@ function Profile() {
   const [pic, setPic] = useState(null)
 
   const [error, setError] = useState('')
+  
+  // verifica l'autenticazione
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login')
+    }
+  }, [isAuthenticated, navigate])
 
   // recupera i dati del profilo dal backend
   useEffect(() => {
@@ -36,12 +45,12 @@ function Profile() {
         setProfile(profile.data)
         setError('')
       } catch (err) {
-        navigate('/login')
+        setError(err.response.data || 'Errore fetchProfile')
       }
     }
 
     fetchProfile()
-  }, [navigate])
+  }, [])
 
   // sincronizza gli stati
   useEffect(() => {
@@ -136,128 +145,130 @@ function Profile() {
 
   return (
     <div>
-      {!error && <TimeMachine />}
-      <p className='error'>{error}</p>
-      <div className='profile-container' id='profile-toplevel'>
-        <h2 className='profile-header'>Ciao, {username}</h2>
-        <div className='profile-pic-container'>
-          <img
-            src={`${process.env.REACT_APP_API}/pics/${profile.picName}`}
-            className='profile-pic'
-            hidden={editMode}
-            alt='Profile' />
+      {isAuthenticated && <>
+        <TimeMachine />
+        <p className='error'>{error}</p>
+        <div className='profile-container' id='profile-toplevel'>
+          <h2 className='profile-header'>Ciao, {username}</h2>
+          <div className='profile-pic-container'>
+            <img
+              src={`${process.env.REACT_APP_API}/pics/${profile.picName}`}
+              className='profile-pic'
+              hidden={editMode}
+              alt='Profile' />
+          </div>
+          <form className='profile-form' onSubmit={confirmEdit}>
+            <div className='profile-form-group' hidden={!editMode}>
+              <label className='profile-label' htmlFor='pic'>
+                Carica una foto profilo (tip: quadrata!)
+              </label>
+              <input 
+                type='file'
+                className='profile-input'
+                name='pic'
+                accept='.png,.jpg,.jpeg'
+                onChange={(e) => setPic(e.target.files[0])} />
+            </div>
+            <div className='profile-form-group'>
+              <label className='profile-label' htmlFor='email'>
+                Email
+              </label>
+              <input
+                type='email'
+                className='profile-input'
+                name='email'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                readOnly={!editMode} />
+            </div>
+            <div className='profile-form-group'>
+              <label className='profile-label' htmlFor='name'>
+                Nome
+              </label>
+              <input
+                type='text'
+                className='profile-input'
+                name='name'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                readOnly={!editMode} />
+            </div>
+            <div className='profile-form-group'>
+              <label className='profile-label' htmlFor='surname'>
+                Cognome
+              </label>
+              <input
+                type='text'
+                className='profile-input'
+                name='surname'
+                value={surname}
+                onChange={(e) => setSurname(e.target.value)}
+                readOnly={!editMode} />
+            </div>
+            <div className='profile-form-group'>
+              <label className='profile-label' htmlFor='bday'>
+                Data di nascita
+              </label>
+              <input
+                type='date'
+                className='profile-input'
+                name='bday'
+                value={birthday}
+                onChange={(e) => setBirthday(e.target.value)}
+                readOnly={!editMode} />
+            </div>
+            <div className='profile-form-group' hidden={!editMode}>
+              <label className='profile-label' htmlFor="oldPsw">
+                Vecchia password
+              </label>
+              <input
+                type="password"
+                className='profile-input'
+                id='profile-psw'
+                name="oldPsw"
+                placeholder='Lascia vuoto per non modificarla'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            <div className='profile-form-group'>
+              <label className='profile-label' htmlFor="newPsw">
+                {editMode ? 'Nuova password' : 'Password'}
+              </label>
+              <input
+                type="password"
+                className='profile-input'
+                id='profile-psw'
+                name="newPsw"
+                placeholder='Lascia vuoto per non modificarla'
+                value={modifiedPsw}
+                onChange={(e) => setModifiedPsw(e.target.value)}
+                readOnly={!editMode}
+                required={password} />
+            </div>
+            <button
+              type='button'
+              className='profile-cancel-btn'
+              onClick={cancelEdit}
+              hidden={!editMode}>Annulla</button>
+            <button
+              type='submit'
+              className='profile-submit-btn'
+              hidden={!editMode}>Conferma</button>
+          </form>
+          <div className='profile-button-group'>
+            <button
+              type='button'
+              className='profile-edit-btn'
+              onClick={enterEdit}
+              hidden={editMode}>Modifica</button>
+            <button
+              type='button'
+              className='profile-delete-btn'
+              onClick={deleteProfile}
+              hidden={editMode}>Elimina profilo</button>
+          </div>
         </div>
-        <form className='profile-form' onSubmit={confirmEdit}>
-          <div className='profile-form-group' hidden={!editMode}>
-            <label className='profile-label' htmlFor='pic'>
-              Carica una foto profilo (tip: quadrata!)
-            </label>
-            <input 
-              type='file'
-              className='profile-input'
-              name='pic'
-              accept='.png,.jpg,.jpeg'
-              onChange={(e) => setPic(e.target.files[0])} />
-          </div>
-          <div className='profile-form-group'>
-            <label className='profile-label' htmlFor='email'>
-              Email
-            </label>
-            <input
-              type='email'
-              className='profile-input'
-              name='email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              readOnly={!editMode} />
-          </div>
-          <div className='profile-form-group'>
-            <label className='profile-label' htmlFor='name'>
-              Nome
-            </label>
-            <input
-              type='text'
-              className='profile-input'
-              name='name'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              readOnly={!editMode} />
-          </div>
-          <div className='profile-form-group'>
-            <label className='profile-label' htmlFor='surname'>
-              Cognome
-            </label>
-            <input
-              type='text'
-              className='profile-input'
-              name='surname'
-              value={surname}
-              onChange={(e) => setSurname(e.target.value)}
-              readOnly={!editMode} />
-          </div>
-          <div className='profile-form-group'>
-            <label className='profile-label' htmlFor='bday'>
-              Data di nascita
-            </label>
-            <input
-              type='date'
-              className='profile-input'
-              name='bday'
-              value={birthday}
-              onChange={(e) => setBirthday(e.target.value)}
-              readOnly={!editMode} />
-          </div>
-          <div className='profile-form-group' hidden={!editMode}>
-            <label className='profile-label' htmlFor="oldPsw">
-              Vecchia password
-            </label>
-            <input
-              type="password"
-              className='profile-input'
-              id='profile-psw'
-              name="oldPsw"
-              placeholder='Lascia vuoto per non modificarla'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)} />
-          </div>
-          <div className='profile-form-group'>
-            <label className='profile-label' htmlFor="newPsw">
-              {editMode ? 'Nuova password' : 'Password'}
-            </label>
-            <input
-              type="password"
-              className='profile-input'
-              id='profile-psw'
-              name="newPsw"
-              placeholder='Lascia vuoto per non modificarla'
-              value={modifiedPsw}
-              onChange={(e) => setModifiedPsw(e.target.value)}
-              readOnly={!editMode}
-              required={password} />
-          </div>
-          <button
-            type='button'
-            className='profile-cancel-btn'
-            onClick={cancelEdit}
-            hidden={!editMode}>Annulla</button>
-          <button
-            type='submit'
-            className='profile-submit-btn'
-            hidden={!editMode}>Conferma</button>
-        </form>
-        <div className='profile-button-group'>
-          <button
-            type='button'
-            className='profile-edit-btn'
-            onClick={enterEdit}
-            hidden={editMode}>Modifica</button>
-          <button
-            type='button'
-            className='profile-delete-btn'
-            onClick={deleteProfile}
-            hidden={editMode}>Elimina profilo</button>
-        </div>
-      </div>
+      </>}
     </div>
   )
 }

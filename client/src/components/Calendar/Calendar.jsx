@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import rrulePlugin from '@fullcalendar/rrule';
+import { useAuth } from '../Auth/AuthenticationContext';
 import { useTimeMachine } from '../TimeMachine/TimeMachineContext';
 import Event from "./Event";
 import Task from "./Task";
@@ -16,7 +18,9 @@ I TASK IN ROSSO VANNO PROPOSTI TEMPORANEAMENTE ANCHE NEL GIORNO ATTUALE
 */
 
 function Calendar() {
+  const { isAuthenticated } = useAuth()
   const { time, isTimeLoading } = useTimeMachine()
+  const navigate = useNavigate()
 
   const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);
@@ -25,6 +29,13 @@ function Calendar() {
   const [calendarTasks, setCalendarTasks] = useState([]);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
+
+  // verifica l'autenticazione
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login')
+    }
+  }, [isAuthenticated, navigate])
 
   // Carica gli eventi dal backend
   useEffect(() => {
@@ -150,6 +161,7 @@ function Calendar() {
 
   return (
       <div className='demo-app'>
+        {isAuthenticated && <>
           <TimeMachine />
           <Sidebar
             weekendsVisible={weekendsVisible}
@@ -234,6 +246,7 @@ function Calendar() {
               selectedTasks={selectedTasks}
             />
           </div>
+        </>}
       </div>
   );
 }
