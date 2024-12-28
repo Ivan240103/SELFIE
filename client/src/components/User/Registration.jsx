@@ -46,7 +46,7 @@ function Registration(){
             })
             .catch((err) => {
                 //messaggio di errore
-                setErr("Registration failed: " + err.response.data || 'no response');
+                setErr("Registration failed: " + err.message || 'no response');
             });
     }
 

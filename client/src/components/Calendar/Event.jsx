@@ -62,7 +62,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
                     const event = await response.json();
                     setEvent(event)
                 } catch (error) {
-                    alert(error.response.data || 'no response')
+                    alert(error.message || 'no response')
                 }
             } else {
                 setEvent({})
@@ -160,7 +160,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
         const result = await response.text();
         alert('Evento salvato con successo:', result);
     } catch (err) {
-        alert('Errore nel salvataggio dell\'evento:', err.response.data || 'no response');
+        alert('Errore nel salvataggio dell\'evento:', err.message || 'no response');
     }
   };
 
@@ -194,7 +194,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
       alert('Evento aggiornato con successo:', result);
       onUpdateEvent({ ...updatedEventData, id: eventDetails });
     } catch (err) {
-      alert('Errore nell\'aggiornamento dell\'evento:', err.response.data || 'no response');
+      alert('Errore nell\'aggiornamento dell\'evento:', err.message || 'no response');
     }
   };
 
@@ -218,7 +218,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
         alert('Evento cancellato con successo!');
         onDeleteEvent(eventDetails);
       } catch (err) {
-        alert('Errore nella cancellazione dell\'evento:', err.response.data || 'no response');
+        alert('Errore nella cancellazione dell\'evento:', err.message || 'no response');
       }
   };
 
