@@ -59,6 +59,8 @@ app.use('/api/notes', noteRoutes)
 const u = process.env.DB_USER
 const p = process.env.DB_PSW
 const mongoURL = `mongodb+srv://${u}:${p}@selfie.qv0gx.mongodb.net/?retryWrites=true&w=majority&appName=SELFIE`
+// const h = process.env.DB_HOSTNAME
+// potrebbe essere questo per gocker??? mongodb://${u}:${p}@${h}:27017/
 mongoose.connect(mongoURL)
 
 app.listen(port)
