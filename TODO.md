@@ -10,7 +10,7 @@
   - [x] ultima sessione pomodoro oppure crea nuova
   - [x] 3 task a scadenza più ravvicinata
   - [x] prossimo evento
-- [ ] eventi e task
+- [x] eventi e task
   - [x] calendario month
   - [x] calendario week
   - [x] calendario day
@@ -18,17 +18,18 @@
   - [x] visualizzazione evento specifico
   - [x] modifica di un evento
   - [x] eliminazione di un evento
-  - [ ] creazione task
-  - [ ] visualizzazione task specifico
-  - [ ] modifica task
-  - [ ] eliminazione task
+  - [x] creazione task
+  - [x] visualizzazione task specifico
+  - [x] modifica task
+  - [x] eliminazione task
 - [ ] solo task
+  - [ ] visualizzazione task come lista a sè
   - [ ] GESTIRE I TASK OLTRE LA SCADENZA
 - [ ] note
-  - [ ] tutte le note
-  - [ ] nota specifica
-  - [ ] modifica di una nota
-  - [ ] eliminazione nota
+  - [x] tutte le note
+  - [x] nota specifica
+  - [x] modifica di una nota
+  - [x] eliminazione nota
   - [ ] ordinamento note ???
 - [ ] pomodoro
   - [ ] schermata timer pomodoro
