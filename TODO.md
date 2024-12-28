@@ -79,8 +79,9 @@
 
 ## Nice to have
 - [ ] recupero della password tramite mail
-- [ ] Drag and drop eventi e task
-- [ ] Doppio click per creare evento/task
+- [ ] drag and drop eventi e task
+- [ ] doppio click per creare evento/task
+- [ ] button per mostrare la psw in chiaro
 
 ## Estensione 18-27
 - [ ] notifica per gli eventi a scelta (mail, SO, whatsapp...), con un certo anticipo e una certa ripetizione

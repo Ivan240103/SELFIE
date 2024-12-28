@@ -212,7 +212,7 @@ function Profile() {
               Vecchia password
             </label>
             <input
-              type="text"
+              type="password"
               className='profile-input'
               id='profile-psw'
               name="oldPsw"
@@ -225,7 +225,7 @@ function Profile() {
               {editMode ? 'Nuova password' : 'Password'}
             </label>
             <input
-              type="text"
+              type="password"
               className='profile-input'
               id='profile-psw'
               name="newPsw"
