@@ -208,7 +208,6 @@ const Dashboard = () => {
               {Object.keys(note).length === 0 ? (
                 <span className='dash-empty-prev'>Nessuna nota presente</span>
               ) : (
-                // TODO: finire preview note
                 <div className='dash-note'>
                   <h3>{note.title}</h3>
                   <small>

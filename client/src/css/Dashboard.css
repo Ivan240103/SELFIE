@@ -86,7 +86,10 @@
 }
 
 .dash-note {
-  border: 1px solid blue;
+  height: 60%;
+  padding: 40px;
+  border: 1px solid #cecece;
+  border-radius: 15px;
 }
 
 .dash-task {

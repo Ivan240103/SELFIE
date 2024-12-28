@@ -19,11 +19,11 @@ function Notes() {
   const [error, setError] = useState('')
 
   // verifica l'autenticazione
-    useEffect(() => {
-      if (!isAuthenticated) {
-        navigate('/login')
-      }
-    }, [isAuthenticated, navigate])
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login')
+    }
+  }, [isAuthenticated, navigate])
 
   // Caricare le note al montaggio del componente
   useEffect(() => {
@@ -57,7 +57,7 @@ function Notes() {
       if (sortCriteria === 'title') {
         sortedNotes.sort((a, b) => a.title.localeCompare(b.title));
       } else if (sortCriteria === 'date') {
-        sortedNotes.sort((a, b) => new Date(a.creation) - new Date(b.creation));
+        sortedNotes.sort((a, b) => new Date(b.creation) - new Date(a.creation));
       } else if (sortCriteria === 'length') {
         sortedNotes.sort((a, b) => a.text.length - b.text.length);
       }
@@ -259,7 +259,7 @@ function Notes() {
                     <strong>{n.title}</strong>
                   </div>
                   <div>
-                    <p>Categorie: {n.categories}</p>
+                    <p>Tags: {n.categories.split(',').map(n => `#${n}`).join(' ')}</p>
                   </div>
                   <div>
                     <p>Creata il: {showTime(n.creation)}</p>
