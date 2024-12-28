@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import CryptoJS from 'crypto-js'
 import TimeMachine from '../TimeMachine/TimeMachine'
 
 import { datetimeToDateString } from '../../services/dateServices'
@@ -16,7 +17,8 @@ function Profile() {
   // stati dei valori nel form
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [password, setPassword] = useState('')  // vecchia psw per validazione
+  const [modifiedPsw, setModifiedPsw] = useState('12345678')  // nuova psw | mock
   const [name, setName] = useState('')
   const [surname, setSurname] = useState('')
   const [birthday, setBirthday] = useState('')  // di tipo String
@@ -34,28 +36,43 @@ function Profile() {
         setProfile(profile.data)
         setError('')
       } catch (err) {
-        setError(err.response.data || 'errore GET')
+        navigate('/login')
       }
     }
 
     fetchProfile()
-  }, [])
+  }, [navigate])
 
   // sincronizza gli stati
   useEffect(() => {
     setUsername(profile.username || '')
     setEmail(profile.email || '')
-    setPassword(profile.password || '')
+    setPassword('')
+    setModifiedPsw('12345678')
     setName(profile.name || '')
     setSurname(profile.surname || '')
     setBirthday(profile.birthday ? datetimeToDateString(new Date(profile.birthday)) : '')
   }, [profile])
 
   /**
+   * Reimposta i valori dei campi
+   */
+  const resetFields = () => {
+    setUsername(profile.username)
+    setEmail(profile.email)
+    setPassword('')
+    setModifiedPsw('12345678')
+    setName(profile.name)
+    setSurname(profile.surname)
+    setBirthday(profile.birthday ? datetimeToDateString(new Date(profile.birthday)) : '')
+  }
+
+  /**
    * Entrare in modalità di modifica
    */
   const enterEdit = () => {
     document.getElementById('profile-toplevel').classList.add('profile-editmode')
+    setModifiedPsw('')
     setEditMode(!editMode)
   }
 
@@ -65,11 +82,7 @@ function Profile() {
   const cancelEdit = () => {
     document.getElementById('profile-toplevel').classList.remove('profile-editmode')
     setEditMode(!editMode)
-    setUsername(profile.username)
-    setEmail(profile.email)
-    setName(profile.name)
-    setSurname(profile.surname)
-    setBirthday(profile.birthday ? datetimeToDateString(new Date(profile.birthday)) : '')
+    resetFields()
   }
 
   /**
@@ -84,6 +97,8 @@ function Profile() {
     // formData per poter inviare l'immagine
     const formData = new FormData()
     formData.append('email', email)
+    if (password !== '') formData.append('oldPsw', CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex))
+    if (modifiedPsw !== '') formData.append('newPsw', CryptoJS.SHA1(modifiedPsw).toString(CryptoJS.enc.Hex))
     formData.append('name', name)
     formData.append('surname', surname)
     formData.append('birthday', birthday)
@@ -97,6 +112,7 @@ function Profile() {
       setError('')
     } catch (err) {
       setError(err.response.data || 'Errore PUT')
+      resetFields()
     }
   }
 
@@ -120,9 +136,9 @@ function Profile() {
 
   return (
     <div>
-      <TimeMachine />
+      {!error && <TimeMachine />}
       <p className='error'>{error}</p>
-      {!error && <div className='profile-container' id='profile-toplevel'>
+      <div className='profile-container' id='profile-toplevel'>
         <h2 className='profile-header'>Ciao, {username}</h2>
         <div className='profile-pic-container'>
           <img
@@ -191,7 +207,34 @@ function Profile() {
               onChange={(e) => setBirthday(e.target.value)}
               readOnly={!editMode} />
           </div>
-          {/* TODO: MODIFICA DELLA PSW */}
+          <div className='profile-form-group' hidden={!editMode}>
+            <label className='profile-label' htmlFor="oldPsw">
+              Vecchia password
+            </label>
+            <input
+              type="text"
+              className='profile-input'
+              id='profile-psw'
+              name="oldPsw"
+              placeholder='Lascia vuoto per non modificarla'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)} />
+          </div>
+          <div className='profile-form-group'>
+            <label className='profile-label' htmlFor="newPsw">
+              {editMode ? 'Nuova password' : 'Password'}
+            </label>
+            <input
+              type="text"
+              className='profile-input'
+              id='profile-psw'
+              name="newPsw"
+              placeholder='Lascia vuoto per non modificarla'
+              value={modifiedPsw}
+              onChange={(e) => setModifiedPsw(e.target.value)}
+              readOnly={!editMode}
+              required={password} />
+          </div>
           <button
             type='button'
             className='profile-cancel-btn'
@@ -214,7 +257,7 @@ function Profile() {
             onClick={deleteProfile}
             hidden={editMode}>Elimina profilo</button>
         </div>
-      </div>}
+      </div>
     </div>
   )
 }

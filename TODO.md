@@ -55,15 +55,14 @@
   - [x] modificare un task specifico
   - [x] segnare un task come completato o non
   - [x] eliminare un task specifico
-- [ ] route per utenti
+- [x] route per utenti
   - [x] controllare funzionamento di Passport
   - [x] registrare un nuovo utente
   - [x] login dell'utente
   - [x] logout dell'utente
   - [x] ottenere i dati di un utente specifico
   - [x] aggiornare i dati di un utente
-  - [ ] modificare la password
-  - [ ] recupero della password
+  - [x] modificare la password
   - [x] eliminare un utente
 - [x] route per pomodoro (ogni user max 1 pomodoro salvato)
   - [x] salvare nuovo pomodoro
@@ -77,6 +76,11 @@
   - [x] ottenere una nota specifica
   - [x] modificare una nota
   - [x] eliminare una nota
+
+## Nice to have
+- [ ] recupero della password tramite mail
+- [ ] Drag and drop eventi e task
+- [ ] Doppio click per creare evento/task
 
 ## Estensione 18-27
 - [ ] notifica per gli eventi a scelta (mail, SO, whatsapp...), con un certo anticipo e una certa ripetizione

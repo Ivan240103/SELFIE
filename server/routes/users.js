@@ -113,14 +113,24 @@ router.get('/time', auth, async (req, res) => {
 })
 
 // aggiornare i dati di un utente
+// delle password passare l'hash SHA1
 // body.birthday è una data in ISO string (UTC)
 router.put('/', [auth, upload.single('pic')], async (req, res) => {
   try {
     const upd = await User.findOne({ username: req.user.username })
     if (!upd) return res.status(404).send(`No user found with username ${req.sur.username}`)
     // modifiche
-    const { email, name, surname, birthday } = req.body
+    const { email, oldPsw, newPsw, name, surname, birthday } = req.body
     upd.email = email || upd.email
+    if (oldPsw) {
+      if (upd.password != oldPsw) {
+        return res.status(400).send('Old password incorrect')
+      } else if (newPsw) {
+        upd.password = newPsw
+      } else {
+        return res.status(400).send('New password undefined')
+      }
+    }
     upd.name = name || upd.name
     upd.surname = surname || upd.surname
     // se cambia la data di nascita crea un nuovo evento di compleanno
