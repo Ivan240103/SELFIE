@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"; // Importa useNavigate;
 import { Link } from "react-router-dom"; //Importa il linking per la registrazione dell'utente
 import CryptoJS from 'crypto-js'
 import { useAuth } from "../Auth/AuthenticationContext";
+import axios from 'axios'
 
 import "../../css/Access.css";
 
@@ -13,34 +14,22 @@ function Access() {
     const navigate = useNavigate(); // Inizializza useNavigate
     const { login } = useAuth()
 
-    function createEvent(e){
+    async function handleLogin(e){
         e.preventDefault();
 
-        const URI = `${process.env.REACT_APP_API}/api/users/login`;
-        const requestBody = {
-            username: usr,
-            password: CryptoJS.SHA1(psw).toString(CryptoJS.enc.Hex)
-        }
-        
-        const request = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody),
-        }
-        
-        fetch(URI, request)
-            .then((res) => {
-                if (res.ok) return res.json();
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API}/api/users/login`, {
+                username: usr,
+                password: CryptoJS.SHA1(psw).toString(CryptoJS.enc.Hex)
+            }, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             })
-            .then((data) => {
-                localStorage.setItem("token", data);
-                login()
-                navigate("/");
-            })
-            .catch((err) => {
-                //messaggio di errore
-                setError("Login failed: " + err.response.data || 'no response');
-            });
+            localStorage.setItem("token", response.data);
+            login();
+            navigate("/");
+        } catch (error) {
+            setError("Login failed: " + error.response.data || 'no response');
+        }
     }
 
     return(
@@ -48,7 +37,7 @@ function Access() {
             <div className="log">
                 <h1>Login</h1>
                 <p>{error}</p>
-                <form onSubmit={createEvent}>
+                <form onSubmit={handleLogin}>
                     <label
                         htmlFor="username"
                         id="username"
