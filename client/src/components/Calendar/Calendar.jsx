@@ -37,6 +37,28 @@ function Calendar() {
     }
   }, [isAuthenticated, navigate])
 
+  // Funzione per calcolare il livello di urgenza
+  const calculateUrgencyLevel = (deadline, isDone) => {
+    if (isDone) {
+      return 0; // Se la task è completata, ritorna 0 e non viene segnalata come scaduta
+    }
+    const now = new Date();
+    const deadlineDate = new Date(deadline);
+    const diffTime = now - deadlineDate;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 0) {
+      return 0; // Non scaduta
+    } else if (diffDays <= 1) {
+      return 1; // Scaduta da 1 giorno
+    } else if (diffDays <= 3) {
+      return 2; // Scaduta da 2-3 giorni
+    } else {
+      return 3; // Scaduta da più di 3 giorni
+    }
+  };
+
+
   // Carica gli eventi dal backend
   useEffect(() => {
     async function fetchEvents() {
@@ -81,15 +103,21 @@ function Calendar() {
         });
         if (response.ok) {
           const tasks = await response.json();
-          const mappedTasks = tasks.map(task => ({
-            id: task._id,
-            title: task.title,
-            start: task.deadline,
-            allDay: true, // FullCalendar richiede questa proprietà
-            color: task.isDone ? 'green' : 'yellow', // Colore specifico per le task
-            textColor: 'black', // Per visibilità
-            eventType: 'task'
-          }));
+          const mappedTasks = tasks.map(task => {
+            const urgencyLevel = calculateUrgencyLevel(task.deadline, task.isDone);
+            const color = task.isDone ? 'green' : (urgencyLevel > 0 ? 'red' : 'yellow');
+            return{
+              id: task._id,
+              title: task.title,
+              start: task.deadline,
+              allDay: true, // FullCalendar richiede questa proprietà
+              color: color,
+              textColor: 'black', // Per visibilità
+              eventType: 'task',
+              urgencyLevel, urgencyLevel,
+              isDone: task.isDone
+            };
+          });
           setCalendarTasks(mappedTasks);
         } else {
           alert('Errore durante il caricamento delle task.');
@@ -100,6 +128,30 @@ function Calendar() {
     }
     fetchTasks();
   }, []);
+
+  // Notifiche di urgenza crescente
+  useEffect(() => {
+    const urgentTasks = calendarTasks.filter(task => task.urgencyLevel > 0);
+    if (urgentTasks.length > 0) {
+      urgentTasks.forEach(task => {
+        const urgencyMessage = `Task "${task.title}" è scaduta da ${task.urgencyLevel} giorno/i.`;
+        alert(urgencyMessage);
+      });
+    }
+  }, [calendarTasks]);
+
+  // Aggiorna le task scadute quando cambia il tempo
+  useEffect(() => {
+    const updatedTasks = calendarTasks.map(task => {
+      const urgencyLevel = calculateUrgencyLevel(task.start);
+      return {
+        ...task,
+        color: urgencyLevel > 0 ? 'red' : (task.isDone ? 'green' : 'yellow'),
+        urgencyLevel: urgencyLevel
+      };
+    });
+    setCalendarTasks(updatedTasks);
+  }, [time]);
 
   function handleTaskSave(newTask) {
     setTasks([...tasks, newTask]);
@@ -226,8 +278,10 @@ function Calendar() {
                         type="checkbox"
                         checked={selectedTasks.includes(task.id)}
                         onChange={() => handleTaskSelect(task.id)}
+                        disabled={task.isDone} // Disabilita la checkbox se la task è completata
                       />
                       {task.title} - Scadenza: {new Date(task.start).toLocaleDateString()}
+                      {task.isDone && <span style={{ color: 'green', marginLeft: '10px' }}>✅ Completata</span>}
                     </li>
                 ))}
               </ul>
