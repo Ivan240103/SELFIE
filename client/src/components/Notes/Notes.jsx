@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Auth/AuthenticationContext';
 import TimeMachine from '../TimeMachine/TimeMachine';
+import { marked } from 'marked';
 
 import '../../css/Note.css';
 
@@ -17,6 +18,12 @@ function Notes() {
   const [sortCriteria, setSortCriteria] = useState('title');
   const [fetchNotes, setFetchNotes] = useState(0) // per segnalare la necessità di un get
   const [error, setError] = useState('')
+  const [showMarkdown, setShowMarkdown] = useState({});
+
+  marked.setOptions({
+    gfm: true,       //Con true usa le specifiche markdown di Github (quelle classiche direi es: # a, *a*, - a, ecc)
+    breaks: true,    //Con true aggiunge una singola linea di break
+  });
 
   // verifica l'autenticazione
   useEffect(() => {
@@ -228,6 +235,12 @@ function Notes() {
               value={text}
               onChange={(e) => setText(e.target.value)}
             />
+            <div className="markdown-preview">
+              <h4>Anteprima Markdown:</h4>
+              <div dangerouslySetInnerHTML={{ __html: marked(title) }} />
+              <div dangerouslySetInnerHTML={{ __html: marked(categories.split(',').map(c => `#${c.trim()}`).join(' ')) }}  />
+              <div dangerouslySetInnerHTML={{ __html: marked(text) }} />
+            </div>
             <button
               onClick={() => (selectedNoteIndex === null ? handleSaveNote() : handleEditNote(selectedNoteIndex))}
               className="note-save-button"
@@ -253,6 +266,7 @@ function Notes() {
             {notes.map((n, index) => {
               const preview = n.text.length > 200 ? n.text.slice(0, 200) + '...' : n.text;
               const showTime = (d) => d.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ')
+              const htmlContent = marked(preview); // Converti il testo in Markdown
               return (
                 <li key={n._id} className="note-item">
                   <div>
@@ -267,7 +281,36 @@ function Notes() {
                   <div>
                     <p>Ultima modifica: {showTime(n.modification)}</p>
                   </div>
-                  <p>{preview}</p>
+                  {/* Opzione per visualizzare in Markdown o col testo semplice */}
+                  {showMarkdown[n._id] ? (
+                    <div dangerouslySetInnerHTML={{ __html: marked(n.text) }} />
+                  ) : (
+                    <p>{preview}</p>
+                  )}
+                  {/* Opzione per visualizzare in Markdown o col testo semplice */}
+                  {showMarkdown[n._id] ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: marked(n.text || ''),
+                        }}
+                      />
+                    ) : (
+                      <p>{preview}</p>
+                    )}
+                    {/* Pulsante per attivare/disattivare il Markdown */}
+                    <button
+                      onClick={() =>
+                        setShowMarkdown((prev) => {
+                          const updated = { ...prev, [n._id]: !prev[n._id] };
+                          console.log('Updated showMarkdown:', updated); // Debug
+                          return updated;
+                        })
+                      }
+                    >
+                      {showMarkdown[n._id]
+                        ? 'Visualizza Testo'
+                        : 'Visualizza Markdown'}
+                    </button>
                   <button onClick={() => handleStartEdit(index)}>Modifica</button>
                   <button onClick={() => handleDeleteNote(index)}>Elimina</button>
                 </li>

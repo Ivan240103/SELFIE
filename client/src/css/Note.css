@@ -113,3 +113,14 @@
   overflow-wrap: break-word; 
   overflow-wrap: break-word; /* Se il testo è troppo lungo, va a capo */
 }
+
+.markdown-preview {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 10px;
+  background-color: #f9f9f9;
+}
+
+.markdown-preview h4 {
+  margin-top: 0;
+}
