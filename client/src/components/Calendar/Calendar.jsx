@@ -135,7 +135,7 @@ function Calendar() {
     if (urgentTasks.length > 0) {
       urgentTasks.forEach(task => {
         const urgencyMessage = `Task "${task.title}" è scaduta da ${task.urgencyLevel} giorno/i.`;
-        alert(urgencyMessage);
+        console.log(urgencyMessage);
       });
     }
   }, [calendarTasks]);
@@ -207,6 +207,45 @@ function Calendar() {
     setCalendarEvents(calendarTasks.filter(task => task.id !== taskId));
   }
 
+  //Chiamata PUT per eventDrop quando trascino l'evento, vado a prendere le info dell'evento selezionato e lo modifico con la data rilasciata
+  const handleEventDrop = async (info) => {
+    const { event } = info;
+
+    const newStartDate = event.start
+    const newEndDate = event.end ? new Date(event.end) : null; // Data di fine corretta
+    const eventId=event.id
+
+    console.log("Nuova data di inizio (locale):", newStartDate.toLocaleString());
+    console.log("Nuova data di fine (locale):", newEndDate ? newEndDate.toLocaleString() : "Nessuna data di fine");
+    
+      try {
+      // Aggiorna la data dell'evento nel backend
+      const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ start: newStartDate.toISOString(), end: newEndDate ? newEndDate.toISOString() : null})
+      });
+  
+      if (response.ok) {
+        // Aggiorna lo stato locale
+        setCalendarEvents(prevEvents =>
+          prevEvents.map(ev =>
+            ev.id === eventId ? { ...ev, start: newStartDate, end: newEndDate } : ev
+          )
+        );
+      } else {
+        alert('Errore durante l\'aggiornamento della data dell\'evento.');
+        event.revert()
+      }
+    } catch (error) {
+      alert('Errore nel caricamento degli eventi:', error.message || 'no response');
+      event.revert()
+    }
+  };
+
   // TODO: USARE LA PROPRIETÀ EDITABLE PER MODIFICARE LA DATA DI EVENTI E TASK
   // TRASCINANDOLI. Attualmente si può però la data resta invariata nel nuovo giorno.
   // leggendo un po' la docs mi sembra si chiami eventDrop la proprietà necessaria.
@@ -235,6 +274,7 @@ function Calendar() {
               nowIndicator={true}
               editable={true}
               selectable={true}
+              droppable={true}
               dayMaxEvents={true}
               showNonCurrentDates={false}
               weekends={weekendsVisible}
@@ -260,6 +300,12 @@ function Calendar() {
                   
                   // Passa i dettagli dell'evento al componente Event per la modifica
                   setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare
+                }
+              }}
+              eventDrop={(info) => {  
+                const { event } = info;
+                if (event.extendedProps.eventType === 'event') {  //Si potrebbe fare anche con le task
+                  handleEventDrop(info); // Gestisci il trascinamento degli eventi
                 }
               }}
             />}
