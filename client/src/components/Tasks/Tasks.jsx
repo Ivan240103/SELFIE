@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import TimeMachine from '../TimeMachine/TimeMachine';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Auth/AuthenticationContext';
-import './Tasks.css';
+import '../../css/Tasks.css';
 
 const Tasks = () => {
     const { isAuthenticated } = useAuth();
@@ -34,12 +34,14 @@ const Tasks = () => {
                 return response.json();
                 })
                 .then((data) => {
-                setTasks(data)
-                setError('')
+                    setTasks(data)
+                    setError('')
                 })
                 .catch((error) => setError('Errore:', error.message));
         };
     }, [isAuthenticated]);
+
+    const now = new Date();
 
     return (
         <div>
@@ -52,20 +54,25 @@ const Tasks = () => {
                             <p>No tasks found.</p>
                         ) : (
                             <ul className="task-list">
-                                {tasks.map((task) => (
-                                    <li
-                                        key={task._id}
-                                        className={`task-item ${task.isDone ? 'completed' : 'not-completed'}`}
-                                    >
-                                        <h2>
-                                            {task.isDone ? '✅ ' : '❌ '}
-                                            {task.title}
-                                        </h2>
-                                        <p>Descrizione: {task.description}</p>
-                                        <p>Deadline: {new Date(task.deadline).toLocaleString()}</p>
-                                        <p>Status: {task.isDone ? 'Completed' : 'Not Completed'}</p>
-                                    </li>
-                                ))}
+                                {tasks.map((task) => {
+                                    const deadline = new Date(task.deadline);
+                                    const isExpired = deadline < now;
+                                    const isHighlighted = !task.isDone && !isExpired;
+                                    return (
+                                        <li
+                                            key={task._id}
+                                            className={`task-item ${task.isDone ? 'completed' : isHighlighted ? 'highlighted' : 'not-completed'}`}
+                                        >
+                                            <h2>
+                                                {task.isDone ? '✅ ' : isHighlighted ? '📌 ' : '❌ '}
+                                                {task.title}
+                                            </h2>
+                                            <p>Descrizione: {task.description}</p>
+                                            <p>Deadline: {deadline.toLocaleString()}</p>
+                                            <p>Status: {task.isDone ? 'Completed' : 'Not Completed'}</p>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         )}
                     </div>

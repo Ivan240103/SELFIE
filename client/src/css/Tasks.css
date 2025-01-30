@@ -47,3 +47,7 @@
 .task-item p:last-child {
     margin-bottom: 0;
 }
+
+.task-item.highlighted {
+    background-color: #fff9c4; /* Giallo chiaro */
+}
