@@ -246,6 +246,43 @@ function Calendar() {
     }
   };
 
+  const handleTaskDrop = async (info) => {
+    const { event } = info;
+
+    const newEndDate = event.start; // Data di fine corretta
+    const taskId=event.id
+
+    console.log("Nuova data di fine (locale):", newEndDate ? newEndDate.toLocaleString() : "Nessuna data di fine");
+    
+    try {
+      // Aggiorna la data dell'evento nel backend
+      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({deadline: newEndDate ? newEndDate.toISOString() : null})
+      });
+
+      if (response.ok) {
+        // Aggiorna lo stato locale
+        setCalendarTasks(prevTasks =>
+          prevTasks.map(task =>
+            task.id === taskId ? { ...task, start: newEndDate } : task
+          )
+        );
+      } else {
+        alert('Errore durante l\'aggiornamento della data dell\'evento.');
+        event.revert()
+      }
+    } catch (error) {
+      alert('Errore nel caricamento degli eventi:', error.message || 'no response');
+      event.revert()
+    }
+  };
+
+
   // TODO: USARE LA PROPRIETÀ EDITABLE PER MODIFICARE LA DATA DI EVENTI E TASK
   // TRASCINANDOLI. Attualmente si può però la data resta invariata nel nuovo giorno.
   // leggendo un po' la docs mi sembra si chiami eventDrop la proprietà necessaria.
@@ -306,6 +343,9 @@ function Calendar() {
                 const { event } = info;
                 if (event.extendedProps.eventType === 'event') {  //Si potrebbe fare anche con le task
                   handleEventDrop(info); // Gestisci il trascinamento degli eventi
+                }
+                else{  //Si potrebbe fare anche con le task
+                  handleTaskDrop(info); // Gestisci il trascinamento degli eventi
                 }
               }}
             />}

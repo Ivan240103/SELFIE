@@ -22,9 +22,9 @@
   - [x] visualizzazione task specifico
   - [x] modifica task
   - [x] eliminazione task
-- [ ] solo task
-  - [ ] visualizzazione task come lista a sè
-  - [ ] GESTIRE I TASK OLTRE LA SCADENZA
+- [x] solo task
+  - [x] visualizzazione task come lista a sè
+  - [x] GESTIRE I TASK OLTRE LA SCADENZA (senza notifica)
 - [ ] note
   - [x] tutte le note
   - [x] nota specifica
@@ -80,14 +80,14 @@
 
 ## Nice to have
 - [ ] recupero della password tramite mail
-- [ ] drag and drop eventi e task
+- [x] drag and drop eventi e task
 - [ ] doppio click per creare evento/task
-- [ ] button per mostrare la psw in chiaro
+- [x] button per mostrare la psw in chiaro
 
 ## Estensione 18-27
 - [ ] notifica per gli eventi a scelta (mail, SO, whatsapp...), con un certo anticipo e una certa ripetizione
 - [ ] notifica crescente di urgenza per le attività
-- [ ] note in markdown
+- [x] note in markdown
 - [ ] cicli di pomodoro programmati come eventi
 - [ ] cicli non completati si spostano alle giornate successive
 - [ ] integrazione con calendari terzi (standard iCalendar?)

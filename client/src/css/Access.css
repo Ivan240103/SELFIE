@@ -31,15 +31,32 @@
   border: 1px solid #ccc;
   margin-bottom: 20px;
 }
-.corpo button {
+.btt {
   background-color: #007bff;
   color: #fff;
   border: none;
   border-radius: 5px;
   padding: 10px 20px;
   cursor: pointer;
+  height: 5vh;
+  width: 10vh;
 }
 .corpo button:hover {
   background-color: #0069d9;
 }
 
+.password-container {
+  position: relative;
+  display: flex;
+}
+
+.toggle-password{
+  width: 5vh;
+  height: 4vh;
+  cursor: pointer;
+}
+
+.toggle-password img {
+  width: 30px;
+  height: 30px;
+}
