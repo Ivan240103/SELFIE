@@ -30,7 +30,7 @@
   - [x] nota specifica
   - [x] modifica di una nota
   - [x] eliminazione nota
-  - [ ] ordinamento note ???
+  - [x] ordinamento note ???
 - [ ] pomodoro
   - [ ] schermata timer pomodoro
 - [x] profilo utente

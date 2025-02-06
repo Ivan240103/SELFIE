@@ -55,13 +55,14 @@ function Notes() {
     }
   }, [isAuthenticated, fetchNotes]);
 
-  // cambia l'ordinamento delle note
-  // TODO: quando viene inserita una nuova nota si trova in disordine
+  //Per l'ordinamento delle note
   useEffect(() => {
     if (notes.length > 0) {
       let sortedNotes = [...notes];
       if (sortCriteria === 'title') {
-        sortedNotes.sort((a, b) => a.title.localeCompare(b.title));
+        sortedNotes.sort((a, b) => 
+          a.title.replace(/[^a-zA-Z0-9]/g, '').localeCompare(b.title.replace(/[^a-zA-Z0-9]/g, ''))  //[^a-zA-Z0-9] sono i caratteri non alfabetici o numeri e li va a togliere prima del compare
+        );
       } else if (sortCriteria === 'date') {
         sortedNotes.sort((a, b) => new Date(b.creation) - new Date(a.creation));
       } else if (sortCriteria === 'length') {
@@ -69,7 +70,7 @@ function Notes() {
       }
       setNotes(sortedNotes);
     }
-  }, [sortCriteria]);
+  }, [sortCriteria, notes]);
 
   // Funzione per salvare una nuova nota
   async function handleSaveNote() {
@@ -219,14 +220,20 @@ function Notes() {
   async function handlePasteNoteContent() {
     try {
       const pastedContent = await navigator.clipboard.readText();
-      const lines = pastedContent.split('\n');
+      const lines = pastedContent.split('\n').map(line => line.trim());
   
-      // Imposta il testo degli input con i dati incollati
-      setTitle(lines[0] || '');
-      setCategories(lines[1] || '');
-      setText(lines.slice(2).join('\n') || '');
+      // Rimuove eventuali righe vuote all'inizio
+      const filteredLines = lines.filter(line => line !== '');
+  
+      setTitle(filteredLines[0] || '');
+  
+      // La seconda riga viene considerata come categorie
+      setCategories(filteredLines[1] || '');
+  
+      // Tutte le righe successive alla seconda diventano il contenuto
+      setText(filteredLines.slice(2).join('\n') || '');
     } catch (error) {
-      alert('Errore durante l\'incolla del contenuto:', error);
+      alert('Errore durante l\'incolla del contenuto: ' + error.message);
     }
   }
 
