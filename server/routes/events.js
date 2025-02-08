@@ -40,8 +40,9 @@ router.post('/', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     const allEvents = await Event.find({ owner: req.user.username })
+    const googleEvents = await listEvents(req.user.username)
     // se non ne trova nessuno invia un oggetto vuoto
-    return res.json(allEvents)
+    return res.json(allEvents.concat(googleEvents))
   } catch (err) {
     return res.status(500).send('Error while getting all events')
   }

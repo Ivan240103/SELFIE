@@ -11,7 +11,7 @@ Per avviare server e client è realizzato uno script unico:
 ```
 
 ## Documentazione
-FullCalendar: https://fullcalendar.io/docs
+FullCalendar: https://fullcalendar.io/docs  
 RRule: https://github.com/jkbrzt/rrule
 
 ## Authors
