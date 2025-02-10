@@ -14,8 +14,7 @@ async function listEvents(owner) {
     const auth = await authorize()
     const calendar = google.calendar({version: 'v3', auth})
     const res = await calendar.events.list({
-      calendarId: 'primary',
-      maxResults: 10
+      calendarId: 'primary'
     })
     const promises = res.data.items?.map(e => eventFromGoogleToSelfie(e, owner))
     return await Promise.all(promises)

@@ -38,6 +38,11 @@ const userSchema = new mongoose.Schema({
   offset: {
     type: Number,
     default: 0
+  },
+  // accesso con google
+  google: {
+    type: Boolean,
+    default: false
   }
 })
 

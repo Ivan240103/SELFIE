@@ -45,7 +45,7 @@ function Profile() {
         setProfile(profile.data)
         setError('')
       } catch (err) {
-        setError(err.response.data || 'Errore fetchProfile')
+        setError(err.response?.data || 'Errore fetchProfile')
       }
     }
 
@@ -120,7 +120,7 @@ function Profile() {
       setProfile(response.data)
       setError('')
     } catch (err) {
-      setError(err.response.data || 'Errore PUT')
+      setError(err.response?.data || 'Errore PUT')
       resetFields()
     }
   }
@@ -138,8 +138,20 @@ function Profile() {
         setError('')
         navigate('/login')
       } catch (err) {
-        setError(err.response.data || 'Errore DELETE')
+        setError(err.response?.data || 'Errore DELETE')
       }
+    }
+  }
+
+  const syncGoogle = async () => {
+    try {
+      const response = await axios.put(`${process.env.REACT_APP_API}/api/users/google`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      })
+      setProfile(response.data)
+      setError('')
+    } catch (err) {
+      setError(err.response?.data || 'Errore Google sync')
     }
   }
 
@@ -256,6 +268,15 @@ function Profile() {
               hidden={!editMode}>Conferma</button>
           </form>
           <div className='profile-button-group'>
+            {profile.google ? (
+              <p>Google Calendar sincronizzato</p>
+            ) : (
+              <button
+                type='button'
+                className='profile-google'
+                onClick={syncGoogle}
+                hidden={editMode}>Sincronizza con Google</button>
+            )}
             <button
               type='button'
               className='profile-edit-btn'

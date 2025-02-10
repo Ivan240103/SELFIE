@@ -6,6 +6,7 @@ const express = require('express')
 
 const auth = require('../middleware/auth')
 const { stringToRrule, rruleToString } = require('../services/RRule')
+const { listEvents } = require('../google/Services')
 
 const Event = require('../models/Event')
 
@@ -40,7 +41,7 @@ router.post('/', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     const allEvents = await Event.find({ owner: req.user.username })
-    const googleEvents = await listEvents(req.user.username)
+    const googleEvents = req.user.google ? await listEvents(req.user.username) : []
     // se non ne trova nessuno invia un oggetto vuoto
     return res.json(allEvents.concat(googleEvents))
   } catch (err) {
