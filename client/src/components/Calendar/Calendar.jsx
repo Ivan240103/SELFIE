@@ -53,7 +53,7 @@ function Calendar() {
           // Mappa _id come id
           const mappedEvents = events.map(event => ({
             ...event,
-            id: event._id, // Mappa _id a id
+            id: event.googleId || event._id, // Mappa _id a id
             eventType: 'event',
             allDay: event.isAllDay
           }));
@@ -194,7 +194,6 @@ function Calendar() {
                 const clickedEvent = info.event;
                 // Se l'evento cliccato è una task
                 if (clickedEvent.extendedProps.eventType === 'task') {
-                  alert('Task cliccata:', clickedEvent);
                   const clickedTask = calendarTasks.find(task => task.id === clickedEvent.id);
                   
                   // Passa la task da modificare al componente Task
@@ -204,8 +203,6 @@ function Calendar() {
                 }
                 // Se l'evento cliccato è un evento (non una task)
                 else if (clickedEvent.extendedProps.eventType === 'event') {
-                  alert('Evento cliccato:', clickedEvent);
-                  
                   // Passa i dettagli dell'evento al componente Event per la modifica
                   setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare
                 }

@@ -90,5 +90,5 @@
 - [ ] note in markdown
 - [ ] cicli di pomodoro programmati come eventi
 - [ ] cicli non completati si spostano alle giornate successive
-- [ ] integrazione con calendari terzi (standard iCalendar?)
+- [x] integrazione con calendari terzi (standard iCalendar?)
 - [ ] geolocalizzazione per gli eventi --> NON SPECIFICATO/APPROFONDITO

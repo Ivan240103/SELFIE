@@ -6,7 +6,10 @@ const express = require('express')
 
 const auth = require('../middleware/auth')
 const { stringToRrule, rruleToString } = require('../services/RRule')
-const { listEvents } = require('../google/Services')
+const { 
+  listEvents,
+  getEvent
+} = require('../google/Services')
 
 const Event = require('../models/Event')
 
@@ -52,7 +55,13 @@ router.get('/', auth, async (req, res) => {
 // ottenere un evento specifico
 router.get('/:id', auth, async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id)
+    let event
+    try {
+      event = req.user.google ? await getEvent(req.params.id, req.user.username) : undefined
+    } catch (error) {
+      event = undefined
+    }
+    if (!event) event = await Event.findById(req.params.id)
     if (!event) return res.status(404).send(`No event found with id ${req.params.id}`)
     // per visualizzare un singolo evento serve la ricorrenza in formato json
     const obj = event.toObject()

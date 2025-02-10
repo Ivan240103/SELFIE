@@ -14,7 +14,7 @@ const { addStartToRrule, removeStartFromRrule } = require('../services/RRule')
  * @returns event object selfie
  */
 const eventFromGoogleToSelfie = async (gEvent, owner) => {
-  const { summary, description, start, end, recurrence, location } = gEvent
+  const { id, summary, description, start, end, recurrence, location } = gEvent
   return new Event({
     title: summary || 'Senza titolo',
     description: description || 'Nessuna descrizione',
@@ -23,7 +23,8 @@ const eventFromGoogleToSelfie = async (gEvent, owner) => {
     isAllDay: 'date' in start,
     rrule: recurrence ? await addStartToRrule(recurrence[0], start) : null,
     place: location || undefined,
-    owner: owner
+    owner: owner,
+    googleId: id
   })
 }
 
@@ -35,8 +36,9 @@ const eventFromGoogleToSelfie = async (gEvent, owner) => {
  * @returns event resource for google
  */
 const eventFromSelfieToGoogle = (sEvent) => {
-  const { title, description, start, end, isAllDay, rrule, place } = sEvent
+  const { title, description, start, end, isAllDay, rrule, place, googleId } = sEvent
   return {
+    id: googleId,
     summary: title,
     description: description,
     start: isAllDay ? { date: start } : { dateTime: start },
