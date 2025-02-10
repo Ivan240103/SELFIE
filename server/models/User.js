@@ -39,10 +39,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  // accesso con google
+  // token per google API
   google: {
-    type: Boolean,
-    default: false
+    type: String,
+    default: ''
   }
 })
 

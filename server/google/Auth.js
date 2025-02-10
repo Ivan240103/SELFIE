@@ -8,23 +8,22 @@ const path = require('path')
 const process = require('process')
 const { authenticate } = require('@google-cloud/local-auth')
 const { google } = require('googleapis')
+const User = require('../models/User')
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-const TOKEN_PATH = path.join(process.cwd(), 'google', 'tokens', 'token.json')
 const CREDENTIALS_PATH = path.join(process.cwd(), 'google', 'credentials.json')
 
-async function loadSavedCredentialsIfExist() {
+function loadSavedCredentialsIfExist(user) {
   try {
-    const content = await fs.readFile(TOKEN_PATH)
-    const credentials = JSON.parse(content)
+    const credentials = JSON.parse(user.google)
     return google.auth.fromJSON(credentials)
   } catch (err) {
     return null
   }
 }
 
-async function saveCredentials(client) {
+async function saveCredentials(client, user) {
   const content = await fs.readFile(CREDENTIALS_PATH)
   const keys = JSON.parse(content)
   const key = keys.installed || keys.web
@@ -34,11 +33,14 @@ async function saveCredentials(client) {
     client_secret: key.client_secret,
     refresh_token: client.credentials.refresh_token,
   })
-  await fs.writeFile(TOKEN_PATH, payload)
+  user.google = payload
+  await user.save()
 }
 
-async function authorize() {
-  let client = await loadSavedCredentialsIfExist()
+async function authorize(username) {
+  const user = await User.findOne({ username: username })
+  if (!user) return null
+  let client = loadSavedCredentialsIfExist(user)
   if (client) {
     return client
   }
@@ -47,7 +49,7 @@ async function authorize() {
     keyfilePath: CREDENTIALS_PATH,
   })
   if (client.credentials) {
-    await saveCredentials(client)
+    await saveCredentials(client, user)
   }
   return client
 }

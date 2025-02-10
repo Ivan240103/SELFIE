@@ -11,7 +11,7 @@ const {
 
 async function listEvents(owner) {
   try {
-    const auth = await authorize()
+    const auth = await authorize(owner)
     const calendar = google.calendar({version: 'v3', auth})
     const res = await calendar.events.list({
       calendarId: 'primary'

@@ -113,15 +113,15 @@ router.get('/time', auth, async (req, res) => {
   }
 })
 
+// effettuare l'accesso con google
 router.put('/google', auth, async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.user.username })
-    const client = await authorize()
-    if (!client) return res.status(400).send('Authentication failed')
-    if (!user) return res.status(404).send(`No user found with username ${req.user.username}`)
-    user.google = true
-    await user.save()
-    return res.json(user)
+    const client = await authorize(req.user.username)
+    if (!client) {
+      return res.status(400).send('Authentication failed')
+    } else {
+      return res.send('ok')
+    }
   } catch (err) {
     return res.status(500).send('Problems during Google authentication')
   }

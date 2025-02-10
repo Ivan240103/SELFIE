@@ -25,6 +25,7 @@ function Profile() {
   const [surname, setSurname] = useState('')
   const [birthday, setBirthday] = useState('')  // di tipo String
   const [pic, setPic] = useState(null)
+  const [google, setGoogle] = useState(false)
 
   const [error, setError] = useState('')
   
@@ -61,6 +62,7 @@ function Profile() {
     setName(profile.name || '')
     setSurname(profile.surname || '')
     setBirthday(profile.birthday ? datetimeToDateString(new Date(profile.birthday)) : '')
+    setGoogle(profile.google ? true : false)
   }, [profile])
 
   /**
@@ -74,6 +76,7 @@ function Profile() {
     setName(profile.name)
     setSurname(profile.surname)
     setBirthday(profile.birthday ? datetimeToDateString(new Date(profile.birthday)) : '')
+    setGoogle(profile.google ? true : false)
   }
 
   /**
@@ -145,11 +148,11 @@ function Profile() {
 
   const syncGoogle = async () => {
     try {
-      const response = await axios.put(`${process.env.REACT_APP_API}/api/users/google`, {}, {
+      await axios.put(`${process.env.REACT_APP_API}/api/users/google`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
-      setProfile(response.data)
       setError('')
+      setGoogle(true)
     } catch (err) {
       setError(err.response?.data || 'Errore Google sync')
     }
@@ -268,15 +271,16 @@ function Profile() {
               hidden={!editMode}>Conferma</button>
           </form>
           <div className='profile-button-group'>
-            {profile.google ? (
-              <p>Google Calendar sincronizzato</p>
-            ) : (
-              <button
-                type='button'
-                className='profile-google'
-                onClick={syncGoogle}
-                hidden={editMode}>Sincronizza con Google</button>
-            )}
+            {!editMode && <>
+              {google ? (
+                <p>Google Calendar sincronizzato</p>
+              ) : (
+                <button
+                  type='button'
+                  className='profile-google'
+                  onClick={syncGoogle}>Sincronizza con Google</button>
+              )}
+            </>}
             <button
               type='button'
               className='profile-edit-btn'
