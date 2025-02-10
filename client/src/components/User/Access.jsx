@@ -28,7 +28,7 @@ function Access() {
             login();
             navigate("/");
         } catch (error) {
-            setError("Login failed: " + error.response.data || 'no response');
+            setError("Login failed: " + error.response?.data || 'no response');
         }
     }
 

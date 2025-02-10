@@ -47,7 +47,7 @@ const Dashboard = () => {
           setUser(response.data)
           setError('')
         } catch (error) {
-          setError(error.response.data || 'Error fetchUser')
+          setError(error.response?.data || 'Error fetchUser')
         }
       }
     }
