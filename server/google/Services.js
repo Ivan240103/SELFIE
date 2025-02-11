@@ -38,6 +38,21 @@ async function getEvent(id, owner) {
   }
 }
 
+// prendere la notifica default del calendario
+// TODO: pensare ai reminder da google
+async function getDefaultReminder(owner) {
+  try {
+    const auth = await authorize(owner)
+    const calendar = google.calendar({version: 'v3', auth})
+    const res = await calendar.settings.get({
+      setting: 'reminders'
+    })
+    console.log('Default Reminders:', res.data)
+  } catch (error) {
+    return undefined
+  }
+}
+
 module.exports = {
   listEvents,
   getEvent

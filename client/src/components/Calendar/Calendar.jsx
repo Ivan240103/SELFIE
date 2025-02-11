@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -21,7 +22,7 @@ function Calendar() {
   const { isAuthenticated } = useAuth()
   const { time, isTimeLoading } = useTimeMachine()
   const navigate = useNavigate()
-
+  const [user, setUser] = useState({})
   const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [currentEvent, setCurrentEvent] = useState(null);
@@ -29,6 +30,7 @@ function Calendar() {
   const [calendarTasks, setCalendarTasks] = useState([]);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
+  const [error, setError] = useState('');
 
   // verifica l'autenticazione
   useEffect(() => {
@@ -36,6 +38,25 @@ function Calendar() {
       navigate('/login')
     }
   }, [isAuthenticated, navigate])
+
+  // recupera il profilo utente
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setUser(response.data)
+          setError('')
+        } catch (error) {
+          setError(error.response?.data || 'Error fetchUser')
+        }
+      }
+    }
+
+    fetchUser()
+  }, [isAuthenticated])
 
   // Carica gli eventi dal backend
   useEffect(() => {
@@ -213,6 +234,7 @@ function Calendar() {
               onUpdateEvent={handleEventUpdate} 
               onDeleteEvent={handleEventDelete} 
               eventDetails={currentEvent}
+              user={user}
             />
             <div>
               <h3>Lista Attività</h3>

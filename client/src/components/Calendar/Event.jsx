@@ -26,7 +26,7 @@ Quando il Modal viene chiuso in Calendar rimettere eventDetails a null, così ch
 tornino ai valori default.
 */
 
-function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
+function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }) {
     // tempo in vigore per l'utente (fuso orario UTC)
     const { time } = useTimeMachine();
 
@@ -40,13 +40,13 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
     const [isAllDay, setIsAllDay] = useState(true);
     const [place, setPlace] = useState("");
     const [googleId, setGoogleId] = useState('')
-
     const [isRecurrent, setIsRecurrent] = useState(false);
     const [freq, setFreq] = useState('daily');
     const [interval, setInterval] = useState(1);
     const [term, setTerm] = useState('n')
     const [until, setUntil] = useState(time.toISOString().substring(0, 10))
     const [count, setCount] = useState(1)
+    const [reminder1, setReminder1] = useState({})
 
     // recupera l'evento specifico dal backend
     useEffect(() => {
@@ -99,6 +99,11 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
                 setUntil(time.toISOString().substring(0, 10))
                 setCount(1)
             }
+            const remindersArray = event.reminders.split(',').map(reminder => {
+              const r = reminder.split(':')
+              return { method: r[0], minutes: r[1] }
+            })
+            setReminder1(remindersArray[0])
         }
         
         setFields()
@@ -133,9 +138,20 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
       }
     }
   }
+
+  const getReminderMinutes = () => {
+
+  }
+
+  function reminderToString(reminder) {
+    return `${reminder.method}:${reminder.minutes}`
+  }
     
   const handleSave = async () => {
     const rrule = isRecurrent ? createRRule() : null
+    const reminders = `
+      ${reminderToString(reminder1)}
+    `
     const eventData = {
       title: title,
       description: description,
@@ -143,7 +159,8 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
       end: end.toISOString(),
       isAllDay: isAllDay,
       rrule: rrule,
-      place: place
+      place: place,
+      reminders: reminders
     };
 
     try {
@@ -172,6 +189,9 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
       return;
     }
     const rrule = isRecurrent ? createRRule() : null
+    const reminders = `
+      ${reminderToString(reminder1)}
+    `
     const updatedEventData = {
         title: title,
         description: description,
@@ -179,7 +199,8 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
         end: end.toISOString(),
         isAllDay: isAllDay,
         rrule: rrule,
-        place: place
+        place: place,
+        reminders: reminders
     };
 
     try {
@@ -229,10 +250,10 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
         <h3>{!eventDetails ? 'Crea' : googleId ? 'Visiona' : 'Modifica'} Evento</h3>
         <button onClick={() => setModalIsOpen(true)}> Dettagli Evento</button>
         <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={() => setModalIsOpen(false)}
-        className='event-modal'
-      >
+          isOpen={modalIsOpen}
+          onRequestClose={() => setModalIsOpen(false)}
+          className='event-modal'
+        >
         <div>
             <label>
             Titolo:
@@ -369,6 +390,33 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
             />
             </label>
         </div>
+        {user.notification && <div>
+            {/* <label> TODO: fix reminders creation
+                Promemoria
+            </label>
+            <input
+                type="number"
+                min='1'
+            />
+            <select>
+                <option value='daily'>{ === 1 ? 'Minuto' : 'Minuti'}</option>
+                <option value='daily'>{ === 1 ? 'Ora' : 'Ore'}</option>
+                <option value='daily'>{ === 1 ? 'Giorno' : 'Giorni'}</option>
+            </select>
+            prima, tramite
+            <input
+                type="radio"
+                name="method-rem1"
+                value='email'
+                checked={}
+            /> Email
+            <input
+                type="radio"
+                name="method-rem1"
+                value='popup'
+                checked={}
+            /> Popup */}
+        </div>}
         {!googleId && <>
           <button onClick={eventDetails ? handleUpdate : handleSave}>
               {eventDetails ? "Aggiorna Evento" : "Salva Evento"}
