@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import TimeMachine from '../TimeMachine/TimeMachine';
+import { useTimeMachine } from '../TimeMachine/TimeMachineContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Auth/AuthenticationContext';
 import '../../css/Tasks.css';
@@ -8,6 +9,7 @@ const Tasks = () => {
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate()
 
+    const { time, isTimeLoading } = useTimeMachine()
     const [tasks, setTasks] = useState([]);
     const [error, setError] = useState(null);
     
@@ -41,14 +43,13 @@ const Tasks = () => {
         };
     }, [isAuthenticated]);
 
-    const now = new Date();
 
     return (
         <div>
-            {isAuthenticated && (
+            {isAuthenticated &&
                 <>
                     <TimeMachine />
-                    <div className="tasks-container">
+                    {!isTimeLoading && <div className="tasks-container">
                         <h1>My Tasks</h1>
                         {tasks.length === 0 ? (
                             <p>No tasks found.</p>
@@ -56,7 +57,7 @@ const Tasks = () => {
                             <ul className="task-list">
                                 {tasks.map((task) => {
                                     const deadline = new Date(task.deadline);
-                                    const isExpired = deadline < now;
+                                    const isExpired = deadline < time;
                                     const isHighlighted = !task.isDone && !isExpired;
                                     return (
                                         <li
@@ -68,7 +69,7 @@ const Tasks = () => {
                                                 {task.title}
                                             </h2>
                                             <p>Descrizione: {task.description}</p>
-                                            <p>Deadline: {deadline.toLocaleString()}</p>
+                                            <p>Deadline: {deadline.toLocaleString('it-IT')}</p>
                                             <p>Status: {task.isDone ? 'Completed' : 'Not Completed'}</p>
                                         </li>
                                     );
@@ -76,8 +77,8 @@ const Tasks = () => {
                             </ul>
                         )}
                     </div>
-                </>
-            )}
+                }
+            </>}
         </div>
     );
 };

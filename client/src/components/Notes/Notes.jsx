@@ -56,21 +56,16 @@ function Notes() {
   }, [isAuthenticated, fetchNotes]);
 
   //Per l'ordinamento delle note
-  useEffect(() => {
-    if (notes.length > 0) {
-      let sortedNotes = [...notes];
-      if (sortCriteria === 'title') {
-        sortedNotes.sort((a, b) => 
-          a.title.replace(/[^a-zA-Z0-9]/g, '').localeCompare(b.title.replace(/[^a-zA-Z0-9]/g, ''))  //[^a-zA-Z0-9] sono i caratteri non alfabetici o numeri e li va a togliere prima del compare
-        );
-      } else if (sortCriteria === 'date') {
-        sortedNotes.sort((a, b) => new Date(b.creation) - new Date(a.creation));
-      } else if (sortCriteria === 'length') {
-        sortedNotes.sort((a, b) => a.text.length - b.text.length);
-      }
-      setNotes(sortedNotes);
+  const sortedNotes = [...notes].sort((a, b) => {
+    if (sortCriteria === 'title') {
+      return a.title.replace(/[^a-zA-Z0-9]/g, '').localeCompare(b.title.replace(/[^a-zA-Z0-9]/g, ''));
+    } else if (sortCriteria === 'date') {
+      return new Date(b.creation) - new Date(a.creation);
+    } else if (sortCriteria === 'length') {
+      return a.text.length - b.text.length;
     }
-  }, [sortCriteria, notes]);
+    return 0;
+  });
 
   // Funzione per salvare una nuova nota
   async function handleSaveNote() {
@@ -300,7 +295,7 @@ function Notes() {
           <div className="notes-view-container">
               <div className="notes-list-container">
                 <ul className="notes-list">
-                  {notes.map((n, index) => {
+                  {sortedNotes.map((n, index) => {
                     const showTime = (d) => d.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ');
                     const markdownContent = marked(`${n.title}\n\n${n.categories.split(',').map(c => `#${c.trim()}`).join(' ')}\n\n${n.text}`);
                     return (

@@ -41,6 +41,11 @@ const eventSchema = mongoose.Schema({
   owner: {
     type: String,
     required: true 
+  },
+  // id dell'evento google
+  googleId: {
+    type: String,
+    default: ""
   }
 })
 

@@ -10,6 +10,7 @@ import { useTimeMachine } from '../TimeMachine/TimeMachineContext';
 import Event from "./Event";
 import Task from "./Task";
 import TimeMachine from '../TimeMachine/TimeMachine';
+import { useRef } from 'react';
 
 /* TODO: X PAYAM
 PER I TASK. CONFRONTARE DEADLINE CON time, SE PASSATA COLORARE DI ROSSO.
@@ -39,23 +40,8 @@ function Calendar() {
 
   // Funzione per calcolare il livello di urgenza
   const calculateUrgencyLevel = (deadline, isDone) => {
-    if (isDone) {
-      return 0; // Se la task è completata, ritorna 0 e non viene segnalata come scaduta
-    }
-    const now = new Date();
-    const deadlineDate = new Date(deadline);
-    const diffTime = now - deadlineDate;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays <= 0) {
-      return 0; // Non scaduta
-    } else if (diffDays <= 1) {
-      return 1; // Scaduta da 1 giorno
-    } else if (diffDays <= 3) {
-      return 2; // Scaduta da 2-3 giorni
-    } else {
-      return 3; // Scaduta da più di 3 giorni
-    }
+    if (isDone || !deadline) return 0;
+    return Math.max(0, Math.floor((new Date(time) - new Date(deadline)) / (1000 * 60 * 60 * 24)));
   };
 
 
@@ -75,7 +61,7 @@ function Calendar() {
           // Mappa _id come id
           const mappedEvents = events.map(event => ({
             ...event,
-            id: event._id, // Mappa _id a id
+            id: event.googleId || event._id, // Mappa _id a id
             eventType: 'event',
             allDay: event.isAllDay
           }));
@@ -103,23 +89,18 @@ function Calendar() {
         });
         if (response.ok) {
           const tasks = await response.json();
-          const mappedTasks = tasks.map(task => {
-            const urgencyLevel = calculateUrgencyLevel(task.deadline, task.isDone);
-            const color = task.isDone ? 'green' : (urgencyLevel > 0 ? 'red' : 'yellow');
-            return{
-              id: task._id,
-              title: task.title,
-              start: task.deadline,
-              allDay: true, // FullCalendar richiede questa proprietà
-              color: color,
-              textColor: 'black', // Per visibilità
-              eventType: 'task',
-              urgencyLevel, urgencyLevel,
-              isDone: task.isDone
-            };
-          });
-          setCalendarTasks(mappedTasks);
-        } else {
+          setCalendarTasks(tasks.map(task => ({
+            id: task._id,
+            title: task.title,
+            start: task.deadline,
+            allDay: true,
+            color: task.isDone ? 'green' : (calculateUrgencyLevel(task.deadline, task.isDone) > 0 ? 'red' : 'yellow'),
+            textColor: 'black',
+            eventType: 'task',
+            urgencyLevel: calculateUrgencyLevel(task.deadline, task.isDone),
+            isDone: task.isDone
+          })));
+        }else {
           alert('Errore durante il caricamento delle task.');
         }
       } catch (error) {
@@ -127,31 +108,19 @@ function Calendar() {
       }
     }
     fetchTasks();
-  }, []);
-
-  // Notifiche di urgenza crescente
-  useEffect(() => {
-    const urgentTasks = calendarTasks.filter(task => task.urgencyLevel > 0);
-    if (urgentTasks.length > 0) {
-      urgentTasks.forEach(task => {
-        const urgencyMessage = `Task "${task.title}" è scaduta da ${task.urgencyLevel} giorno/i.`;
-        console.log(urgencyMessage);
-      });
-    }
-  }, [calendarTasks]);
-
-  // Aggiorna le task scadute quando cambia il tempo
-  useEffect(() => {
-    const updatedTasks = calendarTasks.map(task => {
-      const urgencyLevel = calculateUrgencyLevel(task.start);
-      return {
-        ...task,
-        color: urgencyLevel > 0 ? 'red' : (task.isDone ? 'green' : 'yellow'),
-        urgencyLevel: urgencyLevel
-      };
-    });
-    setCalendarTasks(updatedTasks);
   }, [time]);
+
+  const notifiedTasksRef = useRef(new Set());
+
+  useEffect(() => {
+    calendarTasks.forEach(task => {
+      if (task.urgencyLevel > 0 && !notifiedTasksRef.current.has(task.id)) {
+        console.log(`Task "${task.title}" è scaduta da ${task.urgencyLevel} giorno/i.`);
+        notifiedTasksRef.current.add(task.id); // Segna come notificata
+      }
+    });
+  }, [calendarTasks]);
+  
 
   function handleTaskSave(newTask) {
     setTasks([...tasks, newTask]);
@@ -215,8 +184,8 @@ function Calendar() {
     const newEndDate = event.end ? new Date(event.end) : null; // Data di fine corretta
     const eventId=event.id
 
-    console.log("Nuova data di inizio (locale):", newStartDate.toLocaleString());
-    console.log("Nuova data di fine (locale):", newEndDate ? newEndDate.toLocaleString() : "Nessuna data di fine");
+    console.log("Nuova data di inizio (locale):", newStartDate.toLocaleString('it-IT'));
+    console.log("Nuova data di fine (locale):", newEndDate ? newEndDate.toLocaleString('it-IT') : "Nessuna data di fine");
     
       try {
       // Aggiorna la data dell'evento nel backend
@@ -252,7 +221,7 @@ function Calendar() {
     const newEndDate = event.start; // Data di fine corretta
     const taskId=event.id
 
-    console.log("Nuova data di fine (locale):", newEndDate ? newEndDate.toLocaleString() : "Nessuna data di fine");
+    console.log("Nuova data di fine (locale):", newEndDate ? newEndDate.toLocaleString('it-IT') : "Nessuna data di fine");
     
     try {
       // Aggiorna la data dell'evento nel backend
@@ -364,9 +333,8 @@ function Calendar() {
                         type="checkbox"
                         checked={selectedTasks.includes(task.id)}
                         onChange={() => handleTaskSelect(task.id)}
-                        disabled={task.isDone} // Disabilita la checkbox se la task è completata
                       />
-                      {task.title} - Scadenza: {new Date(task.start).toLocaleDateString()}
+                      {task.title} - Scadenza: {new Date(task.start).toLocaleDateString('it-IT')}
                       {task.isDone && <span style={{ color: 'green', marginLeft: '10px' }}>✅ Completata</span>}
                     </li>
                 ))}
@@ -393,27 +361,15 @@ function Calendar() {
 
 function Sidebar({ weekendsVisible, handleWeekendsToggle }) {
   return (
-    <div className='demo-app-sidebar'>
-      <nav className="navbar">
-          <div className="navbar-container">
-              <ul className="navbar-menu">
-                  <li className="navbar-item">Calendario</li>
-                  <li className="navbar-item">Note</li>
-                  <li className="navbar-item">Pomodoro</li>
-                  <li className="navbar-item">Contatti</li>
-              </ul>
-          </div>
-      </nav>
-      <div className='demo-app-sidebar-section'>
-        <label>
-          <input
-            type='checkbox'
-            checked={weekendsVisible}
-            onChange={handleWeekendsToggle}
-          ></input>
-          toggle weekends
-        </label>
-      </div>
+    <div className='demo-app-sidebar-section'>
+      <label>
+        <input
+          type='checkbox'
+          checked={weekendsVisible}
+          onChange={handleWeekendsToggle}
+        ></input>
+        toggle weekends
+      </label>
     </div>
   );
 }

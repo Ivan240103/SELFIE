@@ -2,7 +2,7 @@
  * Servizio per convertire regole di ricorrenza
  */
 
-const { RRule } = require('rrule')
+const { RRule, rrulestr } = require('rrule')
 
 const { getTime } = require('./TimeMachine')
 
@@ -36,16 +36,45 @@ const rruleToString = async (rrule) => {
  */
 const stringToRrule = (str) => {
   const rrule = RRule.fromString(str)
-  const freq = rrule.options.freq == RRule.DAILY ? 'daily' :
-               rrule.options.freq == RRule.WEEKLY ? 'weekly' :
-               rrule.options.freq == RRule.MONTHLY ? 'monthly' : 'yearly'
+  const { freq, interval, dtstart, until, count } = rrule.options
+  const frequency = freq == RRule.DAILY ? 'daily' :
+                    freq == RRule.WEEKLY ? 'weekly' :
+                    freq == RRule.MONTHLY ? 'monthly' : 'yearly'
   return {
-    freq: freq,
-    interval: rrule.options.interval,
-    dtstart: rrule.options.dtstart,
-    until: rrule.options.until || undefined,
-    count: rrule.options.count || undefined
+    freq: frequency,
+    interval: interval || 1,
+    dtstart: dtstart,
+    until: until || undefined,
+    count: count || undefined
   }
 }
 
-module.exports = { rruleToString, stringToRrule }
+/**
+ * Aggiunge il campo dtstart alla stringa RRule
+ * 
+ * @param {String} rruleStr regola RRule in formato stringa
+ * @param {JSON} start inizio dell'evento ricorrente
+ * @returns stringa RRule con l'inizio aggiornato
+ */
+async function addStartToRrule(rruleStr, start) {
+  const rrule = stringToRrule(rruleStr)
+  rrule.dtstart = start.date || start.dateTime
+  return await rruleToString(rrule)
+}
+
+/**
+ * Rimuove il campo dtstart dalla stringa RRule
+ * 
+ * @param {String} rruleStr regola RRule in formato stringa
+ * @returns stringa RRule con l'inizio aggiornato
+ */
+async function removeStartFromRrule(rruleStr) {
+  return rruleStr.split('\n')[1]
+}
+
+module.exports = {
+  rruleToString,
+  stringToRrule,
+  addStartToRrule,
+  removeStartFromRrule
+}

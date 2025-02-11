@@ -25,6 +25,7 @@ function Profile() {
   const [surname, setSurname] = useState('')
   const [birthday, setBirthday] = useState('')  // di tipo String
   const [pic, setPic] = useState(null)
+  const [google, setGoogle] = useState(false)
 
   const [error, setError] = useState('')
   
@@ -45,7 +46,7 @@ function Profile() {
         setProfile(profile.data)
         setError('')
       } catch (err) {
-        setError(err.response.data || 'Errore fetchProfile')
+        setError(err.response?.data || 'Errore fetchProfile')
       }
     }
 
@@ -61,6 +62,7 @@ function Profile() {
     setName(profile.name || '')
     setSurname(profile.surname || '')
     setBirthday(profile.birthday ? datetimeToDateString(new Date(profile.birthday)) : '')
+    setGoogle(profile.google ? true : false)
   }, [profile])
 
   /**
@@ -74,6 +76,7 @@ function Profile() {
     setName(profile.name)
     setSurname(profile.surname)
     setBirthday(profile.birthday ? datetimeToDateString(new Date(profile.birthday)) : '')
+    setGoogle(profile.google ? true : false)
   }
 
   /**
@@ -120,7 +123,7 @@ function Profile() {
       setProfile(response.data)
       setError('')
     } catch (err) {
-      setError(err.response.data || 'Errore PUT')
+      setError(err.response?.data || 'Errore PUT')
       resetFields()
     }
   }
@@ -138,8 +141,20 @@ function Profile() {
         setError('')
         navigate('/login')
       } catch (err) {
-        setError(err.response.data || 'Errore DELETE')
+        setError(err.response?.data || 'Errore DELETE')
       }
+    }
+  }
+
+  const syncGoogle = async () => {
+    try {
+      await axios.put(`${process.env.REACT_APP_API}/api/users/google`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      })
+      setError('')
+      setGoogle(true)
+    } catch (err) {
+      setError(err.response?.data || 'Errore Google sync')
     }
   }
 
@@ -256,6 +271,16 @@ function Profile() {
               hidden={!editMode}>Conferma</button>
           </form>
           <div className='profile-button-group'>
+            {!editMode && <>
+              {google ? (
+                <p>Google Calendar sincronizzato</p>
+              ) : (
+                <button
+                  type='button'
+                  className='profile-google'
+                  onClick={syncGoogle}>Sincronizza con Google</button>
+              )}
+            </>}
             <button
               type='button'
               className='profile-edit-btn'

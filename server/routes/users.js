@@ -12,6 +12,7 @@ require('dotenv').config()
 const auth = require('../middleware/auth')
 const upload = require('../middleware/multer')
 const tm = require('../services/TimeMachine')
+const { authorize } = require('../google/Auth')
 
 const User = require('../models/User')
 const Event = require('../models/Event')
@@ -109,6 +110,20 @@ router.get('/time', auth, async (req, res) => {
     return res.json(time)
   } catch (err) {
     return res.status(500).send('Error while getting time')
+  }
+})
+
+// effettuare l'accesso con google
+router.put('/google', auth, async (req, res) => {
+  try {
+    const client = await authorize(req.user.username)
+    if (!client) {
+      return res.status(400).send('Authentication failed')
+    } else {
+      return res.send('ok')
+    }
+  } catch (err) {
+    return res.status(500).send('Problems during Google authentication')
   }
 })
 
