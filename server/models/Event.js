@@ -46,6 +46,12 @@ const eventSchema = mongoose.Schema({
   googleId: {
     type: String,
     default: ""
+  },
+  // promemoria per l'evento
+  // method:minutes,method:minutes
+  reminders: {
+    type: String,
+    default: ""
   }
 })
 
