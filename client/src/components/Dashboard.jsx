@@ -9,6 +9,7 @@ import { useTimeMachine } from './TimeMachine/TimeMachineContext'
 import { useAuth } from './Auth/AuthenticationContext';
 import { datetimeToDateString } from '../services/dateServices';
 
+import Header from './Layout/Header'
 import calendarIcon from "../images/calendar-icon.png";
 import notesIcon from "../images/notebook-pen-icon.png";
 import tomatoIcon from "../images/speed-icon.png";
@@ -140,6 +141,7 @@ const Dashboard = () => {
   return(
     <div>
       {isAuthenticated && <>
+        <Header />
         <TimeMachine />
         <p>{error}</p>
         <div className='dash-container'>

@@ -127,6 +127,20 @@ router.put('/google', auth, async (req, res) => {
   }
 })
 
+// attivare le notifiche
+router.put('/notification', auth, async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.user.username })
+    if (!user) return res.status(404).send(`No user found with username ${req.user.username}`)
+    user.notification = true
+    await user.save()
+    return res.json(user)
+  } catch (err) {
+    console.log(err)
+    return res.status(500).send('Error while activating notifications')
+  }
+})
+
 // aggiornare i dati di un utente
 // delle password passare l'hash SHA1
 // body.birthday è una data in ISO string (UTC)
