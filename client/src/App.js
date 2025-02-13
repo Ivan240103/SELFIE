@@ -1,15 +1,4 @@
 import React from 'react';
-<<<<<<< HEAD
-import Accesso from './components/Accesso'
-import Tomato from './components/Tomato/tomato' 
-
-
-function App() {
-  return (
-    <div className="App">
-      <Tomato />
-    </div>
-=======
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { TimeMachineProvider } from './components/TimeMachine/TimeMachineContext';
 import { AuthenticationProvider } from './components/Auth/AuthenticationContext';
@@ -43,7 +32,6 @@ function App() {
         </div>
       </TimeMachineProvider>
     </AuthenticationProvider>
->>>>>>> 2db00811234cda54ccd19de39cc9cd9b82873e7d
   );
 }
 
