@@ -13,28 +13,34 @@ const router = express.Router()
 
 // salvare nuovo pomodoro
 router.post('/', auth, async (req, res) => {
-  const newTomato = new Tomato({
-    studyMinutes: req.body.studyMinutes,
-    pauseMinutes: req.body.pauseMinutes,
-    loops: req.body.loops,
-    modification: new Date(await getTime(req.user.username)),
-    owner: req.user.username
-  })
-
   try {
-    await newTomato.save()
-    return res.send('ok')
+    const updatedTomato = await Tomato.findOneAndUpdate(
+      { owner: req.user.username }, 
+      {
+        studyMinutes: req.body.studyMinutes,
+        pauseMinutes: req.body.pauseMinutes,
+        loops: req.body.loops,
+        interrupted: req.body.interrupted,       
+        remainingMinutes: req.body.remainingMinutes, 
+        remainingLoops: req.body.remainingLoops,     
+        modification: new Date(await getTime(req.user.username))
+      },
+      { new: true, upsert: true } 
+    );
+    return res.json(updatedTomato);
   } catch (err) {
-    return res.status(500).send('Error while saving new tomato')
+    console.error(err);
+    return res.status(500).send('Error while saving tomato');
   }
-})
+});
+
 
 // prendere i dati dell'ultimo pomodoro dell'utente
 router.get('/last', auth, async (req, res) => {
   try {
     const timer = await Tomato.find({
-      username: req.user.username
-    }).sort({ modification: 'desc' }).limit(1)
+      owner: req.user.username
+    }).sort({ modification: 'desc' }).limit(1);
     // se non ne trova nessuno invia un oggetto vuoto
     return res.json(timer)
   } catch (err) {
