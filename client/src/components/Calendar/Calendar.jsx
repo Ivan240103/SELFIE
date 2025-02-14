@@ -10,6 +10,7 @@ import { useTimeMachine } from '../TimeMachine/TimeMachineContext';
 import Event from "./Event";
 import Task from "./Task";
 import TimeMachine from '../TimeMachine/TimeMachine';
+import { useRef } from 'react';
 
 /* TODO: X PAYAM
 PER I TASK. CONFRONTARE DEADLINE CON time, SE PASSATA COLORARE DI ROSSO.
@@ -36,6 +37,13 @@ function Calendar() {
       navigate('/login')
     }
   }, [isAuthenticated, navigate])
+
+  // Funzione per calcolare il livello di urgenza
+  const calculateUrgencyLevel = (deadline, isDone) => {
+    if (isDone || !deadline) return 0;
+    return Math.max(0, Math.floor((new Date(time) - new Date(deadline)) / (1000 * 60 * 60 * 24)));
+  };
+
 
   // Carica gli eventi dal backend
   useEffect(() => {
@@ -81,17 +89,18 @@ function Calendar() {
         });
         if (response.ok) {
           const tasks = await response.json();
-          const mappedTasks = tasks.map(task => ({
+          setCalendarTasks(tasks.map(task => ({
             id: task._id,
             title: task.title,
             start: task.deadline,
-            allDay: true, // FullCalendar richiede questa proprietà
-            color: task.isDone ? 'green' : 'yellow', // Colore specifico per le task
-            textColor: 'black', // Per visibilità
-            eventType: 'task'
-          }));
-          setCalendarTasks(mappedTasks);
-        } else {
+            allDay: true,
+            color: task.isDone ? 'green' : (calculateUrgencyLevel(task.deadline, task.isDone) > 0 ? 'red' : 'yellow'),
+            textColor: 'black',
+            eventType: 'task',
+            urgencyLevel: calculateUrgencyLevel(task.deadline, task.isDone),
+            isDone: task.isDone
+          })));
+        }else {
           alert('Errore durante il caricamento delle task.');
         }
       } catch (error) {
@@ -99,7 +108,19 @@ function Calendar() {
       }
     }
     fetchTasks();
-  }, []);
+  }, [time]);
+
+  const notifiedTasksRef = useRef(new Set());
+
+  useEffect(() => {
+    calendarTasks.forEach(task => {
+      if (task.urgencyLevel > 0 && !notifiedTasksRef.current.has(task.id)) {
+        console.log(`Task "${task.title}" è scaduta da ${task.urgencyLevel} giorno/i.`);
+        notifiedTasksRef.current.add(task.id); // Segna come notificata
+      }
+    });
+  }, [calendarTasks]);
+  
 
   function handleTaskSave(newTask) {
     setTasks([...tasks, newTask]);
@@ -155,6 +176,82 @@ function Calendar() {
     setCalendarEvents(calendarTasks.filter(task => task.id !== taskId));
   }
 
+  //Chiamata PUT per eventDrop quando trascino l'evento, vado a prendere le info dell'evento selezionato e lo modifico con la data rilasciata
+  const handleEventDrop = async (info) => {
+    const { event } = info;
+
+    const newStartDate = event.start
+    const newEndDate = event.end ? new Date(event.end) : null; // Data di fine corretta
+    const eventId=event.id
+
+    console.log("Nuova data di inizio (locale):", newStartDate.toLocaleString('it-IT'));
+    console.log("Nuova data di fine (locale):", newEndDate ? newEndDate.toLocaleString('it-IT') : "Nessuna data di fine");
+    
+      try {
+      // Aggiorna la data dell'evento nel backend
+      const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ start: newStartDate.toISOString(), end: newEndDate ? newEndDate.toISOString() : null})
+      });
+  
+      if (response.ok) {
+        // Aggiorna lo stato locale
+        setCalendarEvents(prevEvents =>
+          prevEvents.map(ev =>
+            ev.id === eventId ? { ...ev, start: newStartDate, end: newEndDate } : ev
+          )
+        );
+      } else {
+        alert('Errore durante l\'aggiornamento della data dell\'evento.');
+        event.revert()
+      }
+    } catch (error) {
+      alert('Errore nel caricamento degli eventi:', error.message || 'no response');
+      event.revert()
+    }
+  };
+
+  const handleTaskDrop = async (info) => {
+    const { event } = info;
+
+    const newEndDate = event.start; // Data di fine corretta
+    const taskId=event.id
+
+    console.log("Nuova data di fine (locale):", newEndDate ? newEndDate.toLocaleString('it-IT') : "Nessuna data di fine");
+    
+    try {
+      // Aggiorna la data dell'evento nel backend
+      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({deadline: newEndDate ? newEndDate.toISOString() : null})
+      });
+
+      if (response.ok) {
+        // Aggiorna lo stato locale
+        setCalendarTasks(prevTasks =>
+          prevTasks.map(task =>
+            task.id === taskId ? { ...task, start: newEndDate } : task
+          )
+        );
+      } else {
+        alert('Errore durante l\'aggiornamento della data dell\'evento.');
+        event.revert()
+      }
+    } catch (error) {
+      alert('Errore nel caricamento degli eventi:', error.message || 'no response');
+      event.revert()
+    }
+  };
+
+
   // TODO: USARE LA PROPRIETÀ EDITABLE PER MODIFICARE LA DATA DI EVENTI E TASK
   // TRASCINANDOLI. Attualmente si può però la data resta invariata nel nuovo giorno.
   // leggendo un po' la docs mi sembra si chiami eventDrop la proprietà necessaria.
@@ -183,6 +280,7 @@ function Calendar() {
               nowIndicator={true}
               editable={true}
               selectable={true}
+              droppable={true}
               dayMaxEvents={true}
               showNonCurrentDates={false}
               weekends={weekendsVisible}
@@ -207,6 +305,15 @@ function Calendar() {
                   setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare
                 }
               }}
+              eventDrop={(info) => {  
+                const { event } = info;
+                if (event.extendedProps.eventType === 'event') {  //Si potrebbe fare anche con le task
+                  handleEventDrop(info); // Gestisci il trascinamento degli eventi
+                }
+                else{  //Si potrebbe fare anche con le task
+                  handleTaskDrop(info); // Gestisci il trascinamento degli eventi
+                }
+              }}
             />}
             <Event 
               onSaveEvent={handleEventSave}
@@ -224,7 +331,8 @@ function Calendar() {
                         checked={selectedTasks.includes(task.id)}
                         onChange={() => handleTaskSelect(task.id)}
                       />
-                      {task.title} - Scadenza: {new Date(task.start).toLocaleDateString()}
+                      {task.title} - Scadenza: {new Date(task.start).toLocaleDateString('it-IT')}
+                      {task.isDone && <span style={{ color: 'green', marginLeft: '10px' }}>✅ Completata</span>}
                     </li>
                 ))}
               </ul>
@@ -250,27 +358,15 @@ function Calendar() {
 
 function Sidebar({ weekendsVisible, handleWeekendsToggle }) {
   return (
-    <div className='demo-app-sidebar'>
-      <nav className="navbar">
-          <div className="navbar-container">
-              <ul className="navbar-menu">
-                  <li className="navbar-item">Calendario</li>
-                  <li className="navbar-item">Note</li>
-                  <li className="navbar-item">Pomodoro</li>
-                  <li className="navbar-item">Contatti</li>
-              </ul>
-          </div>
-      </nav>
-      <div className='demo-app-sidebar-section'>
-        <label>
-          <input
-            type='checkbox'
-            checked={weekendsVisible}
-            onChange={handleWeekendsToggle}
-          ></input>
-          toggle weekends
-        </label>
-      </div>
+    <div className='demo-app-sidebar-section'>
+      <label>
+        <input
+          type='checkbox'
+          checked={weekendsVisible}
+          onChange={handleWeekendsToggle}
+        ></input>
+        toggle weekends
+      </label>
     </div>
   );
 }
