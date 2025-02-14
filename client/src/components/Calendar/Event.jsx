@@ -39,6 +39,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
     const [end, setEnd] = useState(time);   // di tipo Date
     const [isAllDay, setIsAllDay] = useState(true);
     const [place, setPlace] = useState("");
+    const [googleId, setGoogleId] = useState('')
 
     const [isRecurrent, setIsRecurrent] = useState(false);
     const [freq, setFreq] = useState('daily');
@@ -81,6 +82,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
             setEnd(event.end ? new Date(event.end) : time)
             setIsAllDay(event.isAllDay === false ? false : true)
             setPlace(event.place || "")
+            setGoogleId(event.googleId || '')
             setIsRecurrent(event?.rrule ? true : false)
             setFreq(event?.rrule?.freq || 'daily')
             setInterval(event?.rrule?.interval || 1)
@@ -224,8 +226,8 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
 
   return (
     <div className="event-form">
-        <h3>{!eventDetails ? 'Crea' : 'Modifica'} evento</h3>
-        <button onClick={() => setModalIsOpen(true)}> Aggiungi/Modifica Evento</button>
+        <h3>{!eventDetails ? 'Crea' : googleId ? 'Visiona' : 'Modifica'} Evento</h3>
+        <button onClick={() => setModalIsOpen(true)}> Dettagli Evento</button>
         <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
@@ -367,14 +369,14 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails }) {
             />
             </label>
         </div>
-        <button onClick={eventDetails ? handleUpdate : handleSave}>
-            {eventDetails ? "Aggiorna Evento" : "Salva Evento"}
-        </button>
-        {eventDetails && (
-        <>
-          <button onClick={handleDelete}>Elimina Evento</button>
-        </>
-      )}
+        {!googleId && <>
+          <button onClick={eventDetails ? handleUpdate : handleSave}>
+              {eventDetails ? "Aggiorna Evento" : "Salva Evento"}
+          </button>
+          {eventDetails && <button onClick={handleDelete}>
+            Elimina Evento
+          </button>}
+        </>}
       </Modal>
     </div>
   );

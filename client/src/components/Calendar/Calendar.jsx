@@ -292,7 +292,6 @@ function Calendar() {
                 const clickedEvent = info.event;
                 // Se l'evento cliccato è una task
                 if (clickedEvent.extendedProps.eventType === 'task') {
-                  alert('Task cliccata:', clickedEvent);
                   const clickedTask = calendarTasks.find(task => task.id === clickedEvent.id);
                   
                   // Passa la task da modificare al componente Task
@@ -302,8 +301,6 @@ function Calendar() {
                 }
                 // Se l'evento cliccato è un evento (non una task)
                 else if (clickedEvent.extendedProps.eventType === 'event') {
-                  alert('Evento cliccato:', clickedEvent);
-                  
                   // Passa i dettagli dell'evento al componente Event per la modifica
                   setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare
                 }
