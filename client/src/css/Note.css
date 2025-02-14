@@ -14,14 +14,29 @@
   box-sizing: border-box;
 }
 
+.notes-form-container {
+  display: flex;  
+  gap: 20px;  /* Distanza tra form e anteprima */
+  align-items: flex-start; 
+}
+
 .notes-form {
   border: 1px solid #000;
   padding: 10px;
   margin-bottom: 20px;
   width: 100%; 
-  width: 100%; /* Si adatta alla max-width del container */
   box-sizing: border-box;
+  flex: 1;
 }
+.markdown-preview {
+  flex: 1;  
+  max-width: 50%;  
+  border: 1px solid #ccc;
+  padding: 10px;
+  background-color: #f9f9f9;
+  overflow-wrap: break-word;
+}
+
 
 .note-form-textarea {
   display: block;
@@ -112,4 +127,33 @@
   color: #000;
   overflow-wrap: break-word; 
   overflow-wrap: break-word; /* Se il testo è troppo lungo, va a capo */
+}
+
+
+.markdown-preview h4 {
+  margin-top: 0;
+}
+
+.notes-form-container {
+  display: flex;  
+  gap: 20px;  /* Distanza tra form e anteprima */
+  align-items: flex-start; 
+}
+
+.note-textual-info {
+  border: 1px solid #000;
+  padding: 10px;
+  margin-bottom: 20px;
+  width: 100%; 
+  box-sizing: border-box;
+  flex: 1;
+}
+
+.note-markdown-preview {
+  flex: 1;  
+  max-width: 50%;  
+  border: 1px solid #ccc;
+  padding: 10px;
+  background-color: #f9f9f9;
+  overflow-wrap: break-word;
 }
