@@ -30,6 +30,7 @@ function Calendar() {
   const [calendarTasks, setCalendarTasks] = useState([]);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
+  const [lastPomodoro, setLastPomodoro] = useState({});
 
   // verifica l'autenticazione
   useEffect(() => {
@@ -38,6 +39,7 @@ function Calendar() {
     }
   }, [isAuthenticated, navigate])
 
+  
   // Funzione per calcolare il livello di urgenza
   const calculateUrgencyLevel = (deadline, isDone) => {
     if (isDone || !deadline) return 0;
@@ -74,6 +76,36 @@ function Calendar() {
       }
     }
     fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    async function fetchLastPomodoro() {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API}/api/tomatoes/last`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const pomodoro = await response.json();
+          setLastPomodoro({
+            id: pomodoro._id,
+            title: `🍅 Pomodoro`,
+            start: Date.now(),
+            end: new Date(Date.now() + pomodoro.remainingMinutes * 60 * 1000), //Volevo cercare di mostrare la "barra arancione in day nel calendario" come tempo rimanente ma non mi sa che ho fallito
+            allDay: false,
+            color: 'orange',
+            textColor: 'black',
+            eventType: 'pomodoro'
+          });
+        }
+      } catch (error) {
+        console.error('Errore nel caricamento del pomodoro:', error);
+      }
+    }
+    fetchLastPomodoro();
   }, []);
 
   // Carica le task dal backend
@@ -286,7 +318,8 @@ function Calendar() {
               weekends={weekendsVisible}
               events={[
                 ...calendarEvents,
-                ...calendarTasks, // Assicurati di aggiungere le task qui
+                ...calendarTasks,
+                ...(lastPomodoro ? [lastPomodoro] : [])
               ]}
               eventClick={(info) => {
                 const clickedEvent = info.event;

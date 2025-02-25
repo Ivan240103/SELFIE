@@ -1,20 +1,21 @@
 document.addEventListener('DOMContentLoaded', init);
 
-var buttonactivated;
-var optionsstudyopened;
-var optionspauseopened;
-var selectedstudytime;
-var selectedpausetime;
-var numberofsessions;
-var currentsession;
-var interval;
-var ispausetime;
-var currentsecond;
-var isnightmode;
-var finished = false; 
+let buttonactivated;
+let optionsstudyopened;
+let optionspauseopened;
+let selectedstudytime;
+let selectedpausetime;
+let numberofsessions;
+let currentsession;
+let interval;
+let ispausetime;
+let currentsecond;
+let isnightmode;
+let finished = false;
+let currentPomodoroId = null; // Traccia l'ultimo pomodoro caricato
 
 function playNotificationSound() {
-  var audio = new Audio('./notification.mp3');
+  const audio = new Audio('./notification.mp3');
   audio.play();
 }
 
@@ -53,7 +54,7 @@ function init() {
 window.addEventListener('beforeunload', function (e) {
   clearInterval(interval);
   buttonactivated = false;
-  var playButton = document.getElementById('play');
+  const playButton = document.getElementById('play');
   playButton.innerHTML =
     '<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
       '<path d="M30.6693 14.0114L11.6966 2.15371C8.4254 0.342116 4.5 2.48309 4.5 6.27097V29.8217C4.5 33.4449 8.4254 35.7505 11.6966 33.7742L30.6693 21.9165C33.7769 20.1049 33.7769 15.823 30.6693 14.0114Z" fill="white"/>' +
@@ -81,27 +82,38 @@ window.addEventListener('beforeunload', function (e) {
     modification: modification
   };
 
-  const url = 'http://localhost:8000/api/tomatoes';
-  const payload = JSON.stringify(data);
-  const blob = new Blob([payload], { type: 'application/json' });
-  navigator.sendBeacon(url, blob);
+  const url = currentPomodoroId
+    ? `http://localhost:8000/api/tomatoes/${currentPomodoroId}`
+    : 'http://localhost:8000/api/tomatoes';
+  const method = currentPomodoroId ? 'PUT' : 'POST';
+
+  // Uso fetch con keepalive per inviare l'aggiornamento anche in uscita dalla pagina
+  fetch(url, {
+    method: method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    body: JSON.stringify(data),
+    keepalive: true
+  });
 });
 
 function calculateCycles() {
-  var input = document.getElementById('available-time-input').value;
-  var totalMinutes = parseFloat(input);
+  const input = document.getElementById('available-time-input').value;
+  const totalMinutes = parseFloat(input);
   if (isNaN(totalMinutes) || totalMinutes <= 0) {
     document.getElementById('cycle-proposals').innerHTML = "Inserisci un tempo valido.";
     return;
   }
 
-  var studyTime = (typeof selectedstudytime !== 'undefined') ? selectedstudytime : 35;
-  var pauseTime = (typeof selectedpausetime !== 'undefined') ? selectedpausetime : 5;
-  var cycleDuration = studyTime + pauseTime;
-  var cycles = Math.floor(totalMinutes / cycleDuration);
+  const studyTime = (typeof selectedstudytime !== 'undefined') ? selectedstudytime : 35;
+  let pauseTime = (typeof selectedpausetime !== 'undefined') ? selectedpausetime : 5;
+  const cycleDuration = studyTime + pauseTime;
+  let cycles = Math.floor(totalMinutes / cycleDuration);
   if (cycles < 1) cycles = 1;
 
-  var cycleTime = totalMinutes / cycles;
+  const cycleTime = totalMinutes / cycles;
   pauseTime = Math.round(cycleTime - studyTime);
   cycles = Math.round(cycles);
 
@@ -109,31 +121,31 @@ function calculateCycles() {
   selectedpausetime = pauseTime;
   numberofsessions = cycles;
 
-  var sessionElement = document.getElementById('sessions');
+  const sessionElement = document.getElementById('sessions');
   sessionElement.innerHTML =
     '1 of <div><input type="text" value="' + numberofsessions + '" id="ses-selector"></div><div> sessions</div>';
   changesessionslistener();
 
-  var timeElement = document.getElementById('time');
+  const timeElement = document.getElementById('time');
   timeElement.innerHTML = (studyTime < 10 ? '0' : '') + studyTime + ':00';
 
   closeSettingsPanel();
 }
 
 function closeSettingsPanel() {
-  var containersettings = document.getElementById('container-settings');
-  var closebutton = document.getElementById('settings-close');
-  var settingstitle = document.getElementById('title');
-  var optionstext = document.querySelectorAll('#opt');
-  var titlest = document.getElementById('sttitle');
-  var sttime = document.getElementById('stsel-selected');
-  var pslest = document.getElementById('pstitle');
-  var pstime = document.getElementById('pssel-selected');
+  const containersettings = document.getElementById('container-settings');
+  const closebutton = document.getElementById('settings-close');
+  const settingstitle = document.getElementById('title');
+  const optionstext = document.querySelectorAll('#opt');
+  const titlest = document.getElementById('sttitle');
+  const sttime = document.getElementById('stsel-selected');
+  const pslest = document.getElementById('pstitle');
+  const pstime = document.getElementById('pssel-selected');
 
   containersettings.style.width = '0vh';
   closebutton.style.width = '0vh';
   settingstitle.style.display = 'none';
-  optionstext.forEach(function(div) {
+  optionstext.forEach((div) => {
     div.style.display = 'none';
   });
   titlest.style.display = 'none';
@@ -148,15 +160,15 @@ function restartTimer() {
   finished = true;
   clearInterval(interval);
   currentsecond = 0;
-  var tomato = document.getElementById('tmt');
+  const tomato = document.getElementById('tmt');
   tomato.style.transform = 'rotate(0deg)';
-  var timeElement = document.getElementById('time');
+  const timeElement = document.getElementById('time');
   if (ispausetime) {
     timeElement.innerHTML = (selectedpausetime < 10 ? '0' : '') + selectedpausetime + ':00';
   } else {
     timeElement.innerHTML = (selectedstudytime < 10 ? '0' : '') + selectedstudytime + ':00';
   }
-  var playButton = document.getElementById('play');
+  const playButton = document.getElementById('play');
   playButton.innerHTML =
     '<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
       '<path d="M30.6693 14.0114L11.6966 2.15371C8.4254 0.342116 4.5 2.48309 4.5 6.27097V29.8217C4.5 33.4449 8.4254 35.7505 11.6966 33.7742L30.6693 21.9165C33.7769 20.1049 33.7769 15.823 30.6693 14.0114Z" fill="white"/>' +
@@ -172,15 +184,15 @@ function resetTimer() {
   currentsecond = 0;
   currentsession = 1;
   ispausetime = false;
-  var timeElement = document.getElementById('time');
+  const timeElement = document.getElementById('time');
   timeElement.innerHTML = (selectedstudytime < 10 ? '0' : '') + selectedstudytime + ':00';
-  var tomato = document.getElementById('tmt');
+  const tomato = document.getElementById('tmt');
   tomato.style.transform = 'rotate(0deg)';
-  var sessionElement = document.getElementById('sessions');
+  const sessionElement = document.getElementById('sessions');
   sessionElement.innerHTML =
     '1 of <div><input type="text" value="' + numberofsessions + '" id="ses-selector"></div><div> sessions</div>';
   changesessionslistener();
-  var playButton = document.getElementById('play');
+  const playButton = document.getElementById('play');
   playButton.innerHTML =
     '<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
       '<path d="M30.6693 14.0114L11.6966 2.15371C8.4254 0.342116 4.5 2.48309 4.5 6.27097V29.8217C4.5 33.4449 8.4254 35.7505 11.6966 33.7742L30.6693 21.9165C33.7769 20.1049 33.7769 15.823 30.6693 14.0114Z" fill="white"/>' +
@@ -191,10 +203,10 @@ function resetTimer() {
 function skipToNextSession() {
   clearInterval(interval);
   currentsecond = 0;
-  var tomato = document.getElementById('tmt');
+  const tomato = document.getElementById('tmt');
   tomato.style.transform = 'rotate(0deg)';
-  var timeElement = document.getElementById('time');
-  var sessionsElement = document.getElementById('sessions');
+  const timeElement = document.getElementById('time');
+  const sessionsElement = document.getElementById('sessions');
 
   if (ispausetime && currentsession === numberofsessions) {
     resetTimer();
@@ -214,7 +226,7 @@ function skipToNextSession() {
     ispausetime = false;
   }
 
-  var playButton = document.getElementById('play');
+  const playButton = document.getElementById('play');
   playButton.innerHTML =
     '<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
       '<path d="M30.6693 14.0114L11.6966 2.15371C8.4254 0.342116 4.5 2.48309 4.5 6.27097V29.8217C4.5 33.4449 8.4254 35.7505 11.6966 33.7742L30.6693 21.9165C33.7769 20.1049 33.7769 15.823 30.6693 14.0114Z" fill="white"/>' +
@@ -224,11 +236,11 @@ function skipToNextSession() {
 }
 
 function timer(timeElement) {
-  var timeParts = timeElement.innerHTML.split(':');
-  var minutes = parseInt(timeParts[0]);
-  var seconds = parseInt(timeParts[1]);
-  var sessions = document.getElementById('sessions');
-  var tomato = document.getElementById('tmt');
+  const timeParts = timeElement.innerHTML.split(':');
+  let minutes = parseInt(timeParts[0]);
+  let seconds = parseInt(timeParts[1]);
+  const sessions = document.getElementById('sessions');
+  const tomato = document.getElementById('tmt');
   interval = setInterval(function() {
     currentsecond = (currentsecond + 6) % 360;
 
@@ -272,14 +284,14 @@ function timer(timeElement) {
   }, 1000);
 }
 
-function checkbuttonstatus(playbutton, interval, currenttime) {
+function checkbuttonstatus(playbutton, currentInterval, currenttime) {
   if (buttonactivated) {
     playbutton.innerHTML =
       '<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         '<path d="M30.6693 14.0114L11.6966 2.15371C8.4254 0.342116 4.5 2.48309 4.5 6.27097V29.8217C4.5 33.4449 8.4254 35.7505 11.6966 33.7742L30.6693 21.9165C33.7769 20.1049 33.7769 15.823 30.6693 14.0114Z" fill="white"/>' +
       '</svg>';
     buttonactivated = false;
-    clearInterval(interval);
+    clearInterval(currentInterval);
     savePomodoro();
   } else {
     playbutton.innerHTML =
@@ -294,8 +306,8 @@ function checkbuttonstatus(playbutton, interval, currenttime) {
 }
 
 function buttonlistener() {
-  var playbutton = document.getElementById('play');
-  var timeElement = document.getElementById('time');
+  const playbutton = document.getElementById('play');
+  const timeElement = document.getElementById('time');
   playbutton.addEventListener('click', function() {
     checkbuttonstatus(playbutton, interval, timeElement);
   });
@@ -310,20 +322,20 @@ function settingsposition() {
 }
 
 function settingslistener() {
-  var settingsbutton = document.getElementById('settings');
-  var containersettings = document.getElementById('container-settings');
-  var closebutton = document.getElementById('settings-close');
-  var settingstitle = document.getElementById('title');
-  var optionstext = document.querySelectorAll('#opt');
-  var titlest = document.getElementById('sttitle');
-  var sttime = document.getElementById('stsel-selected');
-  var pslest = document.getElementById('pstitle');
-  var pstime = document.getElementById('pssel-selected');
+  const settingsbutton = document.getElementById('settings');
+  const containersettings = document.getElementById('container-settings');
+  const closebutton = document.getElementById('settings-close');
+  const settingstitle = document.getElementById('title');
+  const optionstext = document.querySelectorAll('#opt');
+  const titlest = document.getElementById('sttitle');
+  const sttime = document.getElementById('stsel-selected');
+  const pslest = document.getElementById('pstitle');
+  const pstime = document.getElementById('pssel-selected');
   settingsbutton.addEventListener('click', function() {
     containersettings.style.width = '40vh';
     closebutton.style.width = '36px';
     settingstitle.style.display = 'flex';
-    optionstext.forEach(function(div) {
+    optionstext.forEach((div) => {
       div.style.display = 'flex';
     });
     titlest.style.display = 'flex';
@@ -334,19 +346,19 @@ function settingslistener() {
 }
 
 function closebuttonlistener() {
-  var closebutton = document.getElementById('settings-close');
-  var containersettings = document.getElementById('container-settings');
-  var settingstitle = document.getElementById('title');
-  var optionstext = document.querySelectorAll('#opt');
-  var titlest = document.getElementById('sttitle');
-  var sttime = document.getElementById('stsel-selected');
-  var pslest = document.getElementById('pstitle');
-  var pstime = document.getElementById('pssel-selected');
+  const closebutton = document.getElementById('settings-close');
+  const containersettings = document.getElementById('container-settings');
+  const settingstitle = document.getElementById('title');
+  const optionstext = document.querySelectorAll('#opt');
+  const titlest = document.getElementById('sttitle');
+  const sttime = document.getElementById('stsel-selected');
+  const pslest = document.getElementById('pstitle');
+  const pstime = document.getElementById('pssel-selected');
   closebutton.addEventListener('click', function() {
     containersettings.style.width = '0vh';
     closebutton.style.width = '0vh';
     settingstitle.style.display = 'none';
-    optionstext.forEach(function(div) {
+    optionstext.forEach((div) => {
       div.style.display = 'none';
     });
     titlest.style.display = 'none';
@@ -359,7 +371,7 @@ function closebuttonlistener() {
 }
 
 function changesessionslistener() {
-  var sessel = document.getElementById('ses-selector');
+  const sessel = document.getElementById('ses-selector');
   if (sessel) {
     sessel.addEventListener('input', function() {
       if (!isNaN(sessel.value)) {
@@ -371,9 +383,9 @@ function changesessionslistener() {
 }
 
 function openstdopt() {
-  var arrowbutton = document.getElementById('study-arrow');
-  var rectangle = document.getElementById('study-rectangle');
-  var pausetimesel = document.getElementById('pause-sel');
+  const arrowbutton = document.getElementById('study-arrow');
+  const rectangle = document.getElementById('study-rectangle');
+  const pausetimesel = document.getElementById('pause-sel');
   rectangle.style.marginTop = "-1vh";
   rectangle.style.marginBottom = "0vh";
   arrowbutton.style.transform = 'rotateX(180deg)';
@@ -382,9 +394,9 @@ function openstdopt() {
 }
 
 function closestdfopt() {
-  var arrowbutton = document.getElementById('study-arrow');
-  var rectangle = document.getElementById('study-rectangle');
-  var pausetimesel = document.getElementById('pause-sel');
+  const arrowbutton = document.getElementById('study-arrow');
+  const rectangle = document.getElementById('study-rectangle');
+  const pausetimesel = document.getElementById('pause-sel');
   rectangle.style.marginTop = "-5.5vh";
   rectangle.style.marginBottom = "-3vh";
   arrowbutton.style.transform = 'rotateX(0deg)';
@@ -393,8 +405,8 @@ function closestdfopt() {
 }
 
 function openpsopt() {
-  var arrowbutton2 = document.getElementById('pause-arrow');
-  var rectangle2 = document.getElementById('pause-rectangle');
+  const arrowbutton2 = document.getElementById('pause-arrow');
+  const rectangle2 = document.getElementById('pause-rectangle');
   rectangle2.style.marginTop = "-1vh";
   rectangle2.style.marginBottom = "0vh";
   arrowbutton2.style.transform = 'rotateX(180deg)';
@@ -402,8 +414,8 @@ function openpsopt() {
 }
 
 function closepsopt() {
-  var arrowbutton2 = document.getElementById('pause-arrow');
-  var rectangle2 = document.getElementById('pause-rectangle');
+  const arrowbutton2 = document.getElementById('pause-arrow');
+  const rectangle2 = document.getElementById('pause-rectangle');
   rectangle2.style.marginTop = "-5.5vh";
   rectangle2.style.marginBottom = "-3vh";
   arrowbutton2.style.transform = 'rotateX(0deg)';
@@ -411,11 +423,11 @@ function closepsopt() {
 }
 
 function openoptionslistener() {
-  var arrowbutton = document.getElementById('study-arrow');
-  var rectangle = document.getElementById('study-rectangle');
-  var pausetimesel = document.getElementById('pause-sel');
+  const arrowbutton = document.getElementById('study-arrow');
+  const rectangle = document.getElementById('study-rectangle');
+  const pausetimesel = document.getElementById('pause-sel');
   arrowbutton.addEventListener('click', function() {
-    if (optionsstudyopened == false) {
+    if (!optionsstudyopened) {
       openstdopt();
       closepsopt();
     } else {
@@ -425,10 +437,10 @@ function openoptionslistener() {
 }
 
 function openpauseoptionslistener() {
-  var arrowbutton2 = document.getElementById('pause-arrow');
-  var rectangle2 = document.getElementById('pause-rectangle');
+  const arrowbutton2 = document.getElementById('pause-arrow');
+  const rectangle2 = document.getElementById('pause-rectangle');
   arrowbutton2.addEventListener('click', function() {
-    if (optionspauseopened == false) {
+    if (!optionspauseopened) {
       openpsopt();
       closestdfopt();
     } else {
@@ -438,10 +450,10 @@ function openpauseoptionslistener() {
 }
 
 function stdoptionslistener() {
-  var divsoptions = document.querySelectorAll('.stdop');
-  var time = document.getElementById('time');
-  var selstd = document.getElementById('stsel-selected');
-  divsoptions.forEach(function(div) {
+  const divsoptions = document.querySelectorAll('.stdop');
+  const time = document.getElementById('time');
+  const selstd = document.getElementById('stsel-selected');
+  divsoptions.forEach((div) => {
     div.addEventListener('click', function() {
       time.innerHTML = this.innerHTML.replace(/\D/g, '') + ':00';
       selectedstudytime = parseInt(this.innerHTML.replace(/\D/g, ''), 10);
@@ -452,9 +464,9 @@ function stdoptionslistener() {
 }
 
 function psoptionslistener() {
-  var divsoptions = document.querySelectorAll('.psop');
-  var selps = document.getElementById('pssel-selected');
-  divsoptions.forEach(function(div) {
+  const divsoptions = document.querySelectorAll('.psop');
+  const selps = document.getElementById('pssel-selected');
+  divsoptions.forEach((div) => {
     div.addEventListener('click', function() {
       selectedpausetime = parseInt(this.innerHTML.replace(/\D/g, ''), 10);
       selps.innerHTML = this.innerHTML;
@@ -486,8 +498,13 @@ function savePomodoro() {
     modification: modification
   };
 
-  fetch('http://localhost:8000/api/tomatoes', {
-    method: 'POST',
+  const url = currentPomodoroId
+    ? `http://localhost:8000/api/tomatoes/${currentPomodoroId}`
+    : 'http://localhost:8000/api/tomatoes';
+  const method = currentPomodoroId ? 'PUT' : 'POST';
+
+  fetch(url, {
+    method: method,
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -503,10 +520,14 @@ function savePomodoro() {
       if (!response.ok) {
         throw new Error('Network response was not ok: ' + response.statusText);
       }
-      return response.text();
+      return response.json();
     })
     .then(result => {
       console.log('Pomodoro salvato con successo:', result);
+      // Se abbiamo creato un nuovo pomodoro, memorizzo il suo id per aggiornamenti futuri
+      if (!currentPomodoroId && result.id) {
+        currentPomodoroId = result.id;
+      }
     })
     .catch(error => {
       console.error('Errore nel salvataggio del pomodoro:', error);
@@ -536,6 +557,10 @@ function loadLastPomodoro() {
         data = data[0];
       }
       if (data && Object.keys(data).length > 0) {
+        // Memorizzo l'id del pomodoro se presente
+        if (data.id) {
+          currentPomodoroId = data.id;
+        }
         if (data.interrupted !== undefined && data.interrupted === "f") {
           console.log('Pomodoro finito, uso i valori di default.');
           selectedstudytime = 35;

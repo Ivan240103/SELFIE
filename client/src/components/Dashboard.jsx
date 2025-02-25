@@ -131,17 +131,18 @@ const Dashboard = () => {
         try {
           const response = await axios.get(`${process.env.REACT_APP_API}/api/tomatoes/last`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          })
-          setTomato(response.data)
+          });
+          const data = response.data;
+          setTomato(Array.isArray(data) && data.length > 0 ? data[0] : data);  //controlla se è un'array e passa il primo elemento, altrimenti passa direttamente 'data'
         } catch (error) {
-          setError('Error while fetching tomato')
-          setTomato({})
+          setError('Error while fetching tomato');
+          setTomato({});
         }
       }
-    }
-
-    fetchTomato()
-  }, [isAuthenticated])
+    };
+  
+    fetchTomato();
+  }, [isAuthenticated]);
 
   return(
     <div>
@@ -279,7 +280,6 @@ const Dashboard = () => {
                 // TODO: finire preview pomodoro
                 <div className='dash-tomato'>
                   <h3>Ultima sessione</h3>
-                  {console.log(tomato.loops)}
                   <h4>{tomato.loops} {tomato.loops === 1 ? 'ciclo' : 'cicli'} di</h4>
                   <p><strong>Tempo di studio:</strong> {tomato.studyMinutes}
                   {tomato.studyMinutes === 1 ? 'minuto' : 'minuti'}</p>
