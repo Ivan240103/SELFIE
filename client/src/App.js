@@ -10,22 +10,21 @@ import Calendar from './components/Calendar/Calendar';
 import Notes from './components/Notes/Notes';
 import Tomato from './components/Tomato/tomato';
 
-import './css/App.css'
-
 function App() {
-
   return (
     <AuthenticationProvider>
       <TimeMachineProvider>
         <div className="App">
           <Router>
             <Routes>
-              <Route path="/" element={<Dashboard/>} />
+              <Route path="/" element={<Dashboard />} />
               <Route path="/login" element={<Access />} />
               <Route path="/register" element={<Registration />} />
-              <Route path="/profile" element={<Profile/>} />
-              <Route path="/Calendar" element={<Calendar />} />
-              <Route path="/Notes" element={<Notes />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/notes" element={<Notes />} />
+              {/* TODO: aggiungere route della lista di task */}
+              {/* <Route path="/tasks" element={} /> */}
               <Route path="/tomato" element={<Tomato />} />
             </Routes>
           </Router>

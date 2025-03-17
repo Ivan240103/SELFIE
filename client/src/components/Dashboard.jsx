@@ -165,7 +165,7 @@ const Dashboard = () => {
           <div
             className='dash-card'
             id='dash-calendar'
-            onClick={() => navigate('/Calendar')}
+            onClick={() => navigate('/calendar')}
           >
             <div className='dash-card-header'>
               <img
@@ -194,7 +194,7 @@ const Dashboard = () => {
           <div
             className='dash-card'
             id='dash-note'
-            onClick={() => navigate('/Notes')}
+            onClick={() => navigate('/notes')}
           >
             <div className='dash-card-header'>
               <img
