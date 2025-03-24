@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Auth/AuthenticationContext';
-import TimeMachine from '../TimeMachine/TimeMachine';
+import Header from '../Layout/Header';
 
 import '../../css/Note.css';
 
 function Notes() {
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate()
 
   const [notes, setNotes] = useState([]);
   const [title, setTitle] = useState('');
@@ -17,13 +15,6 @@ function Notes() {
   const [sortCriteria, setSortCriteria] = useState('title');
   const [fetchNotes, setFetchNotes] = useState(0) // per segnalare la necessità di un get
   const [error, setError] = useState('')
-
-  // verifica l'autenticazione
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login')
-    }
-  }, [isAuthenticated, navigate])
 
   // Caricare le note al montaggio del componente
   useEffect(() => {
@@ -63,7 +54,7 @@ function Notes() {
       }
       setNotes(sortedNotes);
     }
-  }, [sortCriteria]);
+  }, [notes, sortCriteria]);
 
   // Funzione per salvare una nuova nota
   async function handleSaveNote() {
@@ -202,7 +193,7 @@ function Notes() {
   return (
     <div>
       {isAuthenticated && <>
-        <TimeMachine />
+        <Header />
         <div className="notes-container">
           <h1 className="notes-header">Note</h1>
           <p>{error}</p>

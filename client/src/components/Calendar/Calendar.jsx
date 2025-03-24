@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -8,20 +7,13 @@ import interactionPlugin from '@fullcalendar/interaction';
 import rrulePlugin from '@fullcalendar/rrule';
 import { useAuth } from '../Auth/AuthenticationContext';
 import { useTimeMachine } from '../TimeMachine/TimeMachineContext';
+import Header from '../Layout/Header'
 import Event from "./Event";
 import Task from "./Task";
-import TimeMachine from '../TimeMachine/TimeMachine';
-
-/* TODO: X PAYAM
-PER I TASK. CONFRONTARE DEADLINE CON time, SE PASSATA COLORARE DI ROSSO.
-I TASK IN ROSSO VANNO PROPOSTI TEMPORANEAMENTE ANCHE NEL GIORNO ATTUALE
-(OLTRE A QUELLO IN CUI AVEVANO LA DEADLINE)
-*/
 
 function Calendar() {
   const { isAuthenticated } = useAuth()
   const { time, isTimeLoading } = useTimeMachine()
-  const navigate = useNavigate()
   const [user, setUser] = useState({})
   const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);
@@ -31,13 +23,6 @@ function Calendar() {
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [error, setError] = useState('');
-
-  // verifica l'autenticazione
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login')
-    }
-  }, [isAuthenticated, navigate])
 
   // recupera il profilo utente
   useEffect(() => {
@@ -181,115 +166,105 @@ function Calendar() {
   // leggendo un po' la docs mi sembra si chiami eventDrop la proprietà necessaria.
 
   return (
-      <div className='demo-app'>
-        {isAuthenticated && <>
-          <TimeMachine />
-          <Sidebar
-            weekendsVisible={weekendsVisible}
-            handleWeekendsToggle={handleWeekendsToggle}
+    <div className='demo-app'>
+      {isAuthenticated && <>
+        <Header />
+        <Sidebar
+          weekendsVisible={weekendsVisible}
+          handleWeekendsToggle={handleWeekendsToggle}
+        />
+        <div className='demo-app-main'>
+          {!isTimeLoading && <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
+            headerToolbar={{
+              left: 'prevYear,prev,today,next,nextYear',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            }}
+            initialView='dayGridMonth'
+            locale='it'
+            initialDate={time}
+            scrollTime='07:00'
+            now={time}
+            nowIndicator={true}
+            editable={true}
+            selectable={true}
+            dayMaxEvents={true}
+            showNonCurrentDates={false}
+            weekends={weekendsVisible}
+            events={[
+              ...calendarEvents,
+              ...calendarTasks, // Assicurati di aggiungere le task qui
+            ]}
+            eventClick={(info) => {
+              const clickedEvent = info.event;
+              // Se l'evento cliccato è una task
+              if (clickedEvent.extendedProps.eventType === 'task') {
+                const clickedTask = calendarTasks.find(task => task.id === clickedEvent.id);
+
+                // Passa la task da modificare al componente Task
+                if (clickedTask) {
+                  setTaskToEdit(clickedTask); // Imposta la task da modificare
+                }
+              }
+              // Se l'evento cliccato è un evento (non una task)
+              else if (clickedEvent.extendedProps.eventType === 'event') {
+                // Passa i dettagli dell'evento al componente Event per la modifica
+                setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare
+              }
+            }}
+          />}
+          <Event
+            onSaveEvent={handleEventSave}
+            onUpdateEvent={handleEventUpdate}
+            onDeleteEvent={handleEventDelete}
+            eventDetails={currentEvent}
+            user={user}
           />
-          <div className='demo-app-main'>
-            {!isTimeLoading && <FullCalendar
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
-              headerToolbar={{
-                left: 'prevYear,prev,today,next,nextYear',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-              }}
-              initialView='dayGridMonth'
-              locale='it'
-              initialDate={time}
-              scrollTime='07:00'
-              now={time}
-              nowIndicator={true}
-              editable={true}
-              selectable={true}
-              dayMaxEvents={true}
-              showNonCurrentDates={false}
-              weekends={weekendsVisible}
-              events={[
-                ...calendarEvents,
-                ...calendarTasks, // Assicurati di aggiungere le task qui
-              ]}
-              eventClick={(info) => {
-                const clickedEvent = info.event;
-                // Se l'evento cliccato è una task
-                if (clickedEvent.extendedProps.eventType === 'task') {
-                  const clickedTask = calendarTasks.find(task => task.id === clickedEvent.id);
-                  
-                  // Passa la task da modificare al componente Task
-                  if (clickedTask) {
-                    setTaskToEdit(clickedTask); // Imposta la task da modificare
-                  }
-                }
-                // Se l'evento cliccato è un evento (non una task)
-                else if (clickedEvent.extendedProps.eventType === 'event') {
-                  // Passa i dettagli dell'evento al componente Event per la modifica
-                  setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare
-                }
-              }}
-            />}
-            <Event 
-              onSaveEvent={handleEventSave}
-              onUpdateEvent={handleEventUpdate} 
-              onDeleteEvent={handleEventDelete} 
-              eventDetails={currentEvent}
-              user={user}
-            />
-            <div>
-              <h3>Lista Attività</h3>
-              <ul>
-                {calendarTasks.map(task => (
-                    <li key={task.id}>
-                      <input
-                        type="checkbox"
-                        checked={selectedTasks.includes(task.id)}
-                        onChange={() => handleTaskSelect(task.id)}
-                      />
-                      {task.title} - Scadenza: {new Date(task.start).toLocaleDateString()}
-                    </li>
-                ))}
-              </ul>
-              {/* Mostra il bottone di modifica solo se una singola task è selezionata */}
-              {selectedTasks.length === 1 && (
-                <button onClick={() => handleTaskClick(calendarTasks.find(task => task.id === selectedTasks[0]))}>
-                  Modifica Task
-                </button>
-              )}
-            </div>
-            <Task 
-              onSaveTask={handleTaskSave} 
-              onUpdateTask={handleTaskUpdate}
-              onDeleteTask={handleTaskDelete}
-              taskDetails={taskToEdit} // Passiamo la task da modificare
-              selectedTasks={selectedTasks}
-            />
+          <div>
+            <h3>Lista Attività</h3>
+            <ul>
+              {calendarTasks.map(task => (
+                <li key={task.id}>
+                  <input
+                    type="checkbox"
+                    checked={selectedTasks.includes(task.id)}
+                    onChange={() => handleTaskSelect(task.id)}
+                  />
+                  {task.title} - Scadenza: {new Date(task.start).toLocaleDateString()}
+                </li>
+              ))}
+            </ul>
+            {/* Mostra il bottone di modifica solo se una singola task è selezionata */}
+            {selectedTasks.length === 1 && (
+              <button onClick={() => handleTaskClick(calendarTasks.find(task => task.id === selectedTasks[0]))}>
+                Modifica Task
+              </button>
+            )}
           </div>
-        </>}
-      </div>
+          <Task
+            onSaveTask={handleTaskSave}
+            onUpdateTask={handleTaskUpdate}
+            onDeleteTask={handleTaskDelete}
+            taskDetails={taskToEdit} // Passiamo la task da modificare
+            selectedTasks={selectedTasks}
+          />
+        </div>
+      </>}
+    </div>
   );
 }
 
 function Sidebar({ weekendsVisible, handleWeekendsToggle }) {
   return (
     <div className='demo-app-sidebar'>
-      <nav className="navbar">
-          <div className="navbar-container">
-              <ul className="navbar-menu">
-                  <li className="navbar-item">Calendario</li>
-                  <li className="navbar-item">Note</li>
-                  <li className="navbar-item">Pomodoro</li>
-                  <li className="navbar-item">Contatti</li>
-              </ul>
-          </div>
-      </nav>
       <div className='demo-app-sidebar-section'>
         <label>
           <input
             type='checkbox'
             checked={weekendsVisible}
             onChange={handleWeekendsToggle}
-          ></input>
+          />
           toggle weekends
         </label>
       </div>

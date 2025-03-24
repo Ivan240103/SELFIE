@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import CryptoJS from 'crypto-js'
 import { useAuth } from '../Auth/AuthenticationContext'
-import TimeMachine from '../TimeMachine/TimeMachine'
+import Header from '../Layout/Header'
 
 import { datetimeToDateString } from '../../utils/dates'
 
@@ -28,13 +28,6 @@ function Profile() {
   const [google, setGoogle] = useState(false)
 
   const [error, setError] = useState('')
-  
-  // verifica l'autenticazione
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login')
-    }
-  }, [isAuthenticated, navigate])
 
   // recupera i dati del profilo dal backend
   useEffect(() => {
@@ -161,7 +154,7 @@ function Profile() {
   return (
     <div>
       {isAuthenticated && <>
-        <TimeMachine />
+        <Header />
         <p className='error'>{error}</p>
         <div className='profile-container' id='profile-toplevel'>
           <h2 className='profile-header'>Ciao, {username}</h2>

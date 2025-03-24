@@ -16,37 +16,37 @@ mettere un button per segnarlo come completato (usare la route)
 */
 
 function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTasks }) {
-    const { time } = useTimeMachine();
+  const { time } = useTimeMachine();
 
-    const [showModal, setShowModal] = useState(false);
-    const [task, setTask] = useState({});
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [deadline, setDeadline] = useState(time);
-    const [isDone, setIsDone] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [task, setTask] = useState({});
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [deadline, setDeadline] = useState(time);
+  const [isDone, setIsDone] = useState(false);
 
-    useEffect(() => {
-      const fetchTask = async () => {
-          if (taskDetails) {
-              try {
-                  const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskDetails}`, {
-                      method: 'GET',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                      }
-                  });
-                  const task = await response.json();
-                  setTask(task)
-              } catch (error) {
-                  alert(error.message || 'no response')
-              }
-          } else {
-              setTask({})
-          }
+  useEffect(() => {
+    const fetchTask = async () => {
+      if (taskDetails) {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskDetails}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          const task = await response.json();
+          setTask(task)
+        } catch (error) {
+          alert(error.message || 'no response')
+        }
+      } else {
+        setTask({})
       }
+    }
 
-      fetchTask()
+    fetchTask()
   }, [taskDetails])
 
   useEffect(() => {
@@ -57,20 +57,13 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
 
   // popola i campi per riempire il form
   useEffect(() => {
-      const setFields = () => {
-        if (task) {
-          setTitle(task.title || "")
-          setDescription(task.description || "")
-          setDeadline(task.deadline ? new Date(task.deadline) : time)
-        } else{
-          setTitle("");
-          setDescription("");
-          setDeadline(time);
-        }
-        
-      }
-      
-      setFields()
+    const setFields = () => {
+      setTitle(task.title || "")
+      setDescription(task.description || "")
+      setDeadline(task.deadline ? new Date(task.deadline) : time)
+    }
+
+    setFields()
   }, [task])
 
   function handleInputChange(e) {
@@ -87,15 +80,14 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
     try {
       // Preparazione della chiamata POST
       const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/`, {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}` // Se necessario
-          },
-          body: JSON.stringify(taskData)
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(taskData)
       });
 
-      const result = await response.json();
       setShowModal(false);
     } catch (error) {
       alert('Errore nella chiamata POST:', error.message || 'no response');
@@ -110,12 +102,12 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
     };
     try {
       const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskDetails.id}`, {
-      method: 'PUT',
-      headers: {
+        method: 'PUT',
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(updatedTask)
+        },
+        body: JSON.stringify(updatedTask)
       });
       const result = await response.json();
       alert('Task aggiornata con successo!');
@@ -127,30 +119,30 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
 
   async function handleDeleteTask() {
     if (selectedTasks.length > 0) {
-        selectedTasks.forEach(async (taskId) => {
-            try {
-            const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
+      selectedTasks.forEach(async (taskId) => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
 
-            if (response.ok) {
-                alert(`Task con ID ${taskId} eliminata con successo!`);
-                onDeleteTask(taskDetails);
-                // Puoi inviare una richiesta GET per aggiornare la lista delle task
-            } else {
-                alert('Errore durante l\'eliminazione delle task!');
-            }
-            } catch (error) {
-                alert('Errore nella chiamata DELETE:', error.message || 'no response');
-            }
-        });
+          if (response.ok) {
+            alert(`Task con ID ${taskId} eliminata con successo!`);
+            onDeleteTask(taskDetails);
+            // Puoi inviare una richiesta GET per aggiornare la lista delle task
+          } else {
+            alert('Errore durante l\'eliminazione delle task!');
+          }
+        } catch (error) {
+          alert('Errore nella chiamata DELETE:', error.message || 'no response');
+        }
+      });
     }
   }
-  
+
   async function handleCompleteTask() {
     const completedTask = {
       isDone: isDone
@@ -161,17 +153,17 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
           const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/toggle/${taskId}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             body: JSON.stringify(completedTask)
           });
-            if (response.ok) {
-              const result = await response.json();
-              // Aggiorna il colore e lo stato della task localmente
-              onUpdateTask({id:taskId, color: 'green', isDone: true})
-              alert('Task completata con successo!');
-            }
+          if (response.ok) {
+            const result = await response.json();
+            // Aggiorna il colore e lo stato della task localmente
+            onUpdateTask({ id: taskId, color: 'green', isDone: true })
+            alert('Task completata con successo!');
+          }
         } catch (error) {
           alert('Errore nella chiamata PUT:', error.message || 'no response');
         }
@@ -184,33 +176,28 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
       <button onClick={() => setShowModal(true)}>Aggiungi Task</button>
 
       {showModal && (
+        // TODO: passare ad un tag Modal
         <div className="modal">
           <div className="modal-content">
             <h2>{taskDetails ? 'Modifica Task' : 'Crea una nuova Task'}</h2>
             <form>
-              <label>
-                Titolo:
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </label>
-              <label>
-                Scadenza:
-                <input
-                  type="datetime-local"
-                  value={datetimeToString(deadline)}
-                  onChange={(e) => setDeadline(new Date(e.target.value))}
-                />
-              </label>
-              <label>
-                Descrizione:
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </label>
+              <label>Titolo:</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <label>Scadenza:</label>
+              <input
+                type="datetime-local"
+                value={datetimeToString(deadline)}
+                onChange={(e) => setDeadline(new Date(e.target.value))}
+              />
+              <label>Descrizione:</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </form>
             <button onClick={taskDetails ? handleUpdateTask : handleSaveTask}>
               {taskDetails ? 'Aggiorna Task' : 'Salva Task'}

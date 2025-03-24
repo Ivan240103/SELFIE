@@ -142,8 +142,7 @@ const Dashboard = () => {
     <div>
       {isAuthenticated && <>
         <Header />
-        <TimeMachine />
-        <p>{error}</p>
+        {error && <p>{error}</p>}
         <div className='dash-container'>
           <div
             className='dash-card'
