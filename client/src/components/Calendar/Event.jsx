@@ -3,7 +3,7 @@ import { useTimeMachine } from '../TimeMachine/TimeMachineContext'
 import { 
     datetimeToString,
     datetimeToDateString
-} from '../../services/dateServices';
+} from '../../utils/dates';
 import Modal from 'react-modal'
 
 import '../../css/Event.css';

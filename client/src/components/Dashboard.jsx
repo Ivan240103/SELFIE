@@ -7,7 +7,7 @@ import rrulePlugin from '@fullcalendar/rrule';
 import TimeMachine from './TimeMachine/TimeMachine'
 import { useTimeMachine } from './TimeMachine/TimeMachineContext'
 import { useAuth } from './Auth/AuthenticationContext';
-import { datetimeToDateString } from '../services/dateServices';
+import { datetimeToDateString } from '../utils/dates';
 
 import Header from './Layout/Header'
 import calendarIcon from "../images/calendar-icon.png";

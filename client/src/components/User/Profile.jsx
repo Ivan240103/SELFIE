@@ -5,7 +5,7 @@ import CryptoJS from 'crypto-js'
 import { useAuth } from '../Auth/AuthenticationContext'
 import TimeMachine from '../TimeMachine/TimeMachine'
 
-import { datetimeToDateString } from '../../services/dateServices'
+import { datetimeToDateString } from '../../utils/dates'
 
 import '../../css/Profile.css'
 
