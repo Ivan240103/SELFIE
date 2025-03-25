@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import { useNavigate } from "react-router-dom"
+import axios from 'axios'
 import { useAuth } from '../Auth/AuthenticationContext'
 import TimeMachine from '../TimeMachine/TimeMachine'
 import '../../css/Header.css'
@@ -18,6 +18,21 @@ function Header() {
       navigate('/login')
     }
   }, [isAuthenticated, navigate])
+
+  useEffect(() => {
+    const registerServiceWorker = async () => {
+      if ("serviceWorker" in navigator) {
+        try {
+          await navigator.serviceWorker.register('/sw.js')
+          setError('')
+        } catch (error) {
+          setError('Service worker registration failed')
+        }
+      }
+    }
+
+    registerServiceWorker()
+  }, [])
 
   // recupera il profilo utente per il permesso delle notifiche
   useEffect(() => {
@@ -38,6 +53,24 @@ function Header() {
     fetchUser()
   }, [isAuthenticated])
 
+  async function subscribeToPush() {
+    const registration = await navigator.serviceWorker.ready
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: process.env.REACT_APP_PUB_VAPID
+    })
+
+    try {
+      await axios.post(`${process.env.REACT_APP_API}/api/notification/subscribe`,
+        JSON.stringify(subscription),
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      )
+      setError('')
+    } catch (error) {
+      setError('subscribeToPush error')
+    }
+  }
+
   async function askNotifyPermission() {
     if (!notifyPermission) {
       const permission = await Notification.requestPermission()
@@ -51,6 +84,7 @@ function Header() {
         } catch (error) {
           setError(error.response?.data || 'Error in askNotifyPermission')
         }
+        await subscribeToPush()
       }
     }
   }
