@@ -86,7 +86,10 @@
 
 ## Estensione 18-27
 - [ ] notifica per gli eventi a scelta (mail, SO, whatsapp...), con un certo anticipo e una certa ripetizione
-- [ ] notifica crescente di urgenza per le attività
+  - [x] eventi ricorrenti
+  - [x] aggiungere il db
+  - [ ] filtrare a chi inviare le notifiche
+- [ ] notifica crescente di urgenza per le attività -> idea: alla tot ora del giorno prendi tutti i task non completati ma scaduti e reimposta la notifica a false, in modo che al giro successivo di check vengano nuovamente notificate. fare la stessa cosa anche per i recurrent events
 - [ ] note in markdown
 - [ ] cicli di pomodoro programmati come eventi
 - [ ] cicli non completati si spostano alle giornate successive

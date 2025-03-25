@@ -24,7 +24,8 @@ const eventFromGoogleToSelfie = async (gEvent, owner) => {
     rrule: recurrence ? await addStartToRrule(recurrence[0], start) : null,
     place: location || undefined,
     owner: owner,
-    googleId: id
+    googleId: id,
+    reminders: ''
   })
 }
 

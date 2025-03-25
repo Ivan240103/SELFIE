@@ -8,6 +8,7 @@ const passport = require('passport')
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt')
 const cors = require('cors')
 require('dotenv').config()
+require('./services/Notificate')
 
 const User = require('./models/User')
 
@@ -54,6 +55,8 @@ const tomatoRoutes = require('./routes/tomatoes')
 app.use('/api/tomatoes', tomatoRoutes)
 const noteRoutes = require('./routes/notes')
 app.use('/api/notes', noteRoutes)
+const { notificationRoutes } = require('./routes/notifications')
+app.use('/api/notification', notificationRoutes)
 
 // connessione al db
 const u = process.env.DB_USER
