@@ -42,10 +42,10 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
   const [googleId, setGoogleId] = useState('')
   const [isRecurrent, setIsRecurrent] = useState(false);
   const [freq, setFreq] = useState('daily');
-  const [interval, setInterval] = useState(1);
+  const [interval, setInterval] = useState('1');
   const [term, setTerm] = useState('n')
   const [until, setUntil] = useState(time.toISOString().substring(0, 10))
-  const [count, setCount] = useState(1)
+  const [count, setCount] = useState('1')
   const [emailReminder, setEmailReminder] = useState(
     { checked: false, method: 'email', before: 15, time: 'm' }
   )
@@ -90,11 +90,11 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
       setGoogleId(event.googleId || '')
       setIsRecurrent(event?.rrule ? true : false)
       setFreq(event?.rrule?.freq || 'daily')
-      setInterval(event?.rrule?.interval || 1)
+      setInterval(event?.rrule?.interval || '1')
       if (event?.rrule?.until) {
         setTerm('u')
         setUntil(event?.rrule?.until)
-        setCount(1)
+        setCount('1')
       } else if (event?.rrule?.count) {
         setTerm('c')
         setUntil(time.toISOString().substring(0, 10))
@@ -102,7 +102,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
       } else {
         setTerm('n')
         setUntil(time.toISOString().substring(0, 10))
-        setCount(1)
+        setCount('1')
       }
       if (event?.reminders) {
         event.reminders.split(',').forEach(reminder => {
@@ -350,10 +350,10 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
             value={freq}
             onChange={(e) => setFreq(e.target.value)}
           >
-            <option value='daily'>{interval === 1 ? 'Giorno' : 'Giorni'}</option>
-            <option value='weekly'>{interval === 1 ? 'Settimana' : 'Settimane'}</option>
-            <option value='monthly'>{interval === 1 ? 'Mese' : 'Mesi'}</option>
-            <option value='yearly'>{interval === 1 ? 'Anno' : 'Anni'}</option>
+            <option value='daily'>{interval === '1' ? 'Giorno' : 'Giorni'}</option>
+            <option value='weekly'>{interval === '1' ? 'Settimana' : 'Settimane'}</option>
+            <option value='monthly'>{interval === '1' ? 'Mese' : 'Mesi'}</option>
+            <option value='yearly'>{interval === '1' ? 'Anno' : 'Anni'}</option>
           </select>
           <label>Scade...</label>
           <input
@@ -386,7 +386,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
             type="number"
             value={count}
             onChange={(e) => setCount(e.target.value)}
-          /> {count === 1 ? 'ripetizione' : 'ripetizioni'}
+          /> {count === '1' ? 'ripetizione' : 'ripetizioni'}
         </div>
         <div>
           <label>Luogo:</label>
@@ -425,9 +425,9 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
               time: e.target.value
             }))}
           >
-            <option value='m'>{emailReminder.before === 1 ? 'Minuto' : 'Minuti'}</option>
-            <option value='h'>{emailReminder.before === 1 ? 'Ora' : 'Ore'}</option>
-            <option value='d'>{emailReminder.before === 1 ? 'Giorno' : 'Giorni'}</option>
+            <option value='m'>{emailReminder.before === '1' ? 'Minuto' : 'Minuti'}</option>
+            <option value='h'>{emailReminder.before === '1' ? 'Ora' : 'Ore'}</option>
+            <option value='d'>{emailReminder.before === '1' ? 'Giorno' : 'Giorni'}</option>
           </select> prima
           <br />
           <input
@@ -437,7 +437,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
               ...prev,
               checked: e.target.checked
             }))}
-          /> Email
+          /> Push
           <input
             type="number"
             min='1'
@@ -456,9 +456,9 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
               time: e.target.value
             }))}
           >
-            <option value='m'>{pushReminder.before === 1 ? 'Minuto' : 'Minuti'}</option>
-            <option value='h'>{pushReminder.before === 1 ? 'Ora' : 'Ore'}</option>
-            <option value='d'>{pushReminder.before === 1 ? 'Giorno' : 'Giorni'}</option>
+            <option value='m'>{pushReminder.before === '1' ? 'Minuto' : 'Minuti'}</option>
+            <option value='h'>{pushReminder.before === '1' ? 'Ora' : 'Ore'}</option>
+            <option value='d'>{pushReminder.before === '1' ? 'Giorno' : 'Giorni'}</option>
           </select> prima
         </div>}
         {!googleId && <>
