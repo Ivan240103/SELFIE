@@ -46,7 +46,12 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
   const [term, setTerm] = useState('n')
   const [until, setUntil] = useState(time.toISOString().substring(0, 10))
   const [count, setCount] = useState(1)
-  const [reminders, setReminders] = useState([])
+  const [emailReminder, setEmailReminder] = useState(
+    { checked: false, method: 'email', before: 15, time: 'm' }
+  )
+  const [pushReminder, setPushReminder] = useState(
+    { checked: false, method: 'push', before: 15, time: 'm' }
+  )
 
   // recupera l'evento specifico dal backend
   useEffect(() => {
@@ -100,13 +105,15 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
         setCount(1)
       }
       if (event?.reminders) {
-        const remindersArray = event.reminders.split(',').map(reminder => {
+        event.reminders.split(',').forEach(reminder => {
           const r = reminder.split(':')
-          return { method: r[0], minutes: r[1] }
+          const calc = calcReminder(parseInt(r[1]))
+          if (r[0] === "email") {
+            setEmailReminder({ checked: true, method: r[0], ...calc })
+          } else if (r[0] === "push") {
+            setPushReminder({ checked: true, method: r[0], ...calc })
+          }
         })
-        setReminders(remindersArray)
-      } else {
-        setReminders([])
       }
     }
 
@@ -143,8 +150,29 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
     }
   }
 
+  function calcReminder(minutes) {
+    if (minutes < 60) {
+      return { before: minutes, time: 'm' }
+    } else if (minutes < 60*24) {
+      return { before: minutes / 60, time: 'h' }
+    } else {
+      return { before: minutes / (60*24), time: 'd'}
+    }
+  }
+
   function remindersToString() {
-    return reminders.map(r => `${r.method}:${r.minutes}`).join(',')
+    const rem = []
+    if (emailReminder.checked) {
+      const minutes = emailReminder.time === 'm' ? emailReminder.before :
+        emailReminder.time === 'h' ? emailReminder.before * 60 : emailReminder.before * 60 * 24
+      rem.push(`${emailReminder.method}:${minutes}`)
+    }
+    if (pushReminder.checked) {
+      const minutes = pushReminder.time === 'm' ? pushReminder.before :
+        pushReminder.time === 'h' ? pushReminder.before * 60 : pushReminder.before * 60 * 24
+      rem.push(`${pushReminder.method}:${minutes}`)
+    }
+    return rem.length > 0 ? rem.join(',') : ''
   }
 
   const handleSave = async () => {
@@ -296,11 +324,11 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
         </div>
         <div hidden={isAllDay}>
           <label>Fine:</label>
-            <input
-              type="datetime-local"
-              value={datetimeToString(end)}
-              onChange={(e) => setEnd(new Date(e.target.value))}
-            />
+          <input
+            type="datetime-local"
+            value={datetimeToString(end)}
+            onChange={(e) => setEnd(new Date(e.target.value))}
+          />
         </div>
         <div>
           <label>Evento ricorrente:</label>
@@ -369,31 +397,69 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
           />
         </div>
         {user.notification && <div>
-          {/* <label> TODO: fix reminders creation
-                Promemoria
-            </label>
-            <input
-                type="number"
-                min='1'
-            />
-            <select>
-                <option value='daily'>{ === 1 ? 'Minuto' : 'Minuti'}</option>
-                <option value='daily'>{ === 1 ? 'Ora' : 'Ore'}</option>
-                <option value='daily'>{ === 1 ? 'Giorno' : 'Giorni'}</option>
-            </select>
-            prima, tramite
-            <input
-                type="radio"
-                name="method-rem1"
-                value='email'
-                checked={}
-            /> Email
-            <input
-                type="radio"
-                name="method-rem1"
-                value='popup'
-                checked={}
-            /> Popup */}
+          <label>Promemoria</label>
+          <br />
+          <input
+            type="checkbox"
+            checked={emailReminder.checked}
+            onChange={e => setEmailReminder(prev => ({
+              ...prev,
+              checked: e.target.checked
+            }))}
+          /> Email
+          <input
+            type="number"
+            min='1'
+            disabled={!emailReminder.checked}
+            value={emailReminder.before}
+            onChange={e => setEmailReminder(prev => ({
+              ...prev,
+              before: e.target.value
+            }))}
+          />
+          <select
+            disabled={!emailReminder.checked}
+            value={emailReminder.time}
+            onChange={e => setEmailReminder(prev => ({
+              ...prev,
+              time: e.target.value
+            }))}
+          >
+            <option value='m'>{emailReminder.before === 1 ? 'Minuto' : 'Minuti'}</option>
+            <option value='h'>{emailReminder.before === 1 ? 'Ora' : 'Ore'}</option>
+            <option value='d'>{emailReminder.before === 1 ? 'Giorno' : 'Giorni'}</option>
+          </select> prima
+          <br />
+          <input
+            type="checkbox"
+            checked={pushReminder.checked}
+            onChange={e => setPushReminder(prev => ({
+              ...prev,
+              checked: e.target.checked
+            }))}
+          /> Email
+          <input
+            type="number"
+            min='1'
+            disabled={!pushReminder.checked}
+            value={pushReminder.before}
+            onChange={e => setPushReminder(prev => ({
+              ...prev,
+              before: e.target.value
+            }))}
+          />
+          <select
+            disabled={!pushReminder.checked}
+            value={pushReminder.time}
+            onChange={e => setPushReminder(prev => ({
+              ...prev,
+              time: e.target.value
+            }))}
+          >
+            <option value='m'>{pushReminder.before === 1 ? 'Minuto' : 'Minuti'}</option>
+            <option value='h'>{pushReminder.before === 1 ? 'Ora' : 'Ore'}</option>
+            <option value='d'>{pushReminder.before === 1 ? 'Giorno' : 'Giorni'}</option>
+          </select> prima
         </div>}
         {!googleId && <>
           {eventDetails ? (
