@@ -42,9 +42,9 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE
 )
 
-const sendPush = async (title, body, user) => {
+const sendPush = async (title, body, username) => {
   try {
-    const sub = await Sub.findOne({ owner: user })
+    const sub = await Sub.findOne({ owner: username })
     const payload = JSON.stringify({ title, body })
     await webpush.sendNotification(sub.subscription, payload)
   } catch (err) {}

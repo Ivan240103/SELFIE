@@ -61,8 +61,8 @@ function Header() {
     })
 
     try {
-      await axios.post(`${process.env.REACT_APP_API}/api/notification/subscribe`,
-        JSON.stringify(subscription),
+      await axios.post(`${process.env.REACT_APP_API}/api/notification/push/subscribe`,
+        { subscription: subscription },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       )
       setError('')

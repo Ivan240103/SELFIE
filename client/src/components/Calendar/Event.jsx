@@ -409,7 +409,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
           /> Email
           <input
             type="number"
-            min='1'
+            min={emailReminder.time === 'm' ? 5 : 1}
             disabled={!emailReminder.checked}
             value={emailReminder.before}
             onChange={e => setEmailReminder(prev => ({
@@ -440,7 +440,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
           /> Push
           <input
             type="number"
-            min='1'
+            min={pushReminder.time === 'm' ? 5 : 1}
             disabled={!pushReminder.checked}
             value={pushReminder.before}
             onChange={e => setPushReminder(prev => ({
