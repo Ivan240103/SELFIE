@@ -107,13 +107,36 @@ async function notificateTaskEmail() {
       if (!owner.notification) return
 
       const mailReminderMinutes = t.reminders.split(',').filter(r => r.includes('email'))[0].split(':')[1]
-      const reminderInstant = (new Date(t.deadline)).getTime() - parseInt(mailReminderMinutes) * 60 * 1000
-      if (Date.parse(await getTime(t.owner)) > reminderInstant) {
-        await sendMail(
-          owner.email,
-          t.title,
-          `Il tuo task "${t.title}" è in scadenza il ` + (new Date(t.deadline)).toLocaleString('it-IT')
-        )
+      const deadlineMs = (new Date(t.deadline)).getTime()
+      const reminderInstant = deadlineMs - parseInt(mailReminderMinutes) * 60 * 1000
+      const ownerTimeMs = Date.parse(await getTime(t.owner))
+      if (ownerTimeMs > reminderInstant) {
+        // needs notification
+        if (ownerTimeMs > deadlineMs + 7 * 24 * 60 * 60 * 1000) {
+          await sendMail(
+            owner.email,
+            `RICORDATI DI ${t.title} !`,
+            `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT') + ', è più di una settimana fa!'
+          )
+        } else if (ownerTimeMs > deadlineMs + 24 * 60 * 60 * 1000) {
+          await sendMail(
+            owner.email,
+            `!!! ${t.title} !!!`,
+            `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT') + ", è già un po' che lo porti dietro."
+          )
+        } else if (ownerTimeMs > deadlineMs) {
+          await sendMail(
+            owner.email,
+            `${t.title}`,
+            `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT')
+          )
+        } else {
+          await sendMail(
+            owner.email,
+            t.title,
+            `Il tuo task "${t.title}" è in scadenza il ` + (new Date(t.deadline)).toLocaleString('it-IT')
+          )
+        }
         await Task.findByIdAndUpdate(
           t._id,
           { $set: { emailNotified: true } }
@@ -140,13 +163,36 @@ async function notificateTaskPush() {
       if (!owner.notification) return
       
       const pushReminderMinutes = t.reminders.split(',').filter(r => r.includes('push'))[0].split(':')[1]
-      const reminderInstant = (new Date(t.deadline)).getTime() - parseInt(pushReminderMinutes) * 60 * 1000
-      if (Date.parse(await getTime(t.owner)) > reminderInstant) {
-        await sendPush(
-          t.title,
-          `Il tuo task "${t.title}" è in scadenza il ` + (new Date(t.deadline)).toLocaleString('it-IT'),
-          t.owner
-        )
+      const deadlineMs = (new Date(t.deadline)).getTime()
+      const reminderInstant = deadlineMs - parseInt(pushReminderMinutes) * 60 * 1000
+      const ownerTimeMs = Date.parse(await getTime(t.owner))
+      if (ownerTimeMs > reminderInstant) {
+        // needs notification
+        if (ownerTimeMs > deadlineMs + 7 * 24 * 60 * 60 * 1000) {
+          await sendPush(
+            `RICORDATI DI ${t.title} !`,
+            `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT') + ', è più di una settimana fa!',
+            t.owner
+          )
+        } else if (ownerTimeMs > deadlineMs + 24 * 60 * 60 * 1000) {
+          await sendPush(
+            `!!! ${t.title} !!!`,
+            `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT') + ", è già un po' che lo porti dietro.",
+            t.owner
+          )
+        } else if (ownerTimeMs > deadlineMs) {
+          await sendPush(
+            t.title,
+            `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT'),
+            t.owner
+          )
+        } else {
+          await sendPush(
+            t.title,
+            `Il tuo task "${t.title}" è in scadenza il ` + (new Date(t.deadline)).toLocaleString('it-IT'),
+            t.owner
+          )
+        }
         await Task.findByIdAndUpdate(
           t._id,
           { $set: { pushNotified: true } }
