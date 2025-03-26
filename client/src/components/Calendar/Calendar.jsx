@@ -93,8 +93,8 @@ function Calendar() {
           setLastPomodoro({
             id: pomodoro._id,
             title: `🍅 Pomodoro`,
-            start: Date.now(),
-            end: new Date(Date.now() + pomodoro.remainingMinutes * 60 * 1000), //Volevo cercare di mostrare la "barra arancione in day nel calendario" come tempo rimanente ma non mi sa che ho fallito
+            start: new Date(time),
+            end: new Date(Date(time) + pomodoro.remainingMinutes * 60 * 1000), //Volevo cercare di mostrare la "barra arancione in day nel calendario" come tempo rimanente ma non mi sa che ho fallito
             allDay: false,
             color: 'orange',
             textColor: 'black',
@@ -319,7 +319,7 @@ function Calendar() {
               events={[
                 ...calendarEvents,
                 ...calendarTasks,
-                ...(lastPomodoro ? [lastPomodoro] : [])
+                lastPomodoro
               ]}
               eventClick={(info) => {
                 const clickedEvent = info.event;

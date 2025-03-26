@@ -133,7 +133,7 @@ const Dashboard = () => {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           });
           const data = response.data;
-          setTomato(Array.isArray(data) && data.length > 0 ? data[0] : data);  //controlla se è un'array e passa il primo elemento, altrimenti passa direttamente 'data'
+          setTomato(response.data);  //controlla se è un'array e passa il primo elemento, altrimenti passa direttamente 'data'
         } catch (error) {
           setError('Error while fetching tomato');
           setTomato({});

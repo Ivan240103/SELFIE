@@ -296,9 +296,25 @@ function Notes() {
               <div className="notes-list-container">
                 <ul className="notes-list">
                   {sortedNotes.map((n, index) => {
+                    const showTime = (d) => d.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ');
                     const markdownContent = marked(`${n.title}\n\n${n.categories.split(',').map(c => `#${c.trim()}`).join(' ')}\n\n${n.text}`);
                     return (
-                      <li className="note-item">
+                      <li key={n._id} className="note-item">
+                        <div className="note-textual-info">
+                          <div>
+                            <strong>Titolo:</strong> {n.title}
+                          </div>
+                          <div>
+                            <strong>Categorie:</strong> {n.categories.split(',').map(c => `#${c.trim()}`).join(' ')}
+                          </div>
+                          <div>
+                            <strong>Creata il:</strong> {showTime(new Date(n.creation))}
+                          </div>
+                          <div>
+                            <strong>Ultima modifica:</strong> {showTime(new Date(n.modification))}
+                          </div>
+                        </div>
+
                         <div className="note-markdown-preview">
                           <h4>Anteprima Markdown:</h4>
                           <div dangerouslySetInnerHTML={{ __html: markdownContent }} />
