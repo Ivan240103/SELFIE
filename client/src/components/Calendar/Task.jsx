@@ -15,7 +15,7 @@ le stesse funzionalità, e in più solo in modalità visualizzazione
 mettere un button per segnarlo come completato (usare la route)
 */
 
-function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTasks }) {
+function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTasks, user }) {
   const { time } = useTimeMachine();
 
   const [showModal, setShowModal] = useState(false);
@@ -24,6 +24,12 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState(time);
   const [isDone, setIsDone] = useState(false);
+  const [emailReminder, setEmailReminder] = useState(
+    { checked: false, method: 'email', before: 15, time: 'm' }
+  )
+  const [pushReminder, setPushReminder] = useState(
+    { checked: false, method: 'push', before: 15, time: 'm' }
+  )
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -61,10 +67,46 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
       setTitle(task.title || "")
       setDescription(task.description || "")
       setDeadline(task.deadline ? new Date(task.deadline) : time)
+      if (task?.reminders) {
+        task.reminders.split(',').forEach(reminder => {
+          const r = reminder.split(':')
+          const calc = calcReminder(parseInt(r[1]))
+          if (r[0] === "email") {
+            setEmailReminder({ checked: true, method: r[0], ...calc })
+          } else if (r[0] === "push") {
+            setPushReminder({ checked: true, method: r[0], ...calc })
+          }
+        })
+      }
     }
 
     setFields()
   }, [task])
+
+  function calcReminder(minutes) {
+    if (minutes < 60) {
+      return { before: minutes, time: 'm' }
+    } else if (minutes < 60*24) {
+      return { before: minutes / 60, time: 'h' }
+    } else {
+      return { before: minutes / (60*24), time: 'd'}
+    }
+  }
+
+  function remindersToString() {
+    const rem = []
+    if (emailReminder.checked) {
+      const minutes = emailReminder.time === 'm' ? emailReminder.before :
+        emailReminder.time === 'h' ? emailReminder.before * 60 : emailReminder.before * 60 * 24
+      rem.push(`${emailReminder.method}:${minutes}`)
+    }
+    if (pushReminder.checked) {
+      const minutes = pushReminder.time === 'm' ? pushReminder.before :
+        pushReminder.time === 'h' ? pushReminder.before * 60 : pushReminder.before * 60 * 24
+      rem.push(`${pushReminder.method}:${minutes}`)
+    }
+    return rem.length > 0 ? rem.join(',') : ''
+  }
 
   function handleInputChange(e) {
     const { name, value } = e.target;
@@ -72,10 +114,12 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
   }
 
   const handleSaveTask = async () => {
+    const reminders = remindersToString()
     const taskData = {
       title: title,
       description: description,
       deadline: deadline.toISOString(),
+      reminders: reminders
     };
     try {
       // Preparazione della chiamata POST
@@ -95,10 +139,12 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
   }
 
   async function handleUpdateTask() {
+    const reminders = remindersToString()
     const updatedTask = {
       title: title,
       description: description,
       deadline: deadline.toISOString(),
+      reminders: reminders
     };
     try {
       const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskDetails.id}`, {
@@ -198,6 +244,71 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
+              {user.notification && <div>
+                <label>Promemoria</label>
+                <br />
+                <input
+                  type="checkbox"
+                  checked={emailReminder.checked}
+                  onChange={e => setEmailReminder(prev => ({
+                    ...prev,
+                    checked: e.target.checked
+                  }))}
+                /> Email
+                <input
+                  type="number"
+                  min={emailReminder.time === 'm' ? 5 : 1}
+                  disabled={!emailReminder.checked}
+                  value={emailReminder.before}
+                  onChange={e => setEmailReminder(prev => ({
+                    ...prev,
+                    before: e.target.value
+                  }))}
+                />
+                <select
+                  disabled={!emailReminder.checked}
+                  value={emailReminder.time}
+                  onChange={e => setEmailReminder(prev => ({
+                    ...prev,
+                    time: e.target.value
+                  }))}
+                >
+                  <option value='m'>{emailReminder.before === '1' ? 'Minuto' : 'Minuti'}</option>
+                  <option value='h'>{emailReminder.before === '1' ? 'Ora' : 'Ore'}</option>
+                  <option value='d'>{emailReminder.before === '1' ? 'Giorno' : 'Giorni'}</option>
+                </select> prima
+                <br />
+                <input
+                  type="checkbox"
+                  checked={pushReminder.checked}
+                  onChange={e => setPushReminder(prev => ({
+                    ...prev,
+                    checked: e.target.checked
+                  }))}
+                /> Push
+                <input
+                  type="number"
+                  min={pushReminder.time === 'm' ? 5 : 1}
+                  disabled={!pushReminder.checked}
+                  value={pushReminder.before}
+                  onChange={e => setPushReminder(prev => ({
+                    ...prev,
+                    before: e.target.value
+                  }))}
+                />
+                <select
+                  disabled={!pushReminder.checked}
+                  value={pushReminder.time}
+                  onChange={e => setPushReminder(prev => ({
+                    ...prev,
+                    time: e.target.value
+                  }))}
+                >
+                  <option value='m'>{pushReminder.before === '1' ? 'Minuto' : 'Minuti'}</option>
+                  <option value='h'>{pushReminder.before === '1' ? 'Ora' : 'Ore'}</option>
+                  <option value='d'>{pushReminder.before === '1' ? 'Giorno' : 'Giorni'}</option>
+                </select> prima
+              </div>}
             </form>
             <button onClick={taskDetails ? handleUpdateTask : handleSaveTask}>
               {taskDetails ? 'Aggiorna Task' : 'Salva Task'}

@@ -12,12 +12,14 @@ const router = express.Router()
 
 // creazione nuovo task
 // body.deadline è un datetime in ISO string (UTC)
+// reminders = lista di method:minutes concatenata da ,
 router.post('/', auth, async (req, res) => {
   const newTask = new Task({
     title: req.body.title,
     description: req.body.description,
     deadline: new Date(req.body.deadline),
-    owner: req.user.username
+    owner: req.user.username,
+    reminders: req.body.reminders
   })
 
   try {
@@ -66,6 +68,7 @@ router.get('/:id', auth, async (req, res) => {
 
 // modificare un task specifico
 // body.deadline è un datetime in ISO string (UTC)
+// reminders = lista di method:minutes concatenata da ,
 router.put('/:id', auth, async (req, res) => {
   try {
     const upd = await Task.findById(req.params.id)
@@ -75,6 +78,7 @@ router.put('/:id', auth, async (req, res) => {
     upd.title = title || upd.title
     upd.description = description || upd.description
     upd.deadline = deadline ? new Date(deadline) : upd.deadline
+    upd.reminders = reminders ?? upd.reminders
     await upd.save()
     return res.send('ok')
   } catch (err) {

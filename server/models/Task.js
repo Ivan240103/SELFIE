@@ -25,6 +25,20 @@ const taskSchema = mongoose.Schema({
   owner: {
     type: String,
     required: true
+  },
+  // promemoria per l'evento
+  // method:minutes,method:minutes
+  reminders: {
+    type: String,
+    default: ""
+  },
+  emailNotified: {
+    type: Boolean,
+    default: false
+  },
+  pushNotified: {
+    type: Boolean,
+    default: false
   }
 })
 

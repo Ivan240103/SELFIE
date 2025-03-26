@@ -248,6 +248,7 @@ function Calendar() {
             onDeleteTask={handleTaskDelete}
             taskDetails={taskToEdit} // Passiamo la task da modificare
             selectedTasks={selectedTasks}
+            user={user}
           />
         </div>
       </>}
