@@ -20,7 +20,7 @@ router.post('/', auth, async (req, res) => {
     modification: new Date(await getTime(req.user.username)),
     owner: req.user.username
   })
-
+  
   try {
     await newTomato.save()
     return res.send('ok')
@@ -33,8 +33,8 @@ router.post('/', auth, async (req, res) => {
 router.get('/last', auth, async (req, res) => {
   try {
     const timer = await Tomato.find({
-      username: req.user.username
-    }).sort({ modification: 'desc' }).limit(1)
+      owner: req.user.username
+    }).sort({ modification: 'desc' }).limit(1);
     // se non ne trova nessuno invia un oggetto vuoto
     return res.json(timer)
   } catch (err) {

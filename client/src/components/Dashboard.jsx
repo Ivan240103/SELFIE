@@ -4,12 +4,12 @@ import axios from 'axios';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import rrulePlugin from '@fullcalendar/rrule';
-import TimeMachine from './TimeMachine/TimeMachine'
 import { useTimeMachine } from './TimeMachine/TimeMachineContext'
 import { useAuth } from './Auth/AuthenticationContext';
 import { datetimeToDateString } from '../utils/dates';
-
+import { marked } from 'marked';
 import Header from './Layout/Header'
+
 import calendarIcon from "../images/calendar-icon.png";
 import notesIcon from "../images/notebook-pen-icon.png";
 import tomatoIcon from "../images/speed-icon.png";
@@ -30,12 +30,10 @@ const Dashboard = () => {
   const [tomato, setTomato] = useState({})
   const [error, setError] = useState('')
 
-  // verifica l'autenticazione
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login')
-    }
-  }, [isAuthenticated, navigate])
+  marked.setOptions({
+    gfm: true,       //Con true usa le specifiche markdown di Github (quelle classiche direi es: # a, *a*, - a, ecc)
+    breaks: true,    //Con true aggiunge una singola linea di break
+  });
 
   // recupera il profilo utente
   useEffect(() => {
@@ -209,15 +207,19 @@ const Dashboard = () => {
               {Object.keys(note).length === 0 ? (
                 <span className='dash-empty-prev'>Nessuna nota presente</span>
               ) : (
-                <div className='dash-note'>
-                  <h3>{note.title}</h3>
-                  <small>
-                    Tags: {note.categories.split(',').map(n => `#${n}`).join(' ')}
-                  </small>
-                  <p>{note.text.substring(0, 200)}{note.text?.length > 200 && '...'}</p>
-                  <time>
-                    {note.modification.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ')}
-                  </time>
+                <div className='dash-note-container'> {/*Container per dividere le note visualizzate normalmente e tradotte in Markdown*/}
+                  <div className='dash-note'>
+                    <h3>{note.title}</h3>
+                    <small>
+                      Tags: {note.categories.split(',').map(n => `#${n}`).join(' ')}
+                    </small>
+                    <p>{note.text.substring(0, 200)}{note.text?.length > 200 && '...'}</p>
+                    <time>
+                      {note.modification.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ')}
+                    </time>
+                  </div>
+                  {/*Visualizzazione in Markdown uguale a quello del listamento in Notes.jsx*/}
+                  <div className='dash-note-markdown' dangerouslySetInnerHTML={{__html: marked(`${note.title}\n\n${note.categories.split(',').map(c => `#${c.trim()}`).join(' ')}\n\n${note.text}`)}}></div>
                 </div>
               )}
             </div>

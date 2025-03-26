@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../Auth/AuthenticationContext';
 import Header from '../Layout/Header';
+import { marked } from 'marked';
 
 import '../../css/Note.css';
 
@@ -15,6 +16,11 @@ function Notes() {
   const [sortCriteria, setSortCriteria] = useState('title');
   const [fetchNotes, setFetchNotes] = useState(0) // per segnalare la necessità di un get
   const [error, setError] = useState('')
+
+  marked.setOptions({
+    gfm: true,       //Con true usa le specifiche markdown di Github (quelle classiche direi es: # a, *a*, - a, ecc)
+    breaks: true,    //Con true aggiunge una singola linea di break
+  });
 
   // Caricare le note al montaggio del componente
   useEffect(() => {
@@ -40,21 +46,17 @@ function Notes() {
     }
   }, [isAuthenticated, fetchNotes]);
 
-  // cambia l'ordinamento delle note
-  // TODO: quando viene inserita una nuova nota si trova in disordine
-  useEffect(() => {
-    if (notes.length > 0) {
-      let sortedNotes = [...notes];
-      if (sortCriteria === 'title') {
-        sortedNotes.sort((a, b) => a.title.localeCompare(b.title));
-      } else if (sortCriteria === 'date') {
-        sortedNotes.sort((a, b) => new Date(b.creation) - new Date(a.creation));
-      } else if (sortCriteria === 'length') {
-        sortedNotes.sort((a, b) => a.text.length - b.text.length);
-      }
-      setNotes(sortedNotes);
+  //Per l'ordinamento delle note
+  const sortedNotes = [...notes].sort((a, b) => {
+    if (sortCriteria === 'title') {
+      return a.title.replace(/[^a-zA-Z0-9]/g, '').localeCompare(b.title.replace(/[^a-zA-Z0-9]/g, ''));
+    } else if (sortCriteria === 'date') {
+      return new Date(b.creation) - new Date(a.creation);
+    } else if (sortCriteria === 'length') {
+      return a.text.length - b.text.length;
     }
-  }, [notes, sortCriteria]);
+    return 0;
+  });
 
   // Funzione per salvare una nuova nota
   async function handleSaveNote() {
@@ -158,37 +160,68 @@ function Notes() {
     setSelectedNoteIndex(index);
   }
 
-  /* TODO: copia e incolla del contenuto + duplicazione
-  function handleDuplicateNote(index) {
-    const note = notes[index];
-    const now = new Date().toISOString();
-    const duplicatedNote = {
-      ...note,
-      creationDate: now,
-      lastModifiedDate: now,
+  async function handleDuplicateNote(index) {
+    const noteToDuplicate = notes[index];
+  
+    // Prepara i dati per la nuova nota (copia il titolo, categorie e testo)
+    const payload = {
+      title: noteToDuplicate.title,
+      categories: noteToDuplicate.categories,
+      text: noteToDuplicate.text
     };
-    const updatedNotes = [...notes, duplicatedNote];
-    setNotes(updatedNotes);
-    onNoteSave && onNoteSave(updatedNotes);
-  }
-
-  async function handleCopyContent(index) {
-    const note = notes[index];
+  
     try {
-      await navigator.clipboard.writeText(note.text);
-      alert('Contenuto copiato negli appunti!');
+      // POST per creare una nuova nota con i dati duplicati
+      const response = await fetch(`${process.env.REACT_APP_API}/api/notes/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error('Errore nella duplicazione della nota');
+  
+      // Aggiorna le note dopo la duplicazione
+      setFetchNotes(prev => prev + 1);
     } catch (error) {
-      alert('Errore nella copia:', error.response.data || 'no response');
+      setError('Errore:', error.message);
     }
   }
-
-  function handlePasteContent() {
-    navigator.clipboard.readText().then((clipText) => {
-      setText(clipText);
+  
+  // Funzione per copiare il contenuto della nota negli appunti
+  function handleCopyNoteContent(index) {
+    const noteToCopy = notes[index];
+    const contentToCopy = `${noteToCopy.title}\n\n${noteToCopy.categories}\n\n${noteToCopy.text}`;
+  
+    // Copia il contenuto negli appunti
+    navigator.clipboard.writeText(contentToCopy).then(() => {
+      alert('Contenuto copiato negli appunti!');
     }).catch((error) => {
-      alert('Errore nella lettura degli appunti:', error.response.data || 'no response');
+      alert('Errore durante la copia del contenuto:', error);
     });
-  } */
+  }
+  
+  // Funzione per incollare il contenuto negli input del form
+  async function handlePasteNoteContent() {
+    try {
+      const pastedContent = await navigator.clipboard.readText();
+      const lines = pastedContent.split('\n').map(line => line.trim());
+  
+      // Rimuove eventuali righe vuote all'inizio
+      const filteredLines = lines.filter(line => line !== '');
+  
+      setTitle(filteredLines[0] || '');
+  
+      // La seconda riga viene considerata come categorie
+      setCategories(filteredLines[1] || '');
+  
+      // Tutte le righe successive alla seconda diventano il contenuto
+      setText(filteredLines.slice(2).join('\n') || '');
+    } catch (error) {
+      alert('Errore durante l\'incolla del contenuto: ' + error.message);
+    }
+  }
 
   return (
     <div>
@@ -197,34 +230,45 @@ function Notes() {
         <div className="notes-container">
           <h1 className="notes-header">Note</h1>
           <p>{error}</p>
-          <div className="notes-form">
-            <h4>{selectedNoteIndex === null ? 'Crea Nuova Nota' : 'Modifica Nota'}</h4>
-            {/* TODO: trasformare textarea in input text */}
-            <textarea
-              placeholder="Titolo..."
-              className="note-form-textarea"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            {/* TODO: campo input con bottone per aggiungerle alla stringa? */}
-            <textarea
-              placeholder="Categorie (separate da virgola)..."
-              className="note-form-textarea"
-              value={categories}
-              onChange={(e) => setCategories(e.target.value)}
-            />
-            <textarea
-              placeholder="Scrivi il contenuto della nota qui..."
-              className="note-form-textarea"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-            <button
-              onClick={() => (selectedNoteIndex === null ? handleSaveNote() : handleEditNote(selectedNoteIndex))}
-              className="note-save-button"
-            >
-              {selectedNoteIndex === null ? 'Salva Nota' : 'Aggiorna Nota'}
-            </button>
+          <div className='notes-form-container'>
+            <div className="notes-form">
+              <h4>{selectedNoteIndex === null ? 'Crea Nuova Nota' : 'Modifica Nota'}</h4>
+              {/* TODO: trasformare textarea in input text */}
+              <textarea
+                placeholder="Titolo..."
+                className="note-form-textarea"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              {/* TODO: campo input con bottone per aggiungerle alla stringa? */}
+              <textarea
+                placeholder="Categorie (separate da virgola)..."
+                className="note-form-textarea"
+                value={categories}
+                onChange={(e) => setCategories(e.target.value)}
+              />
+              <textarea
+                placeholder="Scrivi il contenuto della nota qui..."
+                className="note-form-textarea"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+              />
+              <button
+                onClick={() => (selectedNoteIndex === null ? handleSaveNote() : handleEditNote(selectedNoteIndex))}
+                className="note-save-button"
+              >
+                {selectedNoteIndex === null ? 'Salva Nota' : 'Aggiorna Nota'}
+              </button>
+              <button onClick={handlePasteNoteContent} className="note-paste-button">
+                Incolla
+              </button>
+            </div>
+            <div className="markdown-preview">
+              <h4>Anteprima Markdown:</h4>
+              <div dangerouslySetInnerHTML={{ __html: marked(title) }} />
+              <div dangerouslySetInnerHTML={{ __html: marked(categories.split(',').map(c => `#${c.trim()}`).join(' ')) }}  />
+              <div dangerouslySetInnerHTML={{ __html: marked(text) }} />
+            </div>
           </div>
 
           <div className="notes-sort-controls">
@@ -239,32 +283,42 @@ function Notes() {
               <option value="length">Lunghezza del Contenuto</option>
             </select>
           </div>
-
-          <ul className="notes-list">
-            {notes.map((n, index) => {
-              const preview = n.text.length > 200 ? n.text.slice(0, 200) + '...' : n.text;
-              const showTime = (d) => d.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ')
-              return (
-                <li key={n._id} className="note-item">
-                  <div>
-                    <strong>{n.title}</strong>
-                  </div>
-                  <div>
-                    <p>Tags: {n.categories.split(',').map(n => `#${n}`).join(' ')}</p>
-                  </div>
-                  <div>
-                    <p>Creata il: {showTime(n.creation)}</p>
-                  </div>
-                  <div>
-                    <p>Ultima modifica: {showTime(n.modification)}</p>
-                  </div>
-                  <p>{preview}</p>
-                  <button onClick={() => handleStartEdit(index)}>Modifica</button>
-                  <button onClick={() => handleDeleteNote(index)}>Elimina</button>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="notes-view-container">
+              <div className="notes-list-container">
+                <ul className="notes-list">
+                  {sortedNotes.map((n, index) => {
+                    const showTime = (d) => d.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ');
+                    const markdownContent = marked(`${n.title}\n\n${n.categories.split(',').map(c => `#${c.trim()}`).join(' ')}\n\n${n.text}`);
+                    return (
+                      <li key={n._id} className="note-item">
+                        <div className="note-textual-info">
+                          <div>
+                            <strong>Titolo:</strong> {n.title}
+                          </div>
+                          <div>
+                            <strong>Categorie:</strong> {n.categories.split(',').map(c => `#${c.trim()}`).join(' ')}
+                          </div>
+                          <div>
+                            <strong>Creata il:</strong> {showTime(new Date(n.creation))}
+                          </div>
+                          <div>
+                            <strong>Ultima modifica:</strong> {showTime(new Date(n.modification))}
+                          </div>
+                        </div>
+                        <div className="note-markdown-preview">
+                          <h4>Anteprima Markdown:</h4>
+                          <div dangerouslySetInnerHTML={{ __html: markdownContent }} />
+                        </div>
+                        <button onClick={() => handleStartEdit(index)}>Modifica</button>
+                        <button onClick={() => handleDeleteNote(index)}>Elimina</button>
+                        <button onClick={() => handleDuplicateNote(index)}>Duplica</button>
+                      <button onClick={() => handleCopyNoteContent(index)}>Copia</button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
         </div>
       </>}
     </div>

@@ -8,6 +8,7 @@ import Registration from './components/User/Registration';
 import Profile from './components/User/Profile';
 import Calendar from './components/Calendar/Calendar';
 import Notes from './components/Notes/Notes';
+import Tasks from './components/Tasks/Tasks';
 import Tomato from './components/Tomato/tomato';
 
 function App() {
@@ -23,8 +24,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/notes" element={<Notes />} />
-              {/* TODO: aggiungere route della lista di task */}
-              {/* <Route path="/tasks" element={} /> */}
+              <Route path="/task" element={<Tasks />} />
               <Route path="/tomato" element={<Tomato />} />
             </Routes>
           </Router>
