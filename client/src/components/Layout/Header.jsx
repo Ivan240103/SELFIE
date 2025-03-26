@@ -75,16 +75,34 @@ function Header() {
     if (!notifyPermission) {
       const permission = await Notification.requestPermission()
       if (permission === "granted") {
+        setNotifyPermission(true)
         try {
-          const response = await axios.put(`${process.env.REACT_APP_API}/api/users/notification`, {}, {
+          await axios.put(`${process.env.REACT_APP_API}/api/users/notification`, {
+            state: true
+          }, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setError('')
-          setNotifyPermission(response.data.notification)
         } catch (error) {
           setError(error.response?.data || 'Error in askNotifyPermission')
         }
         await subscribeToPush()
+      }
+    }
+  }
+
+  async function revokeNotifyPermission() {
+    if (notifyPermission) {
+      setNotifyPermission(false)
+      try {
+        await axios.put(`${process.env.REACT_APP_API}/api/users/notification`, {
+          state: false
+        }, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        })
+        setError('')
+      } catch (error) {
+        setError(error.response?.data || 'Error in revokeNotifyPermission')
       }
     }
   }
@@ -97,7 +115,9 @@ function Header() {
       <TimeMachine />
       {error && <p>{error}</p>}
       {notifyPermission ? (
-        <p>Notifiche attive</p>
+        <button onClick={revokeNotifyPermission}>
+          Disattiva le notifiche
+        </button>
       ) : (
         <button onClick={askNotifyPermission}>
           Attiva le notifiche

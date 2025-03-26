@@ -19,6 +19,7 @@ const Event = require('../models/Event')
 const Task = require('../models/Task')
 const Note = require('../models/Note')
 const Tomato = require('../models/Tomato')
+const Sub = require('../models/PushSubscription')
 
 const router = express.Router()
 
@@ -127,17 +128,20 @@ router.put('/google', auth, async (req, res) => {
   }
 })
 
-// attivare le notifiche
+// attivare o disattivare le notifiche
 router.put('/notification', auth, async (req, res) => {
   try {
     const user = await User.findOne({ username: req.user.username })
     if (!user) return res.status(404).send(`No user found with username ${req.user.username}`)
-    user.notification = true
+    user.notification = req.body.state
     await user.save()
-    return res.json(user)
+    if (req.body.state === false) {
+      await Sub.findOneAndDelete({ owner: req.user.username })
+    }
+    return res.send('ok')
   } catch (err) {
     console.log(err)
-    return res.status(500).send('Error while activating notifications')
+    return res.status(500).send('Error while setting notification permission')
   }
 })
 
@@ -212,6 +216,7 @@ router.delete('/', auth, async (req, res) => {
     await Task.deleteMany({ owner: req.user.username })
     await Note.deleteMany({ owner: req.user.username })
     await Tomato.deleteMany({ owner: req.user.username })
+    await Sub.findOneAndDelete({ owner: req.user.username })
     return res.send('ok')
   } catch (err) {
     return res.status(500).send('Error while deleting user')
