@@ -43,6 +43,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
   const [isAllDay, setIsAllDay] = useState(true);
   const [place, setPlace] = useState('');
   const [suggestions, setSuggestions] = useState([])
+  const [mapsLocated, setMapsLocated] = useState(false)
   const [googleId, setGoogleId] = useState('')
   const [isRecurrent, setIsRecurrent] = useState(false);
   const [freq, setFreq] = useState('daily');
@@ -91,6 +92,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
       setEnd(event.end ? new Date(event.end) : time)
       setIsAllDay(event.isAllDay === false ? false : true)
       setPlace(event.place || "")
+      setMapsLocated(event.mapsLocated ?? false)
       setGoogleId(event.googleId || '')
       setIsRecurrent(event?.rrule ? true : false)
       setFreq(event?.rrule?.freq || 'daily')
@@ -190,6 +192,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
       isAllDay: isAllDay,
       rrule: rrule,
       place: place,
+      mapsLocated: mapsLocated,
       reminders: reminders
     };
 
@@ -228,6 +231,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
       isAllDay: isAllDay,
       rrule: rrule,
       place: place,
+      mapsLocated: mapsLocated,
       reminders: reminders
     };
 
@@ -298,6 +302,16 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
     }, 300),
     []
   );
+
+  // apre google maps alla destinazione impostata
+  const openMaps = () => {
+    const encodedDest = encodeURIComponent(place)
+    // se siamo su un mobile usa il geo protocol
+    const isMobile = /Android|webOS|iPhone|iPad/i.test(navigator.userAgent)
+    
+    const url = isMobile ? `geo:0,0?q=${encodedDest}` : `https://www.google.com/maps/search/?api=1&query=${encodedDest}`
+    window.open(url, '_blank')
+  }
 
   return (
     <div className="event-form">
@@ -425,6 +439,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
             value={place}
             onChange={(e) => {
               setPlace(e.target.value);
+              setMapsLocated(false)
               debouncedFetchSuggestions(e.target.value);
             }}
             placeholder="Enter location"
@@ -436,6 +451,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
                   key={s.place_id}
                   onClick={() => {
                     setPlace(s.display_name);
+                    setMapsLocated(true)
                     setSuggestions([]);
                   }}
                 >
@@ -444,6 +460,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
               ))}
             </ul>
           )}
+          {mapsLocated && <button type="button" onClick={() => openMaps()}>Mappa</button>}
         </div>
         {user.notification && <div>
           <label>Promemoria</label>

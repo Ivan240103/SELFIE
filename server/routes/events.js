@@ -21,7 +21,7 @@ const router = express.Router()
 // body.rrule = oggetto rrule (FullCalendar) per eventi ricorrenti
 // reminders = lista di method:minutes concatenata da ,
 router.post('/', auth, async (req, res) => {
-  const { title, description, start, end, isAllDay, rrule, place, reminders } = req.body
+  const { title, description, start, end, isAllDay, rrule, place, mapsLocated, reminders } = req.body
   const newEvent = new Event({
     title: title,
     description: description,
@@ -30,6 +30,7 @@ router.post('/', auth, async (req, res) => {
     isAllDay: isAllDay,
     rrule: rrule ? await rruleToString(rrule) : null,
     place: place,
+    mapsLocated: mapsLocated,
     owner: req.user.username,
     reminders: reminders
   })
@@ -83,7 +84,7 @@ router.put('/:id', auth, async (req, res) => {
     const upd = await Event.findById(req.params.id)
     if (!upd) return res.status(404).send(`No event found with id ${req.params.id}`)
     // modifiche
-    const { title, description, start, end, isAllDay, rrule, place, reminders } = req.body
+    const { title, description, start, end, isAllDay, rrule, place, mapsLocated, reminders } = req.body
     upd.title = title || upd.title
     upd.description = description || upd.description
     upd.start = start ? new Date(start) : upd.start
@@ -91,6 +92,7 @@ router.put('/:id', auth, async (req, res) => {
     upd.isAllDay = isAllDay !== undefined ? isAllDay : upd.isAllDay
     upd.rrule = rrule ? await rruleToString(rrule) : null
     upd.place = place ?? upd.place
+    upd.mapsLocated = mapsLocated ?? upd.mapsLocated
     upd.reminders = reminders ?? upd.reminders
     await upd.save()
     return res.send('ok')

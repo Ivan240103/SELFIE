@@ -36,7 +36,15 @@ const eventSchema = mongoose.Schema({
     type: String,
     default: null
   },
-  place: String,
+  place: {
+    type: String,
+    default: ''
+  },
+  // true se il luogo viene impostato tramite l'API di OpenStreetMap
+  mapsLocated: {
+    type: Boolean,
+    default: false
+  },
   // username dell'utente che ha creato l'evento
   owner: {
     type: String,

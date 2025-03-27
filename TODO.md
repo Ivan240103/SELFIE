@@ -25,14 +25,14 @@
 - [x] solo task
   - [x] visualizzazione task come lista a sè
   - [x] GESTIRE I TASK OLTRE LA SCADENZA (senza notifica)
-- [ ] note
+- [x] note
   - [x] tutte le note
   - [x] nota specifica
   - [x] modifica di una nota
   - [x] eliminazione nota
   - [x] ordinamento note ???
-- [ ] pomodoro
-  - [ ] schermata timer pomodoro
+- [x] pomodoro
+  - [x] schermata timer pomodoro
 - [x] profilo utente
   - [x] pagina del profilo personale
 
@@ -103,9 +103,9 @@
   - [ ] per segnare il task come done devi completare il ciclo di pomodoro (quindi setti da lì)
   - [ ] permettere l'eliminazione, ma non la modifica (una volta che lo pianifichi resta così, altrimenti ne pianifichi un altro)
 - [x] integrazione con calendari terzi (standard iCalendar?)
-- [ ] geolocalizzazione per gli eventi --> NON SPECIFICATO/APPROFONDITO
-  - [x] selezione luogo con autocompletamento di google maps api
-  - [ ] se autocompletato, nella visualizzazione link per andare su google maps (campo aggiuntivo nel model?)
+- [x] geolocalizzazione per gli eventi --> NON SPECIFICATO/APPROFONDITO
+  - [x] selezione luogo con auto-completamento di google maps api
+  - [x] se auto-completato, nella visualizzazione link per andare su google maps (campo aggiuntivo nel model?)
 
 ## Refactor
 - rendere getTime nel server non async
