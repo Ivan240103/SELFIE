@@ -104,6 +104,8 @@
   - [ ] permettere l'eliminazione, ma non la modifica (una volta che lo pianifichi resta così, altrimenti ne pianifichi un altro)
 - [x] integrazione con calendari terzi (standard iCalendar?)
 - [ ] geolocalizzazione per gli eventi --> NON SPECIFICATO/APPROFONDITO
+  - [x] selezione luogo con autocompletamento di google maps api
+  - [ ] se autocompletato, nella visualizzazione link per andare su google maps (campo aggiuntivo nel model?)
 
 ## Refactor
 - rendere getTime nel server non async

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import _ from 'lodash';
 import { useTimeMachine } from '../TimeMachine/TimeMachineContext'
 import {
   datetimeToString,
@@ -26,6 +27,8 @@ Quando il Modal viene chiuso in Calendar rimettere eventDetails a null, così ch
 tornino ai valori default.
 */
 
+// FIXME: la scelta della data inizialmente non rispetta il tempo dell'utente
+
 function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }) {
   // tempo in vigore per l'utente (fuso orario UTC)
   const { time } = useTimeMachine();
@@ -38,7 +41,8 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
   const [start, setStart] = useState(time); // di tipo Date
   const [end, setEnd] = useState(time);   // di tipo Date
   const [isAllDay, setIsAllDay] = useState(true);
-  const [place, setPlace] = useState("");
+  const [place, setPlace] = useState('');
+  const [suggestions, setSuggestions] = useState([])
   const [googleId, setGoogleId] = useState('')
   const [isRecurrent, setIsRecurrent] = useState(false);
   const [freq, setFreq] = useState('daily');
@@ -269,6 +273,32 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
     }
   };
 
+  const debouncedFetchSuggestions = useCallback(
+    _.debounce(async (loc) => {
+      if (loc.length < 3) {
+        setSuggestions([])
+        return
+      }
+      
+      // usa LocationIQ (OpenStreetMap) che è gratis
+      try {
+        const response = await fetch(
+          `https://us1.locationiq.com/v1/search?key=pk.7116bbd07a01adaf5eb1e5740b977e7e&q=${encodeURIComponent(loc)}&format=json`
+        )
+        if (!response.ok) {
+          throw new Error('Error while fetching suggestions')
+        }
+        const data = await response.json()
+        setSuggestions(data)
+
+        console.log(data)
+      } catch (error) {
+        setSuggestions([])
+      }
+    }, 300),
+    []
+  );
+
   return (
     <div className="event-form">
       <h3>{!eventDetails ? 'Crea' : googleId ? 'Visiona' : 'Modifica'} Evento</h3>
@@ -393,8 +423,27 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
           <input
             type="text"
             value={place}
-            onChange={(e) => setPlace(e.target.value)}
+            onChange={(e) => {
+              setPlace(e.target.value);
+              debouncedFetchSuggestions(e.target.value);
+            }}
+            placeholder="Enter location"
           />
+          {suggestions.length > 0 && (
+            <ul>
+              {suggestions.map((s) => (
+                <li
+                  key={s.place_id}
+                  onClick={() => {
+                    setPlace(s.display_name);
+                    setSuggestions([]);
+                  }}
+                >
+                  {s.display_name}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         {user.notification && <div>
           <label>Promemoria</label>
