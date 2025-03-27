@@ -95,7 +95,13 @@
 - [x] disabilitare le notifiche
 - [x] note in markdown
 - [ ] cicli di pomodoro programmati come eventi
-- [ ] cicli non completati si spostano alle giornate successive
+  - [ ] cicli non completati si spostano alle giornate successive
+  - [ ] aggiungere campo tomato a task
+  - [ ] settings per pianificare dentro a tomato page, che creano un task con associato il pomodoro
+  - [ ] se il campo tomato != null, nella lista task non mostrare
+  - [ ] se il campo tomato != null, visualizzazione diversa nel calendar (con link che manda alla tomato page)
+  - [ ] per segnare il task come done devi completare il ciclo di pomodoro (quindi setti da lì)
+  - [ ] permettere l'eliminazione, ma non la modifica (una volta che lo pianifichi resta così, altrimenti ne pianifichi un altro)
 - [x] integrazione con calendari terzi (standard iCalendar?)
 - [ ] geolocalizzazione per gli eventi --> NON SPECIFICATO/APPROFONDITO
 
