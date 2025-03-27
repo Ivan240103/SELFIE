@@ -305,6 +305,7 @@ function Notes() {
                             <strong>Ultima modifica:</strong> {showTime(new Date(n.modification))}
                           </div>
                         </div>
+
                         <div className="note-markdown-preview">
                           <h4>Anteprima Markdown:</h4>
                           <div dangerouslySetInnerHTML={{ __html: markdownContent }} />
@@ -312,7 +313,7 @@ function Notes() {
                         <button onClick={() => handleStartEdit(index)}>Modifica</button>
                         <button onClick={() => handleDeleteNote(index)}>Elimina</button>
                         <button onClick={() => handleDuplicateNote(index)}>Duplica</button>
-                      <button onClick={() => handleCopyNoteContent(index)}>Copia</button>
+                        <button onClick={() => handleCopyNoteContent(index)}>Copia</button>
                       </li>
                     );
                   })}

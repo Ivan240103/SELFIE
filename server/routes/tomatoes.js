@@ -22,21 +22,23 @@ router.post('/', auth, async (req, res) => {
   })
   
   try {
-    await newTomato.save()
-    return res.send('ok')
+    await newTomato.save();
+    return res.json(newTomato);
   } catch (err) {
-    return res.status(500).send('Error while saving new tomato')
+    console.error(err);
+    return res.status(500).send('Error while saving tomato');
   }
-})
+});
+
 
 // prendere i dati dell'ultimo pomodoro dell'utente
 router.get('/last', auth, async (req, res) => {
   try {
-    const timer = await Tomato.find({
+    const timer = await Tomato.findOne({
       owner: req.user.username
-    }).sort({ modification: 'desc' }).limit(1);
+    }).sort({ modification: 'desc' });
     // se non ne trova nessuno invia un oggetto vuoto
-    return res.json(timer)
+    return res.json(timer || {})
   } catch (err) {
     return res.status(500).send('Error while getting last tomato')
   }

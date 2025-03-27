@@ -50,6 +50,7 @@ function Calendar() {
     fetchUser()
   }, [isAuthenticated])
 
+
   // Funzione per calcolare il livello di urgenza
   const calculateUrgencyLevel = (deadline, isDone) => {
     if (isDone || !deadline) return 0;
@@ -292,6 +293,7 @@ function Calendar() {
             nowIndicator={true}
             editable={true}
             selectable={true}
+            droppable={true}
             dayMaxEvents={true}
             showNonCurrentDates={false}
             weekends={weekendsVisible}
@@ -334,38 +336,38 @@ function Calendar() {
             user={user}
           />
           <div>
-            <h3>Lista Attività</h3>
-            <ul>
-              {calendarTasks.map(task => (
-                <li key={task.id}>
-                  <input
-                    type="checkbox"
-                    checked={selectedTasks.includes(task.id)}
-                    onChange={() => handleTaskSelect(task.id)}
-                  />
-                  {task.title} - Scadenza: {new Date(task.start).toLocaleDateString('it-IT')}
-                  {task.isDone && <span style={{ color: 'green', marginLeft: '10px' }}>✅ Completata</span>}
-                </li>
-              ))}
-            </ul>
-            {/* Mostra il bottone di modifica solo se una singola task è selezionata */}
-            {selectedTasks.length === 1 && (
-              <button onClick={() => handleTaskClick(calendarTasks.find(task => task.id === selectedTasks[0]))}>
-                Modifica Task
-              </button>
-            )}
-          </div>
-          <Task
-            onSaveTask={handleTaskSave}
-            onUpdateTask={handleTaskUpdate}
-            onDeleteTask={handleTaskDelete}
-            taskDetails={taskToEdit} // Passiamo la task da modificare
-            selectedTasks={selectedTasks}
-            user={user}
-          />
-        </div>
-      </>}
+      <h3>Lista Attività</h3>
+      <ul>
+        {calendarTasks.map(task => (
+          <li key={task.id}>
+            <input
+              type="checkbox"
+              checked={selectedTasks.includes(task.id)}
+              onChange={() => handleTaskSelect(task.id)}
+            />
+            {task.title} - Scadenza: {new Date(task.start).toLocaleDateString('it-IT')}
+            {task.isDone && <span style={{ color: 'green', marginLeft: '10px' }}>✅ Completata</span>}
+          </li>
+        ))}
+      </ul>
+      {/* Mostra il bottone di modifica solo se una singola task è selezionata */}
+      {selectedTasks.length === 1 && (
+        <button onClick={() => handleTaskClick(calendarTasks.find(task => task.id === selectedTasks[0]))}>
+          Modifica Task
+        </button>
+      )}
     </div>
+    <Task
+      onSaveTask={handleTaskSave}
+      onUpdateTask={handleTaskUpdate}
+      onDeleteTask={handleTaskDelete}
+      taskDetails={taskToEdit} // Passiamo la task da modificare
+      selectedTasks={selectedTasks}
+      user={user}
+    />
+  </div>
+      </>}
+    </div >
   );
 }
 

@@ -110,13 +110,23 @@
 .dash-note-container {
   display: flex;
   gap: 20px;
+  
 }
-.dash-note {
-  width: 50%;
-}
+
+
 .dash-note-markdown {
-  width: 50%;
-  padding: 10px;
-  border-left: 2px solid #ccc;
   background: #f9f9f9;
+  border: 1px solid #cecece;
+  width: 100%;
+  max-height: 100%;
+  overflow: hidden;  /* Nasconde il contenuto in eccesso */
+  text-overflow: ellipsis;  /* Aggiunge "..." se il testo è troppo lungo zio cane */
+  white-space: normal; 
+  display: -webkit-box;
+  -webkit-line-clamp: 6;  /* Numero massimo di righe visibili */
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+  border-radius: 15px;
+  padding: 10px;
 }
+

@@ -124,17 +124,17 @@ const Dashboard = () => {
         try {
           const response = await axios.get(`${process.env.REACT_APP_API}/api/tomatoes/last`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          })
-          setTomato(response.data)
+          });
+          setTomato(response.data);
         } catch (error) {
-          setError('Error while fetching tomato')
-          setTomato({})
+          setError('Error while fetching tomato');
+          setTomato({});
         }
       }
-    }
-
-    fetchTomato()
-  }, [isAuthenticated])
+    };
+  
+    fetchTomato();
+  }, [isAuthenticated]);
 
   return(
     <div>
@@ -208,18 +208,11 @@ const Dashboard = () => {
                 <span className='dash-empty-prev'>Nessuna nota presente</span>
               ) : (
                 <div className='dash-note-container'> {/*Container per dividere le note visualizzate normalmente e tradotte in Markdown*/}
-                  <div className='dash-note'>
-                    <h3>{note.title}</h3>
-                    <small>
-                      Tags: {note.categories.split(',').map(n => `#${n}`).join(' ')}
-                    </small>
-                    <p>{note.text.substring(0, 200)}{note.text?.length > 200 && '...'}</p>
-                    <time>
-                      {note.modification.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ')}
-                    </time>
-                  </div>
                   {/*Visualizzazione in Markdown uguale a quello del listamento in Notes.jsx*/}
-                  <div className='dash-note-markdown' dangerouslySetInnerHTML={{__html: marked(`${note.title}\n\n${note.categories.split(',').map(c => `#${c.trim()}`).join(' ')}\n\n${note.text}`)}}></div>
+                  <div className='dash-note-markdown' dangerouslySetInnerHTML={{
+                    __html: marked(`${note.title}\n\n${note.categories.split(',').map(c => `#${c.trim()}`).join(' ')}\n\n${note.text.substring(0, 200)}${note.text.length > 200 ? '...' : ''}`)
+                  }}>
+                  </div>
                 </div>
               )}
             </div>
