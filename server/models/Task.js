@@ -31,6 +31,11 @@ const taskSchema = mongoose.Schema({
   reminders: {
     type: String,
     default: ""
+  },
+  // timestamp dell'ultima notifica di ritardo
+  lateTs: {
+    type: Number,
+    default: -1
   }
 })
 

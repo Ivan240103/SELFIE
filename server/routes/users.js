@@ -13,6 +13,7 @@ const auth = require('../middleware/auth')
 const upload = require('../middleware/multer')
 const tm = require('../services/TimeMachine')
 const { authorize } = require('../google/Auth')
+const { resetUserTaskTs } = require('../services/Notificate')
 
 const User = require('../models/User')
 const Event = require('../models/Event')
@@ -190,11 +191,20 @@ router.put('/', [auth, upload.single('pic')], async (req, res) => {
 // senza body per resettare la data
 router.put('/time', auth, async (req, res) => {
   try {
+    // per controllare se l'utente si sposta indietro nel tempo
+    const pre = Date.parse(await tm.getTime(req.user.username))
+    // TODO: reset e set potrebbero essere la stessa funzione
     if (req.body.time) {
       const time = await tm.setTime(req.user.username, req.body.time)
+      if (Date.parse(time) < pre) {
+        await resetUserTaskTs(req.user.username)
+      }
       return res.json(time)
     } else {
       const time = await tm.resetTime(req.user.username)
+      if (Date.parse(time) < pre) {
+        await resetUserTaskTs(req.user.username)
+      }
       return res.json(time)
     }
   } catch (err) {

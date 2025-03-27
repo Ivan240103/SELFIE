@@ -41,6 +41,10 @@ async function isNotificationMoment(T, isPush, isEvent) {
   return getDatetimeString(reminderInstant) == getDatetimeString(await getTime(T.owner))
 }
 
+function getDateForMsg(convertible) {
+  return getDatetimeString(convertible).replace(',', ' alle')
+}
+
 async function notificateEvents() {
   try {
     const events = await Event.find({ reminders: { $ne: '' } })
@@ -57,7 +61,7 @@ async function notificateEvents() {
         if (await isNotificationMoment(e, true, true)) {
           await sendPush(
             e.title,
-            `Il tuo evento "${e.title}" è in programma per il ` + getDatetimeString(e.start),
+            `Il tuo evento "${e.title}" è in programma per il ${getDateForMsg(e.start)}.`,
             e.owner
           )
         }
@@ -69,7 +73,7 @@ async function notificateEvents() {
           await sendMail(
             owner.email,
             e.title,
-            `Il tuo evento "${e.title}" è in programma per il ` + getDatetimeString(e.start)
+            `Il tuo evento "${e.title}" è in programma per il ${getDateForMsg(e.start)}.`
           )
         }
       }
@@ -95,7 +99,7 @@ async function notificateTasks() {
         if (await isNotificationMoment(t, true, false)) {
           await sendPush(
             t.title,
-            `Il tuo task "${t.title}" è in scadenza il ${getDatetimeString(t.deadline)}.`,
+            `Il tuo task "${t.title}" è in scadenza il ${getDateForMsg(t.deadline)}.`,
             t.owner
           )
         }
@@ -107,7 +111,7 @@ async function notificateTasks() {
           await sendMail(
             owner.email,
             t.title,
-            `Il tuo task "${t.title}" è in scadenza il ${getDatetimeString(t.deadline)}.`
+            `Il tuo task "${t.title}" è in scadenza il ${getDateForMsg(t.deadline)}.`
           )
         }
       }
@@ -117,36 +121,80 @@ async function notificateTasks() {
   }
 }
 
-/* tasks.forEach(async (t) => {
-  const mailReminderMinutes = t.reminders.split(',').filter(r => r.includes('email'))[0].split(':')[1]
-  const deadlineMs = (new Date(t.deadline)).getTime()
-  const reminderInstant = deadlineMs - parseInt(mailReminderMinutes) * 60 * 1000
-  const ownerTimeMs = Date.parse(await getTime(t.owner))
-  if (ownerTimeMs > reminderInstant) {
-    // needs notification
-    if (ownerTimeMs > deadlineMs + 7 * 24 * 60 * 60 * 1000) {
-      await sendMail(
-        owner.email,
-        `RICORDATI DI ${t.title} !`,
-        `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT') + ', è più di una settimana fa!'
-      )
-    } else if (ownerTimeMs > deadlineMs + 24 * 60 * 60 * 1000) {
-      await sendMail(
-        owner.email,
-        `!!! ${t.title} !!!`,
-        `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT') + ", è già un po' che lo porti dietro."
-      )
-    } else if (ownerTimeMs > deadlineMs) {
-      await sendMail(
-        owner.email,
-        `${t.title}`,
-        `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT')
-      )
+function getUrgencyMessage(current, deadline, task) {
+  if (current > deadline + 7 * 24 * 60 * 60 * 1000) {
+    return {
+      title: `RICORDATI DI ${task.title}`,
+      body: `Il tuo task "${task.title}" è scaduto il ${getDateForMsg(task.deadline)}, è più di una settimana fa!`
+    }
+  } else if (current > deadline + 3 * 24 * 60 * 60 * 1000) {
+    return {
+      title: `!! ${task.title} !!`,
+      body: `Il tuo task "${task.title}" è scaduto il ${getDateForMsg(task.deadline)}, è già un po' che lo porti dietro.`
+    }
+  } else {
+    return {
+      title: task.title,
+      body: `Il tuo task "${task.title}" è scaduto il ${getDateForMsg(task.deadline)}.`
     }
   }
-}) */
+}
+
+async function notificateLateTasks() {
+  try {
+    const tasks = await Task.find({
+      reminders: { $ne: '' },
+      isDone: false
+    })
+    // tengo solo quelli scaduti da almeno un giorno
+    const lateTasks = tasks.filter(
+      async (t) => Date.parse(await getTime(t.owner)) > t.deadline.getTime() + 24 * 60 * 60 * 1000
+    )
+
+    lateTasks.forEach(async (t) => {
+      const owner = await User.findOne({ username: t.owner })
+      if (!owner.notification) return
+
+      const ownerTimeMs = Date.parse(await getTime(t.owner))
+      if (t.lateTs === -1 || ownerTimeMs > t.lateTs + 24 * 60 * 60 * 1000) {
+        const deadlineMs = t.deadline.getTime()
+        const lateMsg = getUrgencyMessage(ownerTimeMs, deadlineMs, t)
+      
+        if (t.reminders.includes('push')) {
+          await sendPush(lateMsg.title, lateMsg.body, t.owner)
+        }
+
+        if (t.reminders.includes('email')) {
+          await sendMail(owner.email, lateMsg.title, lateMsg.body)
+        }
+
+        await Task.findByIdAndUpdate(
+          t._id,
+          { $set: { lateTs: ownerTimeMs } }
+        )
+      }
+    })
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+/* quando un utente torna indietro nel tempo, non potendo sapere quanto avanti fosse,
+resettiamo i timestamp di tutti i suoi task non completati in modo che quelli in ritardo
+possano essere nuovamente notificati se necessario */
+async function resetUserTaskTs(username) {
+  await Task.updateMany(
+    { 
+      isDone: false, 
+      owner: username
+    }, 
+    { $set: { lateTs: -1 } }
+  )
+}
 
 module.exports = {
   notificateEvents,
-  notificateTasks
+  notificateTasks,
+  notificateLateTasks,
+  resetUserTaskTs
 }

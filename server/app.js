@@ -10,7 +10,8 @@ const cors = require('cors')
 require('dotenv').config()
 const {
   notificateEvents,
-  notificateTasks
+  notificateTasks,
+  notificateLateTasks
 } = require('./services/Notificate')
 
 const User = require('./models/User')
@@ -70,8 +71,8 @@ const mongoURL = `mongodb+srv://${u}:${p}@selfie.qv0gx.mongodb.net/?retryWrites=
 mongoose.connect(mongoURL)
 
 // demoni per le notifiche
-// DEBUG: riportare a 60 * 1000 per fare il check ogni minuto
 setInterval(notificateEvents, 60 * 1000)
 setInterval(notificateTasks, 60 * 1000)
+setInterval(notificateLateTasks, 3 * 60 * 1000)
 
 app.listen(port)

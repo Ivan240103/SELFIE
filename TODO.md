@@ -89,9 +89,9 @@
   - [x] eventi ricorrenti
   - [x] aggiungere il db
   - [x] filtrare a chi inviare le notifiche
-  - [ ] quando ci si sposta nel tempo le notifiche vanno controllate
-- [ ] notifica crescente di urgenza per le attività
-  - [ ] ogni 5 minuti controllare quali task sono in ritardo e nel caso notificarli
+  - [x] quando ci si sposta nel tempo le notifiche vanno controllate
+- [x] notifica crescente di urgenza per le attività
+  - [x] ogni 5 minuti controllare quali task sono in ritardo e nel caso notificarli
 - [x] disabilitare le notifiche
 - [x] note in markdown
 - [ ] cicli di pomodoro programmati come eventi
