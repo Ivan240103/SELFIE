@@ -50,6 +50,7 @@
     ]
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.15",
     "cross-env": "^7.0.3"
   }
 }

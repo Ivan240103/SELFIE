@@ -8,27 +8,24 @@ import Registration from './components/User/Registration';
 import Profile from './components/User/Profile';
 import Calendar from './components/Calendar/Calendar';
 import Notes from './components/Notes/Notes';
-import Tomato from './components/Tomato/tomato';
 import Tasks from './components/Tasks/Tasks';
-
-import './css/App.css'
+import Tomato from './components/Tomato/tomato';
 
 function App() {
-
   return (
     <AuthenticationProvider>
       <TimeMachineProvider>
         <div className="App">
           <Router>
             <Routes>
-              <Route path="/" element={<Dashboard/>} />
+              <Route path="/" element={<Dashboard />} />
               <Route path="/login" element={<Access />} />
               <Route path="/register" element={<Registration />} />
-              <Route path="/profile" element={<Profile/>} />
-              <Route path="/Calendar" element={<Calendar />} />
-              <Route path="/Notes" element={<Notes />} />
-              <Route path="/tomato" element={<Tomato />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/notes" element={<Notes />} />
               <Route path="/task" element={<Tasks />} />
+              <Route path="/tomato" element={<Tomato />} />
             </Routes>
           </Router>
         </div>

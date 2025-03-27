@@ -1,0 +1,6 @@
+.header-container {
+  width: 96vw;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+}

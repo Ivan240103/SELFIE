@@ -1,9 +1,6 @@
 .time-container {
-  width: 100vw;
+  width: fit-content;
   padding: 8px 0px;
-  background-color: #c8ffff;
-  display: flex;
-  justify-content: center;
 }
 
 .time-btn {

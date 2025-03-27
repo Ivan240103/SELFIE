@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema({
   google: {
     type: String,
     default: ''
+  },
+  // permesso di inviare notifiche
+  notification: {
+    type: Boolean,
+    default: false
   }
 })
 

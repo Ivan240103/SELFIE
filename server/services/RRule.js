@@ -2,7 +2,7 @@
  * Servizio per convertire regole di ricorrenza
  */
 
-const { RRule, rrulestr } = require('rrule')
+const { RRule } = require('rrule')
 
 const { getTime } = require('./TimeMachine')
 

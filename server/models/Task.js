@@ -25,6 +25,17 @@ const taskSchema = mongoose.Schema({
   owner: {
     type: String,
     required: true
+  },
+  // promemoria per l'evento
+  // method:minutes,method:minutes
+  reminders: {
+    type: String,
+    default: ""
+  },
+  // timestamp dell'ultima notifica di ritardo
+  lateTs: {
+    type: Number,
+    default: -1
   }
 })
 

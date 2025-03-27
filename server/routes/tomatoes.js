@@ -13,18 +13,15 @@ const router = express.Router()
 
 // salvare nuovo pomodoro
 router.post('/', auth, async (req, res) => {
+  const newTomato = new Tomato({
+    studyMinutes: req.body.studyMinutes,
+    pauseMinutes: req.body.pauseMinutes,
+    loops: req.body.loops,
+    modification: new Date(await getTime(req.user.username)),
+    owner: req.user.username
+  })
+  
   try {
-    const newTomato = new Tomato({
-      owner: req.user.username,
-      studyMinutes: req.body.studyMinutes,
-      pauseMinutes: req.body.pauseMinutes,
-      loops: req.body.loops,
-      interrupted: req.body.interrupted,       
-      remainingMinutes: req.body.remainingMinutes, 
-      remainingLoops: req.body.remainingLoops,     
-      modification: new Date(await getTime(req.user.username))
-    });
-    
     await newTomato.save();
     return res.json(newTomato);
   } catch (err) {
@@ -39,7 +36,7 @@ router.get('/last', auth, async (req, res) => {
   try {
     const timer = await Tomato.findOne({
       owner: req.user.username
-    }).sort({ modification: -1 });
+    }).sort({ modification: 'desc' });
     // se non ne trova nessuno invia un oggetto vuoto
     return res.json(timer || {})
   } catch (err) {

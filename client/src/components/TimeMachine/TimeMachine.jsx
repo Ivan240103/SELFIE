@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import Modal from 'react-modal'
 import { useTimeMachine } from "./TimeMachineContext"
-import { datetimeToString } from '../../services/dateServices'
+import { datetimeToString } from '../../utils/dates'
 
 import '../../css/TimeMachine.css'
 

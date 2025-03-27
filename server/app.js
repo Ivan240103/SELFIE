@@ -8,6 +8,11 @@ const passport = require('passport')
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt')
 const cors = require('cors')
 require('dotenv').config()
+const {
+  notificateEvents,
+  notificateTasks,
+  notificateLateTasks
+} = require('./services/Notificate')
 
 const User = require('./models/User')
 
@@ -54,6 +59,8 @@ const tomatoRoutes = require('./routes/tomatoes')
 app.use('/api/tomatoes', tomatoRoutes)
 const noteRoutes = require('./routes/notes')
 app.use('/api/notes', noteRoutes)
+const { notificationRoutes } = require('./routes/notifications')
+app.use('/api/notification', notificationRoutes)
 
 // connessione al db
 const u = process.env.DB_USER
@@ -62,5 +69,10 @@ const mongoURL = `mongodb+srv://${u}:${p}@selfie.qv0gx.mongodb.net/?retryWrites=
 // const h = process.env.DB_HOSTNAME
 // potrebbe essere questo per gocker??? mongodb://${u}:${p}@${h}:27017/
 mongoose.connect(mongoURL)
+
+// demoni per le notifiche
+setInterval(notificateEvents, 60 * 1000)
+setInterval(notificateTasks, 60 * 1000)
+setInterval(notificateLateTasks, 3 * 60 * 1000)
 
 app.listen(port)

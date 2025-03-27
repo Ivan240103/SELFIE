@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Auth/AuthenticationContext';
-import TimeMachine from '../TimeMachine/TimeMachine';
+import Header from '../Layout/Header';
 import { marked } from 'marked';
 
 import '../../css/Note.css';
 
 function Notes() {
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate()
 
   const [notes, setNotes] = useState([]);
   const [title, setTitle] = useState('');
@@ -23,13 +21,6 @@ function Notes() {
     gfm: true,       //Con true usa le specifiche markdown di Github (quelle classiche direi es: # a, *a*, - a, ecc)
     breaks: true,    //Con true aggiunge una singola linea di break
   });
-
-  // verifica l'autenticazione
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login')
-    }
-  }, [isAuthenticated, navigate])
 
   // Caricare le note al montaggio del componente
   useEffect(() => {
@@ -235,7 +226,7 @@ function Notes() {
   return (
     <div>
       {isAuthenticated && <>
-        <TimeMachine />
+        <Header />
         <div className="notes-container">
           <h1 className="notes-header">Note</h1>
           <p>{error}</p>

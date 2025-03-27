@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -7,9 +7,9 @@ import interactionPlugin from '@fullcalendar/interaction';
 import rrulePlugin from '@fullcalendar/rrule';
 import { useAuth } from '../Auth/AuthenticationContext';
 import { useTimeMachine } from '../TimeMachine/TimeMachineContext';
+import Header from '../Layout/Header'
 import Event from "./Event";
 import Task from "./Task";
-import TimeMachine from '../TimeMachine/TimeMachine';
 import { useRef } from 'react';
 
 /* TODO: X PAYAM
@@ -21,8 +21,7 @@ I TASK IN ROSSO VANNO PROPOSTI TEMPORANEAMENTE ANCHE NEL GIORNO ATTUALE
 function Calendar() {
   const { isAuthenticated } = useAuth()
   const { time, isTimeLoading } = useTimeMachine()
-  const navigate = useNavigate()
-
+  const [user, setUser] = useState({})
   const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [currentEvent, setCurrentEvent] = useState(null);
@@ -30,16 +29,28 @@ function Calendar() {
   const [calendarTasks, setCalendarTasks] = useState([]);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
-  const [lastPomodoro, setLastPomodoro] = useState({});
+  const [error, setError] = useState('');
 
-  // verifica l'autenticazione
+  // recupera il profilo utente
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login')
+    const fetchUser = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setUser(response.data)
+          setError('')
+        } catch (error) {
+          setError(error.response?.data || 'Error fetchUser')
+        }
+      }
     }
-  }, [isAuthenticated, navigate])
 
-  
+    fetchUser()
+  }, [isAuthenticated])
+
+
   // Funzione per calcolare il livello di urgenza
   const calculateUrgencyLevel = (deadline, isDone) => {
     if (isDone || !deadline) return 0;
@@ -78,36 +89,6 @@ function Calendar() {
     fetchEvents();
   }, []);
 
-  useEffect(() => {
-    async function fetchLastPomodoro() {
-      try {
-        const response = await fetch(`${process.env.REACT_APP_API}/api/tomatoes/last`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        if (response.ok) {
-          const pomodoro = await response.json();
-          setLastPomodoro({
-            id: pomodoro._id,
-            title: `🍅 Pomodoro`,
-            start: new Date(time),
-            end: new Date(Date(time) + pomodoro.remainingMinutes * 60 * 1000), //Volevo cercare di mostrare la "barra arancione in day nel calendario" come tempo rimanente ma non mi sa che ho fallito
-            allDay: false,
-            color: 'orange',
-            textColor: 'black',
-            eventType: 'pomodoro'
-          });
-        }
-      } catch (error) {
-        console.error('Errore nel caricamento del pomodoro:', error);
-      }
-    }
-    fetchLastPomodoro();
-  }, []);
-
   // Carica le task dal backend
   useEffect(() => {
     async function fetchTasks() {
@@ -132,7 +113,7 @@ function Calendar() {
             urgencyLevel: calculateUrgencyLevel(task.deadline, task.isDone),
             isDone: task.isDone
           })));
-        }else {
+        } else {
           alert('Errore durante il caricamento delle task.');
         }
       } catch (error) {
@@ -152,7 +133,7 @@ function Calendar() {
       }
     });
   }, [calendarTasks]);
-  
+
 
   function handleTaskSave(newTask) {
     setTasks([...tasks, newTask]);
@@ -214,12 +195,12 @@ function Calendar() {
 
     const newStartDate = event.start
     const newEndDate = event.end ? new Date(event.end) : null; // Data di fine corretta
-    const eventId=event.id
+    const eventId = event.id
 
     console.log("Nuova data di inizio (locale):", newStartDate.toLocaleString('it-IT'));
     console.log("Nuova data di fine (locale):", newEndDate ? newEndDate.toLocaleString('it-IT') : "Nessuna data di fine");
-    
-      try {
+
+    try {
       // Aggiorna la data dell'evento nel backend
       const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventId}`, {
         method: 'PUT',
@@ -227,9 +208,9 @@ function Calendar() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ start: newStartDate.toISOString(), end: newEndDate ? newEndDate.toISOString() : null})
+        body: JSON.stringify({ start: newStartDate.toISOString(), end: newEndDate ? newEndDate.toISOString() : null })
       });
-  
+
       if (response.ok) {
         // Aggiorna lo stato locale
         setCalendarEvents(prevEvents =>
@@ -251,10 +232,10 @@ function Calendar() {
     const { event } = info;
 
     const newEndDate = event.start; // Data di fine corretta
-    const taskId=event.id
+    const taskId = event.id
 
     console.log("Nuova data di fine (locale):", newEndDate ? newEndDate.toLocaleString('it-IT') : "Nessuna data di fine");
-    
+
     try {
       // Aggiorna la data dell'evento nel backend
       const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
@@ -263,7 +244,7 @@ function Calendar() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({deadline: newEndDate ? newEndDate.toISOString() : null})
+        body: JSON.stringify({ deadline: newEndDate ? newEndDate.toISOString() : null })
       });
 
       if (response.ok) {
@@ -289,103 +270,104 @@ function Calendar() {
   // leggendo un po' la docs mi sembra si chiami eventDrop la proprietà necessaria.
 
   return (
-      <div className='demo-app'>
-        {isAuthenticated && <>
-          <TimeMachine />
-          <Sidebar
-            weekendsVisible={weekendsVisible}
-            handleWeekendsToggle={handleWeekendsToggle}
+    <div className='demo-app'>
+      {isAuthenticated && <>
+        <Header />
+        <Sidebar
+          weekendsVisible={weekendsVisible}
+          handleWeekendsToggle={handleWeekendsToggle}
+        />
+        <div className='demo-app-main'>
+          {!isTimeLoading && <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
+            headerToolbar={{
+              left: 'prevYear,prev,today,next,nextYear',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            }}
+            initialView='dayGridMonth'
+            locale='it'
+            initialDate={time}
+            scrollTime='07:00'
+            now={time}
+            nowIndicator={true}
+            editable={true}
+            selectable={true}
+            droppable={true}
+            dayMaxEvents={true}
+            showNonCurrentDates={false}
+            weekends={weekendsVisible}
+            events={[
+              ...calendarEvents,
+              ...calendarTasks, // Assicurati di aggiungere le task qui
+            ]}
+            eventClick={(info) => {
+              const clickedEvent = info.event;
+              // Se l'evento cliccato è una task
+              if (clickedEvent.extendedProps.eventType === 'task') {
+                const clickedTask = calendarTasks.find(task => task.id === clickedEvent.id);
+
+                // Passa la task da modificare al componente Task
+                if (clickedTask) {
+                  setTaskToEdit(clickedTask); // Imposta la task da modificare
+                }
+              }
+              // Se l'evento cliccato è un evento (non una task)
+              else if (clickedEvent.extendedProps.eventType === 'event') {
+                // Passa i dettagli dell'evento al componente Event per la modifica
+                setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare
+              }
+            }}
+            eventDrop={(info) => {
+              const { event } = info;
+              if (event.extendedProps.eventType === 'event') {  //Si potrebbe fare anche con le task
+                handleEventDrop(info); // Gestisci il trascinamento degli eventi
+              }
+              else {  //Si potrebbe fare anche con le task
+                handleTaskDrop(info); // Gestisci il trascinamento degli eventi
+              }
+            }}
+          />}
+          <Event
+            onSaveEvent={handleEventSave}
+            onUpdateEvent={handleEventUpdate}
+            onDeleteEvent={handleEventDelete}
+            eventDetails={currentEvent}
+            user={user}
           />
-          <div className='demo-app-main'>
-            {!isTimeLoading && <FullCalendar
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
-              headerToolbar={{
-                left: 'prevYear,prev,today,next,nextYear',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-              }}
-              initialView='dayGridMonth'
-              locale='it'
-              initialDate={time}
-              scrollTime='07:00'
-              now={time}
-              nowIndicator={true}
-              editable={true}
-              selectable={true}
-              droppable={true}
-              dayMaxEvents={true}
-              showNonCurrentDates={false}
-              weekends={weekendsVisible}
-              events={[
-                ...calendarEvents,
-                ...calendarTasks,
-                lastPomodoro
-              ]}
-              eventClick={(info) => {
-                const clickedEvent = info.event;
-                // Se l'evento cliccato è una task
-                if (clickedEvent.extendedProps.eventType === 'task') {
-                  const clickedTask = calendarTasks.find(task => task.id === clickedEvent.id);
-                  
-                  // Passa la task da modificare al componente Task
-                  if (clickedTask) {
-                    setTaskToEdit(clickedTask); // Imposta la task da modificare
-                  }
-                }
-                // Se l'evento cliccato è un evento (non una task)
-                else if (clickedEvent.extendedProps.eventType === 'event') {
-                  // Passa i dettagli dell'evento al componente Event per la modifica
-                  setCurrentEvent(clickedEvent.id);  // Imposta l'evento da modificare
-                }
-              }}
-              eventDrop={(info) => {  
-                const { event } = info;
-                if (event.extendedProps.eventType === 'event') {  //Si potrebbe fare anche con le task
-                  handleEventDrop(info); // Gestisci il trascinamento degli eventi
-                }
-                else{  //Si potrebbe fare anche con le task
-                  handleTaskDrop(info); // Gestisci il trascinamento degli eventi
-                }
-              }}
-            />}
-            <Event 
-              onSaveEvent={handleEventSave}
-              onUpdateEvent={handleEventUpdate} 
-              onDeleteEvent={handleEventDelete} 
-              eventDetails={currentEvent}
+          <div>
+      <h3>Lista Attività</h3>
+      <ul>
+        {calendarTasks.map(task => (
+          <li key={task.id}>
+            <input
+              type="checkbox"
+              checked={selectedTasks.includes(task.id)}
+              onChange={() => handleTaskSelect(task.id)}
             />
-            <div>
-              <h3>Lista Attività</h3>
-              <ul>
-                {calendarTasks.map(task => (
-                    <li key={task.id}>
-                      <input
-                        type="checkbox"
-                        checked={selectedTasks.includes(task.id)}
-                        onChange={() => handleTaskSelect(task.id)}
-                      />
-                      {task.title} - Scadenza: {new Date(task.start).toLocaleDateString('it-IT')}
-                      {task.isDone && <span style={{ color: 'green', marginLeft: '10px' }}>✅ Completata</span>}
-                    </li>
-                ))}
-              </ul>
-              {/* Mostra il bottone di modifica solo se una singola task è selezionata */}
-              {selectedTasks.length === 1 && (
-                <button onClick={() => handleTaskClick(calendarTasks.find(task => task.id === selectedTasks[0]))}>
-                  Modifica Task
-                </button>
-              )}
-            </div>
-            <Task 
-              onSaveTask={handleTaskSave} 
-              onUpdateTask={handleTaskUpdate}
-              onDeleteTask={handleTaskDelete}
-              taskDetails={taskToEdit} // Passiamo la task da modificare
-              selectedTasks={selectedTasks}
-            />
-          </div>
-        </>}
-      </div>
+            {task.title} - Scadenza: {new Date(task.start).toLocaleDateString('it-IT')}
+            {task.isDone && <span style={{ color: 'green', marginLeft: '10px' }}>✅ Completata</span>}
+          </li>
+        ))}
+      </ul>
+      {/* Mostra il bottone di modifica solo se una singola task è selezionata */}
+      {selectedTasks.length === 1 && (
+        <button onClick={() => handleTaskClick(calendarTasks.find(task => task.id === selectedTasks[0]))}>
+          Modifica Task
+        </button>
+      )}
+    </div>
+    <Task
+      onSaveTask={handleTaskSave}
+      onUpdateTask={handleTaskUpdate}
+      onDeleteTask={handleTaskDelete}
+      taskDetails={taskToEdit} // Passiamo la task da modificare
+      selectedTasks={selectedTasks}
+      user={user}
+    />
+  </div>
+      </>}
+    </div >
   );
 }
 

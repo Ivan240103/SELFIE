@@ -13,12 +13,14 @@ const auth = require('../middleware/auth')
 const upload = require('../middleware/multer')
 const tm = require('../services/TimeMachine')
 const { authorize } = require('../google/Auth')
+const { resetUserTaskTs } = require('../services/Notificate')
 
 const User = require('../models/User')
 const Event = require('../models/Event')
 const Task = require('../models/Task')
 const Note = require('../models/Note')
 const Tomato = require('../models/Tomato')
+const Sub = require('../models/PushSubscription')
 
 const router = express.Router()
 
@@ -127,6 +129,23 @@ router.put('/google', auth, async (req, res) => {
   }
 })
 
+// attivare o disattivare le notifiche
+router.put('/notification', auth, async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.user.username })
+    if (!user) return res.status(404).send(`No user found with username ${req.user.username}`)
+    user.notification = req.body.state
+    await user.save()
+    if (req.body.state === false) {
+      await Sub.findOneAndDelete({ owner: req.user.username })
+    }
+    return res.send('ok')
+  } catch (err) {
+    console.log(err)
+    return res.status(500).send('Error while setting notification permission')
+  }
+})
+
 // aggiornare i dati di un utente
 // delle password passare l'hash SHA1
 // body.birthday è una data in ISO string (UTC)
@@ -172,11 +191,20 @@ router.put('/', [auth, upload.single('pic')], async (req, res) => {
 // senza body per resettare la data
 router.put('/time', auth, async (req, res) => {
   try {
+    // per controllare se l'utente si sposta indietro nel tempo
+    const pre = Date.parse(await tm.getTime(req.user.username))
+    // TODO: reset e set potrebbero essere la stessa funzione
     if (req.body.time) {
       const time = await tm.setTime(req.user.username, req.body.time)
+      if (Date.parse(time) < pre) {
+        await resetUserTaskTs(req.user.username)
+      }
       return res.json(time)
     } else {
       const time = await tm.resetTime(req.user.username)
+      if (Date.parse(time) < pre) {
+        await resetUserTaskTs(req.user.username)
+      }
       return res.json(time)
     }
   } catch (err) {
@@ -198,6 +226,7 @@ router.delete('/', auth, async (req, res) => {
     await Task.deleteMany({ owner: req.user.username })
     await Note.deleteMany({ owner: req.user.username })
     await Tomato.deleteMany({ owner: req.user.username })
+    await Sub.findOneAndDelete({ owner: req.user.username })
     return res.send('ok')
   } catch (err) {
     return res.status(500).send('Error while deleting user')

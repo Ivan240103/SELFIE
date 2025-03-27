@@ -85,10 +85,19 @@
 - [x] button per mostrare la psw in chiaro
 
 ## Estensione 18-27
-- [ ] notifica per gli eventi a scelta (mail, SO, whatsapp...), con un certo anticipo e una certa ripetizione
-- [ ] notifica crescente di urgenza per le attività
+- [x] notifica per gli eventi a scelta (mail, SO, whatsapp...), con un certo anticipo e una certa ripetizione
+  - [x] eventi ricorrenti
+  - [x] aggiungere il db
+  - [x] filtrare a chi inviare le notifiche
+  - [x] quando ci si sposta nel tempo le notifiche vanno controllate
+- [x] notifica crescente di urgenza per le attività
+  - [x] ogni 5 minuti controllare quali task sono in ritardo e nel caso notificarli
+- [x] disabilitare le notifiche
 - [x] note in markdown
 - [ ] cicli di pomodoro programmati come eventi
 - [ ] cicli non completati si spostano alle giornate successive
 - [x] integrazione con calendari terzi (standard iCalendar?)
 - [ ] geolocalizzazione per gli eventi --> NON SPECIFICATO/APPROFONDITO
+
+## Refactor
+- rendere getTime nel server non async

@@ -4,11 +4,11 @@ import axios from 'axios';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import rrulePlugin from '@fullcalendar/rrule';
-import TimeMachine from './TimeMachine/TimeMachine'
 import { useTimeMachine } from './TimeMachine/TimeMachineContext'
 import { useAuth } from './Auth/AuthenticationContext';
-import { datetimeToDateString } from '../services/dateServices';
+import { datetimeToDateString } from '../utils/dates';
 import { marked } from 'marked';
+import Header from './Layout/Header'
 
 import calendarIcon from "../images/calendar-icon.png";
 import notesIcon from "../images/notebook-pen-icon.png";
@@ -34,13 +34,6 @@ const Dashboard = () => {
     gfm: true,       //Con true usa le specifiche markdown di Github (quelle classiche direi es: # a, *a*, - a, ecc)
     breaks: true,    //Con true aggiunge una singola linea di break
   });
-
-  // verifica l'autenticazione
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login')
-    }
-  }, [isAuthenticated, navigate])
 
   // recupera il profilo utente
   useEffect(() => {
@@ -132,8 +125,7 @@ const Dashboard = () => {
           const response = await axios.get(`${process.env.REACT_APP_API}/api/tomatoes/last`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           });
-          const data = response.data;
-          setTomato(response.data);  //controlla se è un'array e passa il primo elemento, altrimenti passa direttamente 'data'
+          setTomato(response.data);
         } catch (error) {
           setError('Error while fetching tomato');
           setTomato({});
@@ -147,8 +139,8 @@ const Dashboard = () => {
   return(
     <div>
       {isAuthenticated && <>
-        <TimeMachine />
-        <p>{error}</p>
+        <Header />
+        {error && <p>{error}</p>}
         <div className='dash-container'>
           <div
             className='dash-card'
@@ -170,7 +162,7 @@ const Dashboard = () => {
           <div
             className='dash-card'
             id='dash-calendar'
-            onClick={() => navigate('/Calendar')}
+            onClick={() => navigate('/calendar')}
           >
             <div className='dash-card-header'>
               <img
@@ -199,7 +191,7 @@ const Dashboard = () => {
           <div
             className='dash-card'
             id='dash-note'
-            onClick={() => navigate('/Notes')}
+            onClick={() => navigate('/notes')}
           >
             <div className='dash-card-header'>
               <img
