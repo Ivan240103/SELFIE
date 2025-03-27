@@ -31,14 +31,6 @@ const taskSchema = mongoose.Schema({
   reminders: {
     type: String,
     default: ""
-  },
-  emailNotified: {
-    type: Boolean,
-    default: false
-  },
-  pushNotified: {
-    type: Boolean,
-    default: false
   }
 })
 

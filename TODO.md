@@ -89,12 +89,15 @@
   - [x] eventi ricorrenti
   - [x] aggiungere il db
   - [x] filtrare a chi inviare le notifiche
-- [x] notifica crescente di urgenza per le attività
-- [ ] alla tot ora del giorno prendi tutti i task non completati ma scaduti e reimposta la notifica a false, in modo che al giro successivo di check vengano nuovamente notificate. fare la stessa cosa anche per i recurrent events
+  - [ ] quando ci si sposta nel tempo le notifiche vanno controllate
+- [ ] notifica crescente di urgenza per le attività
+  - [ ] ogni 5 minuti controllare quali task sono in ritardo e nel caso notificarli
 - [x] disabilitare le notifiche
-- [ ] quando ci si sposta nel tempo le notifiche vanno controllate
 - [x] note in markdown
 - [ ] cicli di pomodoro programmati come eventi
 - [ ] cicli non completati si spostano alle giornate successive
 - [x] integrazione con calendari terzi (standard iCalendar?)
 - [ ] geolocalizzazione per gli eventi --> NON SPECIFICATO/APPROFONDITO
+
+## Refactor
+- rendere getTime nel server non async

@@ -8,7 +8,10 @@ const passport = require('passport')
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt')
 const cors = require('cors')
 require('dotenv').config()
-require('./services/Notificate')
+const {
+  notificateEvents,
+  notificateTasks
+} = require('./services/Notificate')
 
 const User = require('./models/User')
 
@@ -65,5 +68,10 @@ const mongoURL = `mongodb+srv://${u}:${p}@selfie.qv0gx.mongodb.net/?retryWrites=
 // const h = process.env.DB_HOSTNAME
 // potrebbe essere questo per gocker??? mongodb://${u}:${p}@${h}:27017/
 mongoose.connect(mongoURL)
+
+// demoni per le notifiche
+// DEBUG: riportare a 60 * 1000 per fare il check ogni minuto
+setInterval(notificateEvents, 60 * 1000)
+setInterval(notificateTasks, 60 * 1000)
 
 app.listen(port)

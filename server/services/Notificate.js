@@ -7,7 +7,6 @@ const Task = require('../models/Task')
 const User = require('../models/User')
 const { getTime } = require('../services/TimeMachine')
 const { RRule } = require('rrule')
-require('dotenv').config()
 
 /**
  * Trasforma lo start degli eventi ricorrenti nella loro prima occorrenza
@@ -24,33 +23,55 @@ async function mapRecurrentEvents(events) {
   }))
 }
 
-async function notificateEventEmail() {
-  try {
-    let events = await Event.find({
-      $and: [
-        { reminders: { $ne: '' } },
-        { emailNotified: false }
-      ]
-    })
-    events = events.filter(e => e.reminders.includes('email'))
-    events = await mapRecurrentEvents(events)
+/**
+ * Fornisce una stringa rappresentante la data passata come argomento
+ * (con sensibilità al minuto)
+ * @param convertible qualcosa di convertibile in un Date (ms, stringa...)
+ */
+function getDatetimeString(convertible) {
+  return (new Date(convertible)).toLocaleString('it-IT').slice(0, -3)
+}
 
-    events.forEach(async (e) => {
+async function isNotificationMoment(T, isPush, isEvent) {
+  const method = isPush ? 'push' : 'email'
+  const reminder = T.reminders.split(',').filter(r => r.includes(method))[0]
+  const minutes = parseInt(reminder.split(':')[1])
+  const activityDate = isEvent ? new Date(T.start) : new Date(T.deadline)
+  const reminderInstant = activityDate.getTime() - minutes * 60 * 1000
+  return getDatetimeString(reminderInstant) == getDatetimeString(await getTime(T.owner))
+}
+
+async function notificateEvents() {
+  try {
+    const events = await Event.find({ reminders: { $ne: '' } })
+    const futureEvents = (await mapRecurrentEvents(events)).filter(
+      async (e) => (new Date(e.start)).getTime() > Date.parse(await getTime(e.owner))
+    )
+
+    futureEvents.forEach(async (e) => {
       const owner = await User.findOne({ username: e.owner })
       if (!owner.notification) return
 
-      const mailReminderMinutes = e.reminders.split(',').filter(r => r.includes('email'))[0].split(':')[1]
-      const reminderInstant = (new Date(e.start)).getTime() - parseInt(mailReminderMinutes) * 60 * 1000
-      if (Date.parse(await getTime(e.owner)) > reminderInstant) {
-        await sendMail(
-          owner.email,
-          e.title,
-          `Il tuo evento "${e.title}" è in programma per il ` + (new Date(e.start)).toLocaleString('it-IT')
-        )
-        await Event.findByIdAndUpdate(
-          e._id,
-          { $set: { emailNotified: true } }
-        )
+      if (e.reminders.includes('push')) {
+        // push notification
+        if (await isNotificationMoment(e, true, true)) {
+          await sendPush(
+            e.title,
+            `Il tuo evento "${e.title}" è in programma per il ` + getDatetimeString(e.start),
+            e.owner
+          )
+        }
+      }
+
+      if (e.reminders.includes('email')) {
+        // email notification
+        if (await isNotificationMoment(e, false, true)) {
+          await sendMail(
+            owner.email,
+            e.title,
+            `Il tuo evento "${e.title}" è in programma per il ` + getDatetimeString(e.start)
+          )
+        }
       }
     })
   } catch (err) {
@@ -58,89 +79,37 @@ async function notificateEventEmail() {
   }
 }
 
-async function notificateEventPush() {
+async function notificateTasks() {
   try {
-    let events = await Event.find({
-      $and: [
-        { reminders: { $ne: '' } },
-        { pushNotified: false }
-      ]
-    })
-    events = events.filter(e => e.reminders.includes('push'))
-    events = await mapRecurrentEvents(events)
+    const tasks = await Task.find({ reminders: { $ne: '' } })
+    const futureTasks = tasks.filter(
+      async (t) => (new Date(t.deadline)).getTime() > Date.parse(await getTime(t.owner))
+    )
 
-    events.forEach(async (e) => {
-      const owner = await User.findOne({ username: e.owner })
-      if (!owner.notification) return
-      
-      const pushReminderMinutes = e.reminders.split(',').filter(r => r.includes('push'))[0].split(':')[1]
-      const reminderInstant = (new Date(e.start)).getTime() - parseInt(pushReminderMinutes) * 60 * 1000
-      if (Date.parse(await getTime(e.owner)) > reminderInstant) {
-        await sendPush(
-          e.title,
-          `Il tuo evento "${e.title}" è in programma per il ` + (new Date(e.start)).toLocaleString('it-IT'),
-          e.owner
-        )
-        await Event.findByIdAndUpdate(
-          e._id,
-          { $set: { pushNotified: true } }
-        )
-      }
-    })
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-async function notificateTaskEmail() {
-  try {
-    let tasks = await Task.find({
-      $and: [
-        { reminders: { $ne: '' } },
-        { emailNotified: false }
-      ]
-    })
-    tasks = tasks.filter(t => t.reminders.includes('email'))
-
-    tasks.forEach(async (t) => {
+    futureTasks.forEach(async (t) => {
       const owner = await User.findOne({ username: t.owner })
       if (!owner.notification) return
 
-      const mailReminderMinutes = t.reminders.split(',').filter(r => r.includes('email'))[0].split(':')[1]
-      const deadlineMs = (new Date(t.deadline)).getTime()
-      const reminderInstant = deadlineMs - parseInt(mailReminderMinutes) * 60 * 1000
-      const ownerTimeMs = Date.parse(await getTime(t.owner))
-      if (ownerTimeMs > reminderInstant) {
-        // needs notification
-        if (ownerTimeMs > deadlineMs + 7 * 24 * 60 * 60 * 1000) {
-          await sendMail(
-            owner.email,
-            `RICORDATI DI ${t.title} !`,
-            `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT') + ', è più di una settimana fa!'
+      if (t.reminders.includes('push')) {
+        // push notification
+        if (await isNotificationMoment(t, true, false)) {
+          await sendPush(
+            t.title,
+            `Il tuo task "${t.title}" è in scadenza il ${getDatetimeString(t.deadline)}.`,
+            t.owner
           )
-        } else if (ownerTimeMs > deadlineMs + 24 * 60 * 60 * 1000) {
-          await sendMail(
-            owner.email,
-            `!!! ${t.title} !!!`,
-            `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT') + ", è già un po' che lo porti dietro."
-          )
-        } else if (ownerTimeMs > deadlineMs) {
-          await sendMail(
-            owner.email,
-            `${t.title}`,
-            `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT')
-          )
-        } else {
+        }
+      }
+
+      if (t.reminders.includes('email')) {
+        // email notification
+        if (await isNotificationMoment(t, false, false)) {
           await sendMail(
             owner.email,
             t.title,
-            `Il tuo task "${t.title}" è in scadenza il ` + (new Date(t.deadline)).toLocaleString('it-IT')
+            `Il tuo task "${t.title}" è in scadenza il ${getDatetimeString(t.deadline)}.`
           )
         }
-        await Task.findByIdAndUpdate(
-          t._id,
-          { $set: { emailNotified: true } }
-        )
       }
     })
   } catch (err) {
@@ -148,64 +117,36 @@ async function notificateTaskEmail() {
   }
 }
 
-async function notificateTaskPush() {
-  try {
-    let tasks = await Task.find({
-      $and: [
-        { reminders: { $ne: '' } },
-        { pushNotified: false }
-      ]
-    })
-    tasks = tasks.filter(t => t.reminders.includes('push'))
-
-    tasks.forEach(async (t) => {
-      const owner = await User.findOne({ username: t.owner })
-      if (!owner.notification) return
-      
-      const pushReminderMinutes = t.reminders.split(',').filter(r => r.includes('push'))[0].split(':')[1]
-      const deadlineMs = (new Date(t.deadline)).getTime()
-      const reminderInstant = deadlineMs - parseInt(pushReminderMinutes) * 60 * 1000
-      const ownerTimeMs = Date.parse(await getTime(t.owner))
-      if (ownerTimeMs > reminderInstant) {
-        // needs notification
-        if (ownerTimeMs > deadlineMs + 7 * 24 * 60 * 60 * 1000) {
-          await sendPush(
-            `RICORDATI DI ${t.title} !`,
-            `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT') + ', è più di una settimana fa!',
-            t.owner
-          )
-        } else if (ownerTimeMs > deadlineMs + 24 * 60 * 60 * 1000) {
-          await sendPush(
-            `!!! ${t.title} !!!`,
-            `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT') + ", è già un po' che lo porti dietro.",
-            t.owner
-          )
-        } else if (ownerTimeMs > deadlineMs) {
-          await sendPush(
-            t.title,
-            `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT'),
-            t.owner
-          )
-        } else {
-          await sendPush(
-            t.title,
-            `Il tuo task "${t.title}" è in scadenza il ` + (new Date(t.deadline)).toLocaleString('it-IT'),
-            t.owner
-          )
-        }
-        await Task.findByIdAndUpdate(
-          t._id,
-          { $set: { pushNotified: true } }
-        )
-      }
-    })
-  } catch (err) {
-    console.error(err)
+/* tasks.forEach(async (t) => {
+  const mailReminderMinutes = t.reminders.split(',').filter(r => r.includes('email'))[0].split(':')[1]
+  const deadlineMs = (new Date(t.deadline)).getTime()
+  const reminderInstant = deadlineMs - parseInt(mailReminderMinutes) * 60 * 1000
+  const ownerTimeMs = Date.parse(await getTime(t.owner))
+  if (ownerTimeMs > reminderInstant) {
+    // needs notification
+    if (ownerTimeMs > deadlineMs + 7 * 24 * 60 * 60 * 1000) {
+      await sendMail(
+        owner.email,
+        `RICORDATI DI ${t.title} !`,
+        `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT') + ', è più di una settimana fa!'
+      )
+    } else if (ownerTimeMs > deadlineMs + 24 * 60 * 60 * 1000) {
+      await sendMail(
+        owner.email,
+        `!!! ${t.title} !!!`,
+        `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT') + ", è già un po' che lo porti dietro."
+      )
+    } else if (ownerTimeMs > deadlineMs) {
+      await sendMail(
+        owner.email,
+        `${t.title}`,
+        `Il tuo task "${t.title}" è scaduto il ` + (new Date(t.deadline)).toLocaleString('it-IT')
+      )
+    }
   }
-}
+}) */
 
-// DEBUG: riportare a 60 * 1000 per fare il check ogni minuto
-setInterval(notificateEventEmail, 10 * 1000)
-setInterval(notificateEventPush, 10 * 1000)
-setInterval(notificateTaskEmail, 10 * 1000)
-setInterval(notificateTaskPush, 10 * 1000)
+module.exports = {
+  notificateEvents,
+  notificateTasks
+}
