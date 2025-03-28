@@ -1,9 +1,13 @@
 /**
- * Note model for db
+ * `Note` model for db
  */
 
 const mongoose = require('mongoose')
 
+/**
+ * DOC:
+ * - le categorie sono salvate in una stringa unica, separate da virgole
+ */
 const noteSchema = mongoose.Schema({
   title: {
     type: String,
@@ -13,15 +17,17 @@ const noteSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  // data e ora di creazione
   creation: {
     type: Date,
     required: true
   },
+  // data e ora dell'ultima modifica
   modification: {
     type: Date,
     required: true
   },
-  // categorie separate da virgole ','
+  // categorie associate
   categories: {
     type: String,
     default: ''
@@ -33,4 +39,6 @@ const noteSchema = mongoose.Schema({
   }
 })
 
-module.exports = mongoose.model("Note", noteSchema)
+const Note = mongoose.model('Note', noteSchema)
+
+module.exports = Note

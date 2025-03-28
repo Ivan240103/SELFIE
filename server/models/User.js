@@ -1,10 +1,11 @@
 /**
- * User model for db
+ * `User` model for db
  */
 
 const mongoose = require('mongoose')
 
 const userSchema = new mongoose.Schema({
+  // username univoco
   username: {
     type: String,
     unique: true,
@@ -30,11 +31,12 @@ const userSchema = new mongoose.Schema({
   birthday: {
     type: Date
   },
+  // nome salvato dell'immagine del profilo
   picName: {
     type: String,
     default: 'default.png'
   },
-  // spostamento del datetime
+  // spostamento del datetime rispetto a quello reale
   offset: {
     type: Number,
     default: 0
@@ -51,4 +53,6 @@ const userSchema = new mongoose.Schema({
   }
 })
 
-module.exports = mongoose.model('User', userSchema)
+const User = mongoose.model('User', userSchema)
+
+module.exports = User

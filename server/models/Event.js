@@ -1,9 +1,20 @@
 /**
- * Event model for db
+ * `Event` model for db
  */
 
 const mongoose = require('mongoose')
 
+/**
+ * DOC:
+ * - se isAllDay == true, start e end conterranno solo la data  
+ *   se isAllDay == false, start e end conterranno anche l'orario
+ * - rrule segue lo standard iCalendar  
+ *   RRULE:FREQ=f;INTERVAL=i;COUNT=c oppure RRULE:FREQ=f;INTERVAL=i;UNTIL=u
+ * - mapsLocated = true se place viene impostato tramite l'API di LocationIQ
+ * - googleId ha significato solo se l'evento arriva da Google
+ * - reminders si trova nella forma method:minutes,method:minutes  
+ *   dove method := email | push, minutes sono i minuti di anticipo
+ */
 const eventSchema = mongoose.Schema({
   title: {
     type: String,
@@ -13,54 +24,53 @@ const eventSchema = mongoose.Schema({
     type: String,
     default: 'Nessuna descrizione'
   },
-  // se la data di start e end coincide, l'evento si svolge solo in quel giorno
+  // data (e orario) di inizio
   start: {
     type: Date,
     required: true
   },
+  // data (e orario) di fine
   end: {
     type: Date,
     required: true
   },
-  // se isAllDay = false, start e end conterranno anche l'orario
+  // flag se l'evento dura tutto il giorno
   isAllDay: {
     type: Boolean,
     default: true
   },
-  /*
-  standard iCalendar
-  RRULE:FREQ=f;INTERVAL=i;COUNT=c
-  RRULE:FREQ=f;INTERVAL=i;UNTIL=u
-  */
+  // regola di ricorrenza
   rrule: {
     type: String,
     default: null
   },
+  // luogo dell'evento
   place: {
     type: String,
     default: ''
   },
-  // true se il luogo viene impostato tramite l'API di OpenStreetMap
+  // flag se il luogo è geolocalizzato
   mapsLocated: {
     type: Boolean,
     default: false
+  },
+  // ID dell'evento Google Calendar
+  googleId: {
+    type: String,
+    default: ''
+  },
+  // promemoria per l'evento
+  reminders: {
+    type: String,
+    default: ''
   },
   // username dell'utente che ha creato l'evento
   owner: {
     type: String,
     required: true 
-  },
-  // id dell'evento google
-  googleId: {
-    type: String,
-    default: ""
-  },
-  // promemoria per l'evento
-  // method:minutes,method:minutes
-  reminders: {
-    type: String,
-    default: ""
   }
 })
 
-module.exports = mongoose.model("Event", eventSchema)
+const Event = mongoose.model('Event', eventSchema)
+
+module.exports = Event

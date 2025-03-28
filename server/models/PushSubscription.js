@@ -5,6 +5,7 @@
 const mongoose = require('mongoose')
 
 const subSchema = mongoose.Schema({
+  // sottoscrizione al servizio di notifica
   subscription: {
     type: Object,
     required: true
@@ -16,4 +17,6 @@ const subSchema = mongoose.Schema({
   }
 })
 
-module.exports = mongoose.model("Sub", subSchema)
+const Sub = mongoose.model('Sub', subSchema)
+
+module.exports = Sub

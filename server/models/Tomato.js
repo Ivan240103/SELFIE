@@ -1,42 +1,54 @@
 /**
- * Tomato-timer model for db
+ * `Tomato` timer model for db
  */
 
 const mongoose = require('mongoose')
 
+/**
+ * DOC:
+ * - i possibili valori per interrupted sono:
+ *   - 'n' = not interrupted
+ *   - 's' = interrupted during study time
+ *   - 'p' = interrupted during pause time
+ *   - 'f' = finished
+ * - remainingMinutes e remainingLoops hanno significato
+ *   solo se interrupted != 'n'
+ */
 const tomatoSchema = mongoose.Schema({
+  // tempo di studio in minuti
   studyMinutes: {
     type: Number,
     min: 1,
     required: true
   },
+  // tempo di pausa in minuti
   pauseMinutes: {
     type: Number,
     min: 1,
     required: true
   },
+  // numero di cicli totali (studio + pausa)
   loops: {
     type: Number,
     min: 1,
     required: true
   },
-  // 'n' = not interrupted, 's' = interrupted during study time,
-  // 'p' = interrupted during pause time, 'f' = finished
+  // stato del timer
   interrupted: {
     type: String,
     default: 'n'
   },
-  // ha valore solo se interrupted != 'n'
+  // tempo rimanente in minuti
   remainingMinutes: {
     type: Number,
     default: -1
   },
-  // un loop è inteso come studio + pausa
+  // numero di cicli rimanenti
   remainingLoops: {
     type: Number,
     default: -1
   },
-  // ultima modifica al timer
+  // data e ora dell'ultima modifica al timer
   modification: {
     type: Date,
     required: true
@@ -48,4 +60,6 @@ const tomatoSchema = mongoose.Schema({
   }
 })
 
-module.exports = mongoose.model("Tomato", tomatoSchema)
+const Tomato = mongoose.model('Tomato', tomatoSchema)
+
+module.exports = Tomato

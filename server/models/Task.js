@@ -1,9 +1,14 @@
 /**
- * Task model for db
+ * `Task` model for db
  */
 
 const mongoose = require('mongoose')
 
+/**
+ * DOC:
+ * - reminders si trova nella forma method:minutes,method:minutes  
+ *   dove method := email | push, minutes sono i minuti di anticipo
+ */
 const taskSchema = mongoose.Schema({
   title: {
     type: String,
@@ -13,30 +18,33 @@ const taskSchema = mongoose.Schema({
     type: String,
     default: 'Nessuna descrizione'
   },
+  // termine dell'attività
   deadline: {
     type: Date,
     required: true
   },
+  // flag se il task è completato
   isDone: {
     type: Boolean,
     default: false
   },
-  // username dell'utente che ha creato l'attività
-  owner: {
-    type: String,
-    required: true
-  },
-  // promemoria per l'evento
-  // method:minutes,method:minutes
+  // promemoria per l'attività
   reminders: {
     type: String,
-    default: ""
+    default: ''
   },
   // timestamp dell'ultima notifica di ritardo
   lateTs: {
     type: Number,
     default: -1
+  },
+  // username dell'utente che ha creato l'attività
+  owner: {
+    type: String,
+    required: true
   }
 })
 
-module.exports = mongoose.model("Task", taskSchema)
+const Task = mongoose.model('Task', taskSchema)
+
+module.exports = Task
