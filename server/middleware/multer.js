@@ -1,21 +1,21 @@
 /**
- * Middleware per il caricamento dell'immagine profilo
+ * Profile pic upload middleware based on Multer
  */
 
 const multer = require('multer')
 const path = require('path')
 
-// configurazione di multer per salvare le immagini profilo
+// configurazione per salvare le immagini
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // dove salvare i file
-    const uploadPath = path.resolve(__dirname, '../uploads/images')
+    const uploadPath = path.resolve(__dirname, '../images/uploads')
     cb(null, uploadPath)
   },
   filename: (req, file, cb) => {
     // creazione nome univoco
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    cb(null, uniqueSuffix + path.extname(file.originalname))
+    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, uniqueName + path.extname(file.originalname))
   },
 })
 

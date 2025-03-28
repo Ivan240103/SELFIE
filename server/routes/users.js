@@ -175,7 +175,7 @@ router.put('/', [auth, upload.single('pic')], async (req, res) => {
     // elimina la vecchia foto quando viene rimpiazzata
     if (req.file?.filename) {
       if (upd.picName !== 'default.png') {
-        fs.unlink(path.resolve(__dirname, `../uploads/images/${upd.picName}`), () => {})
+        fs.unlink(path.resolve(__dirname, `../images/uploads/${upd.picName}`), () => {})
       }
       upd.picName = req.file.filename
     }
@@ -219,7 +219,7 @@ router.delete('/', auth, async (req, res) => {
     if (!del) return res.status(404).send(`No user found with username ${req.user.username}`)
     // elimina a cascata tutte le risorse dell'utente
     if (del.picName !== 'default.png') {
-      fs.unlink(path.resolve(__dirname, `../uploads/images/${del.picName}`), () => {})
+      fs.unlink(path.resolve(__dirname, `../images/uploads/${del.picName}`), () => {})
     }
     await del.deleteOne()
     await Event.deleteMany({ owner: req.user.username })
