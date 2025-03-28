@@ -4,69 +4,45 @@
 
 const express = require('express')
 const mongoose = require('mongoose')
-const passport = require('passport')
-const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt')
 const cors = require('cors')
 require('dotenv').config()
+require('./middleware/auth')
 const {
   notificateEvents,
   notificateTasks,
   notificateLateTasks
 } = require('./services/Notificate')
 
-const User = require('./models/User')
-
 const app = express()
 const port = 8000
 
 // MIDDLEWARE
-// per accedere i campi JSON
 app.use(express.json())
-// per accedere i campi nel body del POST
 app.use(express.urlencoded({ extended: true }))
-// per accettare le richieste da domini esterni
 app.use(cors())
-// per gestire l'autenticazione
-app.use(passport.initialize())
-// per mettere a disposizione del frontend le immagini del profilo
-app.use('/pics', express.static('./uploads/images'));
-
-// configurazione passport.js
-const opts = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
-}
-
-passport.use(
-  new JwtStrategy(opts, async (jwtPayload, done) => {
-    try {
-      const user = await User.findById(jwtPayload.userId)
-      return done(null, user || false)
-    } catch (error) {
-      return done(error, false)
-    }
-  })
-)
+// mette a disposizione del frontend le immagini del profilo
+app.use('/pics', express.static('./images/uploads'))
 
 // ROUTES
 const userRoutes = require('./routes/users')
-app.use('/api/users', userRoutes)
 const eventRoutes = require('./routes/events')
-app.use('/api/events', eventRoutes)
 const taskRoutes = require('./routes/tasks')
-app.use('/api/tasks', taskRoutes)
 const tomatoRoutes = require('./routes/tomatoes')
-app.use('/api/tomatoes', tomatoRoutes)
 const noteRoutes = require('./routes/notes')
-app.use('/api/notes', noteRoutes)
 const { notificationRoutes } = require('./routes/notifications')
-app.use('/api/notification', notificationRoutes)
 
-// connessione al db
+app.use('/api/users', userRoutes)
+app.use('/api/events', eventRoutes)
+app.use('/api/tasks', taskRoutes)
+app.use('/api/tomatoes', tomatoRoutes)
+app.use('/api/notes', noteRoutes)
+app.use('/api/notifications', notificationRoutes)
+
+// connessione al db mongo
 const u = process.env.DB_USER
 const p = process.env.DB_PSW
-const mongoURL = `mongodb+srv://${u}:${p}@selfie.qv0gx.mongodb.net/?retryWrites=true&w=majority&appName=SELFIE`
 // const h = process.env.DB_HOSTNAME
+const mongoURL = `mongodb+srv://${u}:${p}@selfie.qv0gx.mongodb.net/?retryWrites=true&w=majority&appName=SELFIE`
 // potrebbe essere questo per gocker??? mongodb://${u}:${p}@${h}:27017/
 mongoose.connect(mongoURL)
 
