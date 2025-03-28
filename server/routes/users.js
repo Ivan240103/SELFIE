@@ -191,22 +191,14 @@ router.put('/', [auth, upload.single('pic')], async (req, res) => {
 // senza body per resettare la data
 router.put('/time', auth, async (req, res) => {
   try {
+    const user = await User.findOne({ username: req.user.username })
     // per controllare se l'utente si sposta indietro nel tempo
-    const pre = Date.parse(await tm.getTime(req.user.username))
-    // TODO: reset e set potrebbero essere la stessa funzione
-    if (req.body.time) {
-      const time = await tm.setTime(req.user.username, req.body.time)
-      if (Date.parse(time) < pre) {
-        await resetUserTaskTs(req.user.username)
-      }
-      return res.json(time)
-    } else {
-      const time = await tm.resetTime(req.user.username)
-      if (Date.parse(time) < pre) {
-        await resetUserTaskTs(req.user.username)
-      }
-      return res.json(time)
+    const pre = Date.parse(tm.getTime(user))
+    const time = await tm.setTime(user, req.body.time)
+    if (Date.parse(time) < pre) {
+      await resetUserTaskTs(req.user.username)
     }
+    return res.json(time)
   } catch (err) {
     return res.status(500).send('Error while setting time')
   }
