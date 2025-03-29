@@ -1,3 +1,7 @@
+/**
+ * Notification service to send both email and push alert
+ */
+
 const {
   sendMail,
   sendPush

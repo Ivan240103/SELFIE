@@ -4,7 +4,7 @@
 */
 
 const Event = require('../models/Event')
-const { addStartToRrule, removeStartFromRrule } = require('../services/RRule')
+const { addDtstartToRrule, removeDtstartFromRrule } = require('../services/RRule')
 
 /**
  * Traduce un evento google in un evento selfie
@@ -21,7 +21,7 @@ const eventFromGoogleToSelfie = async (gEvent, owner) => {
     start: start.date || start.dateTime,
     end: end.date || end.dateTime,
     isAllDay: 'date' in start,
-    rrule: recurrence ? await addStartToRrule(recurrence[0], start) : null,
+    rrule: recurrence ? await addDtstartToRrule(recurrence[0], start) : null,
     place: location || undefined,
     owner: owner,
     googleId: id,
@@ -44,7 +44,7 @@ const eventFromSelfieToGoogle = (sEvent) => {
     description: description,
     start: isAllDay ? { date: start } : { dateTime: start },
     end: isAllDay ? { date: end } : { dateTime: end },
-    recurrence: rrule ? [removeStartFromRrule(rrule)] : undefined,
+    recurrence: rrule ? [removeDtstartFromRrule(rrule)] : undefined,
     location: place
   }
 }

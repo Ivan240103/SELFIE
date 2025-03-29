@@ -1,3 +1,6 @@
 {
-    "liveServer.settings.multiRootWorkspaceName": "ProgettoTecWeb"
+    "liveServer.settings.multiRootWorkspaceName": "ProgettoTecWeb",
+    "cSpell.words": [
+        "dtstart"
+    ]
 }

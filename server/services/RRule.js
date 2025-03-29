@@ -1,40 +1,39 @@
 /**
- * Servizio per convertire regole di ricorrenza
+ * RRule service to handle recurrence rules
  */
 
 const { RRule } = require('rrule')
 
-const { getTime } = require('./TimeMachine')
-
 /**
- * Converte un oggetto rrule compatibile con FullCalendar in
+ * Converte una regola di ricorrenza compatibile con FullCalendar in
  * una stringa rappresentante una RRule
  * 
- * @param {JSON} rrule oggetto rrule compatibile con FullCalendar
- * @returns regola RRule in formato stringa
+ * @param {JSON} rrule regola di ricorrenza compatibile con FullCalendar
+ * @returns regola RRule equivalente in formato stringa
  */
-const rruleToString = async (rrule) => {
-  const freq = rrule.freq === 'daily' ? RRule.DAILY :
-               rrule.freq === 'weekly' ? RRule.WEEKLY :
-               rrule.freq === 'monthly' ? RRule.MONTHLY : RRule.YEARLY
+function rruleToString(rrule) {
+  const frequency = rrule.freq === 'daily' ? RRule.DAILY :
+                    rrule.freq === 'weekly' ? RRule.WEEKLY :
+                    rrule.freq === 'monthly' ? RRule.MONTHLY : RRule.YEARLY
+  const ruleStart = rrule.dtstart ? new Date(rrule.dtstart) : new Date()
   const r = new RRule({
-    freq: freq,
+    freq: frequency,
     interval: rrule.interval || 1,
-    dtstart: rrule.dtstart ? new Date(rrule.dtstart) : new Date((await getTime())),
+    dtstart: ruleStart,
     until: rrule.until || undefined,
-    count: rrule.count || undefined,
+    count: rrule.count || undefined
   })
   return r.toString()
 }
 
 /**
- * Converte una stringa rappresentante una RRule in un
- * oggetto JSON compatibile con il plugin di FullCalendar
+ * Converte una stringa rappresentante una RRule in una regola di
+ * ricorrenza in formato JSON, compatibile con FullCalendar
  *  
  * @param {String} str regola RRule in formato stringa
- * @returns oggetto rrule compatibile con FullCalendar
+ * @returns regola di ricorrenza compatibile con FullCalendar
  */
-const stringToRrule = (str) => {
+function stringToRrule(str) {
   const rrule = RRule.fromString(str)
   const { freq, interval, dtstart, until, count } = rrule.options
   const frequency = freq == RRule.DAILY ? 'daily' :
@@ -53,28 +52,42 @@ const stringToRrule = (str) => {
  * Aggiunge il campo dtstart alla stringa RRule
  * 
  * @param {String} rruleStr regola RRule in formato stringa
- * @param {JSON} start inizio dell'evento ricorrente
- * @returns stringa RRule con l'inizio aggiornato
+ * @param {JSON} start data di inizio dell'evento ricorrente
+ * @returns stringa RRule con aggiunto il campo dtstart
  */
-async function addStartToRrule(rruleStr, start) {
+function addDtstartToRrule(rruleStr, start) {
   const rrule = stringToRrule(rruleStr)
   rrule.dtstart = start.date || start.dateTime
-  return await rruleToString(rrule)
+  return rruleToString(rrule)
 }
 
 /**
  * Rimuove il campo dtstart dalla stringa RRule
  * 
  * @param {String} rruleStr regola RRule in formato stringa
- * @returns stringa RRule con l'inizio aggiornato
+ * @returns stringa RRule senza il campo dtstart
  */
-async function removeStartFromRrule(rruleStr) {
+function removeDtstartFromRrule(rruleStr) {
+  // il campo dtstart è salvato nella prima riga della stringa
   return rruleStr.split('\n')[1]
+}
+
+/**
+ * Trova la prima occorrenza dell'evento dopo la data fornita
+ * 
+ * @param {Event} event evento ricorrente
+ * @param {Date} instant momento da cui partire a cercare l'occorrenza
+ * @returns prima occorrenza dell'evento
+ */
+function getFirstOccurrence(event, instant) {
+  const r = RRule.fromString(event.rrule)
+  return r.after(instant)
 }
 
 module.exports = {
   rruleToString,
   stringToRrule,
-  addStartToRrule,
-  removeStartFromRrule
+  addDtstartToRrule,
+  removeDtstartFromRrule,
+  getFirstOccurrence
 }
