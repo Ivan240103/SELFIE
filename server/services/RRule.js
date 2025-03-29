@@ -5,6 +5,21 @@
 const { RRule } = require('rrule')
 
 /**
+ * Genera una regola di ricorrenza per il compleanno
+ * 
+ * @param {Date} birthday data di nascita
+ * @returns regola di ricorrenza in formato stringa
+ */
+function getBdayRrule(birthday) {
+  const rule = new RRule({
+    freq: RRule.YEARLY,
+    interval: 1,
+    dtstart: birthday
+  })
+  return rule.toString()
+}
+
+/**
  * Converte una regola di ricorrenza compatibile con FullCalendar in
  * una stringa rappresentante una RRule
  * 
@@ -85,6 +100,7 @@ function getFirstOccurrence(event, instant) {
 }
 
 module.exports = {
+  getBdayRrule,
   rruleToString,
   stringToRrule,
   addDtstartToRrule,

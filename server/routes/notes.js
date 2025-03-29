@@ -1,31 +1,29 @@
 /**
- * Routes for Note-related operations
+ * Routes for Note related operations
  */
 
 const express = require('express')
-
-const auth = require('../middleware/auth')
+const { auth } = require('../middleware/auth')
 const { getTime } = require('../services/TimeMachine')
-
 const Note = require('../models/Note')
 
 const router = express.Router()
 
 // creare una nuova nota
-// passare title, text, categories
+// categories := stringa di categorie separate da virgole
 router.post('/', auth, async (req, res) => {
   const { title, text, categories } = req.body
-  const newNote = new Note({
+  const note = new Note({
     title: title,
-    text: text,    
-    creation: new Date(await getTime(req.user.username)),
-    modification: new Date(await getTime(req.user.username)),
+    text: text,   
+    creation: new Date(getTime(req.user)),
+    modification: new Date(getTime(req.user)),
     categories: categories,
     owner: req.user.username    
   })
 
   try {
-    await newNote.save()
+    await note.save()
     return res.send('ok')
   } catch (err) {
     return res.status(500).send('Error while creating note')
@@ -35,20 +33,20 @@ router.post('/', auth, async (req, res) => {
 // ottenere tutte le note
 router.get('/', auth, async (req, res) => {
   try {
-    const allNotes = await Note.find({ owner: req.user.username })
-    // se non ne trova nessuna invia un oggetto vuoto
-    return res.json(allNotes)
+    const notes = await Note.find({ owner: req.user.username })
+    return res.json(notes)
   } catch (err) {
     return res.status(500).send('Error while getting all notes')
   }
 })
 
-// ottenere ultima nota modificata
+// ottenere l'ultima nota modificata
 router.get('/last', auth, async (req, res) => {
   try {
-    const lastNote = await Note.find({ owner: req.user.username }).sort({ modification: 'desc' }).limit(1)
-    // se non ne trova nessuna invia un oggetto vuoto
-    return res.json(lastNote[0])
+    const note = await Note.find({
+      owner: req.user.username
+    }).sort({ modification: 'desc' }).limit(1)
+    return res.json(note[0])
   } catch (err) {
     return res.status(500).send('Error while getting last modified note')
   }
@@ -58,37 +56,43 @@ router.get('/last', auth, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
   try {
     const note = await Note.findById(req.params.id)
-    if (!note) return res.status(404).send(`No note found with id ${req.params.id}`)
+    if (!note) {
+      return res.status(404).send(`No note found with id ${req.params.id}`)
+    }
     return res.json(note)
   } catch (err) {
     return res.status(500).send('Error while getting specific note')
   }
 })
 
-// modificare una nota
-// passare title, text, categories
+// modificare una nota specifica
+// categories := stringa di categorie separate da virgole
 router.put('/:id', auth, async (req, res) => {
   try {
-    const upd = await Note.findById(req.params.id)
-    if (!upd) return res.status(404).send(`No note found with id ${req.params.id}`)
+    const note = await Note.findById(req.params.id)
+    if (!note) {
+      return res.status(404).send(`No note found with id ${req.params.id}`)
+    }
     // modifiche
     const { title, text, categories } = req.body
-    upd.title = title || upd.title
-    upd.text = text || upd.text
-    upd.modification = new Date(await getTime(req.user.username))
-    upd.categories = categories !== undefined ? categories : upd.categories
-    await upd.save()
-    return res.send('ok')
+    note.title = title || note.title
+    note.text = text || note.text
+    note.modification = new Date(getTime(req.user))
+    note.categories = categories ?? note.categories
+    await note.save()
+    return res.json(note)
   } catch (err) {
     return res.status(500).send('Error while updating note')
   }
 })
 
-// eliminare una nota
+// eliminare una nota specifica
 router.delete('/:id', auth, async (req, res) => {
   try {
     const deletion = await Note.findByIdAndDelete(req.params.id)
-    if (!deletion) return res.status(404).send(`No note found with id ${req.params.id}`)
+    if (!deletion) {
+      return res.status(404).send(`No note found with id ${req.params.id}`)
+    }
     return res.send('ok')
   } catch (err) {
     return res.status(500).send('Error while deleting note')

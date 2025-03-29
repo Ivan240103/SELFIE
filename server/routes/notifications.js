@@ -1,13 +1,14 @@
 /**
- * Routes for notification-related operations
+ * Routes for notification related operations
  */
 
 const express = require('express')
-const auth = require('../middleware/auth')
+const { auth } = require('../middleware/auth')
 const Sub = require('../models/PushSubscription')
 
 const router = express.Router()
 
+// sottoscrivere un servizio di notifiche push
 router.post('/push/subscribe', auth, async (req, res) => {
   try {
     const sub = await Sub.findOne({ owner: req.user.username })
@@ -20,9 +21,9 @@ router.post('/push/subscribe', auth, async (req, res) => {
         owner: req.user.username
       })
     }
-    res.send('ok')
+    return res.send('ok')
   } catch (err) {
-    res.status(500).send('Error while attempting subscription')
+    return res.status(500).send('Error while attempting subscription')
   }
 })
 

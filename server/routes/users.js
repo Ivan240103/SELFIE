@@ -1,20 +1,16 @@
 /**
- * Routes for User-related operations
+ * Routes for User related operations
  */
 
 const express = require('express')
-const jwt = require('jsonwebtoken')
-const { RRule } = require('rrule')
 const fs = require('fs')
 const path = require('path')
-require('dotenv').config()
-
-const auth = require('../middleware/auth')
+const { auth, getToken } = require('../middleware/auth')
 const upload = require('../middleware/multer')
-const tm = require('../services/TimeMachine')
-const { authorize } = require('../google/Auth')
+const { getTime, setTime } = require('../services/TimeMachine')
+const { getBdayRrule } = require('../services/RRule')
 const { resetUserTaskTs } = require('../services/Notificate')
-
+const { authorize } = require('../google/Auth')
 const User = require('../models/User')
 const Event = require('../models/Event')
 const Task = require('../models/Task')
@@ -30,36 +26,41 @@ const router = express.Router()
  * @param {Date} bday data di nascita dell'utente
  * @param {String} username username dell'utente
  */
-const createBdayEvent = async (bday, username) => {
+async function createBdayEvent(bday, username) {
   try {
-    // cerca il compleanno precedente e lo elimina
+    // cerca l'evento compleanno precedente e lo elimina
     await Event.findOneAndDelete({ owner: username, title: 'Compleanno' })
     // crea un nuovo evento compleanno
-    const rep = new RRule({
-      freq: RRule.YEARLY,
-      interval: 1,
-      dtstart: bday
-    })
-    const bdayEvent = new Event({
+    await Event.create({
       title: 'Compleanno',
-      description: `Oggi è il compleanno di ${username}!`,
+      description: `Buon compleanno ${username}!`,
       start: bday,
       end: bday,
       isAllDay: true,
-      rrule: rep.toString(),
+      rrule: getBdayRrule(bday),
       owner: username
     })
-    await bdayEvent.save()
   } catch (err) {
     throw 'Error while creating birthday event'
   }
 }
 
+/**
+ * Elimina una foto profilo dal server
+ * 
+ * @param {String} name nome del file da eliminare
+ */
+function deletePic(name) {
+  if (name !== 'default.png') {
+    fs.unlink(path.resolve(__dirname, `../images/uploads/${name}`), () => {})
+  }
+}
+
 // registrare un nuovo utente
-// della password passare l'hash SHA1
+// password := hash SHA1 della password
 router.post('/register', async (req, res) => {
   const { username, email, password, name, surname } = req.body
-  const newUser = new User({
+  const user = new User({
     username: username,
     email: email,
     password: password,
@@ -68,152 +69,87 @@ router.post('/register', async (req, res) => {
   })
 
   try {
-    await newUser.save()
+    await user.save()
     return res.send('ok')
   } catch(err) {
     return res.status(500).send('Error while registering new user')
   }
 })
 
-// login dell'utente
-// della password passare l'hash SHA1
+// effettuare il login dell'utente
+// password := hash SHA1 della password
 router.post('/login', async (req, res) => {
   const { username, password } = req.body
   try {
     const user = await User.findOne({ username: username })
-    if (!user) return res.status(400).send('Incorrect username')
-    const pswOk = password == user.password
-    if (!pswOk) return res.status(400).send('Incorrect password')
+    if (!user) {
+      return res.status(403).send('Invalid credentials')
+    }
+    if (password != user.password) {
+      return res.status(403).send('Invalid credentials')
+    }
 
-    const tokenPayload = { userId: user._id, username: user.username }
-    // DEBUG: token non scade mai
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET/*, { expiresIn: '24h' } */)
+    const token = getToken(user)
     return res.json(token)
   } catch (err) {
-    res.status(500).send('Error during login')
+    return res.status(500).send('Error while performing login')
   }
 })
 
 // ottenere i dati di un utente specifico
-router.get('/', auth, async (req, res) => {
+router.get('/', auth, (req, res) => {
   try {
-    const user = await User.findOne({ username: req.user.username })
-    if (!user) return res.status(404).send(`No user found with username ${req.user.username}`)
-    return res.json(user)
+    return res.json(req.user)
   } catch (err) {
-    res.status(500).send('Error while getting specific user')
-  }
-})
-
-// ottenere il tempo in vigore per un utente in ISO string (UTC)
-router.get('/time', auth, async (req, res) => {
-  try {
-    const time = await tm.getTime(req.user.username)
-    return res.json(time)
-  } catch (err) {
-    return res.status(500).send('Error while getting time')
-  }
-})
-
-// effettuare l'accesso con google
-router.put('/google', auth, async (req, res) => {
-  try {
-    const client = await authorize(req.user.username)
-    if (!client) {
-      return res.status(400).send('Authentication failed')
-    } else {
-      return res.send('ok')
-    }
-  } catch (err) {
-    return res.status(500).send('Problems during Google authentication')
-  }
-})
-
-// attivare o disattivare le notifiche
-router.put('/notification', auth, async (req, res) => {
-  try {
-    const user = await User.findOne({ username: req.user.username })
-    if (!user) return res.status(404).send(`No user found with username ${req.user.username}`)
-    user.notification = req.body.state
-    await user.save()
-    if (req.body.state === false) {
-      await Sub.findOneAndDelete({ owner: req.user.username })
-    }
-    return res.send('ok')
-  } catch (err) {
-    console.log(err)
-    return res.status(500).send('Error while setting notification permission')
+    return res.status(500).send('Error while getting specific user')
   }
 })
 
 // aggiornare i dati di un utente
-// delle password passare l'hash SHA1
-// body.birthday è una data in ISO string (UTC)
+// oldPsw, newPsw := hash SHA1 della password
+// birthday := data in ISO string (UTC)
 router.put('/', [auth, upload.single('pic')], async (req, res) => {
   try {
-    const upd = await User.findOne({ username: req.user.username })
-    if (!upd) return res.status(404).send(`No user found with username ${req.sur.username}`)
+    const user = await User.findById(req.user._id)
+    if (!user) {
+      return res.status(404).send(`No user found with username ${req.user.username}`)
+    }
     // modifiche
     const { email, oldPsw, newPsw, name, surname, birthday } = req.body
-    upd.email = email || upd.email
+    user.email = email || user.email
     if (oldPsw) {
-      if (upd.password != oldPsw) {
+      if (user.password != oldPsw) {
         return res.status(400).send('Old password incorrect')
       } else if (newPsw) {
-        upd.password = newPsw
+        user.password = newPsw
       } else {
         return res.status(400).send('New password undefined')
       }
     }
-    upd.name = name || upd.name
-    upd.surname = surname || upd.surname
-    // se cambia la data di nascita crea un nuovo evento di compleanno
-    if (birthday && (upd.birthday === undefined || birthday !== upd.birthday.toISOString().substring(0, 10))) {
-      upd.birthday = new Date(birthday)
+    user.name = name || user.name
+    user.surname = surname || user.surname
+    // se cambia la data di nascita oppure non c'era, crea un nuovo evento di compleanno
+    if (birthday && (user.birthday === undefined || user.birthday.toISOString().slice(0, 10) !== birthday)) {
+      user.birthday = new Date(birthday)
       await createBdayEvent(new Date(birthday), req.user.username)
     }
-    // elimina la vecchia foto quando viene rimpiazzata
+    // sostituisce la foto profilo
     if (req.file?.filename) {
-      if (upd.picName !== 'default.png') {
-        fs.unlink(path.resolve(__dirname, `../images/uploads/${upd.picName}`), () => {})
-      }
-      upd.picName = req.file.filename
+      deletePic(user.picName)
+      user.picName = req.file.filename
     }
-    await upd.save()
-    return res.json(upd)
+    await user.save()
+    return res.json(user)
   } catch (err) {
     return res.status(500).send('Error while updating user info')
-  }
-})
-
-// modificare l'offset di un utente
-// body.time = datetime a cui ci si vuole spostare in ISO string (UTC)
-// senza body per resettare la data
-router.put('/time', auth, async (req, res) => {
-  try {
-    const user = await User.findOne({ username: req.user.username })
-    // per controllare se l'utente si sposta indietro nel tempo
-    const pre = Date.parse(tm.getTime(user))
-    const time = await tm.setTime(user, req.body.time)
-    if (Date.parse(time) < pre) {
-      await resetUserTaskTs(req.user.username)
-    }
-    return res.json(time)
-  } catch (err) {
-    return res.status(500).send('Error while setting time')
   }
 })
 
 // eliminare un utente
 router.delete('/', auth, async (req, res) => {
   try {
-    const del = await User.findOne({ username: req.user.username })
-    if (!del) return res.status(404).send(`No user found with username ${req.user.username}`)
-    // elimina a cascata tutte le risorse dell'utente
-    if (del.picName !== 'default.png') {
-      fs.unlink(path.resolve(__dirname, `../images/uploads/${del.picName}`), () => {})
-    }
-    await del.deleteOne()
+    deletePic(req.user.picName)
+    await User.findByIdAndDelete(req.user._id)
     await Event.deleteMany({ owner: req.user.username })
     await Task.deleteMany({ owner: req.user.username })
     await Note.deleteMany({ owner: req.user.username })
@@ -222,6 +158,63 @@ router.delete('/', auth, async (req, res) => {
     return res.send('ok')
   } catch (err) {
     return res.status(500).send('Error while deleting user')
+  }
+})
+
+// ottenere il tempo in vigore per un utente in ISO string (UTC)
+router.get('/time', auth, (req, res) => {
+  try {
+    const time = getTime(req.user)
+    return res.json(time)
+  } catch (err) {
+    return res.status(500).send('Error while getting current time')
+  }
+})
+
+// modificare il tempo in vigore per un utente
+// time := datetime a cui si vuole spostare in ISO string (UTC)
+// senza body per resettare la data
+router.put('/time', auth, async (req, res) => {
+  try {
+    // per controllare se l'utente si sposta indietro nel tempo
+    const pre = Date.parse(getTime(req.user))
+    const post = await setTime(req.user, req.body.time)
+    if (Date.parse(post) < pre) {
+      await resetUserTaskTs(req.user.username)
+    }
+    return res.json(post)
+  } catch (err) {
+    return res.status(500).send('Error while setting time')
+  }
+})
+
+// effettuare l'accesso con google
+router.put('/google', auth, async (req, res) => {
+  try {
+    const client = await authorize(req.user.username)
+    if (!client) {
+      return res.status(403).send('Authentication failed')
+    }
+    return res.send('ok')
+  } catch (err) {
+    return res.status(500).send('Error while performing Google authentication')
+  }
+})
+
+// attivare o disattivare le notifiche
+// state := true per attivare, false per disattivare
+router.put('/notification', auth, async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: { notification: req.body.state } }
+    )
+    if (req.body.state === false) {
+      await Sub.findOneAndDelete({ owner: req.user.username })
+    }
+    return res.send('ok')
+  } catch (err) {
+    return res.status(500).send('Error while setting notification permission')
   }
 })
 

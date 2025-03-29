@@ -1,82 +1,87 @@
 /**
- * Routes for Tomato-related operations
+ * Routes for Tomato related operations
  */
 
 const express = require('express')
-
-const auth = require('../middleware/auth')
+const { auth } = require('../middleware/auth')
 const { getTime } = require('../services/TimeMachine')
-
 const Tomato = require('../models/Tomato')
 
 const router = express.Router()
 
-// salvare nuovo pomodoro
+// creare un nuovo pomodoro
 router.post('/', auth, async (req, res) => {
-  const newTomato = new Tomato({
-    studyMinutes: req.body.studyMinutes,
-    pauseMinutes: req.body.pauseMinutes,
-    loops: req.body.loops,
-    modification: new Date(await getTime(req.user.username)),
+  const { studyMinutes, pauseMinutes, loops } = req.body
+  const tomato = new Tomato({
+    studyMinutes: studyMinutes,
+    pauseMinutes: pauseMinutes,
+    loops: loops,
+    modification: new Date(getTime(req.user)),
     owner: req.user.username
   })
   
   try {
-    await newTomato.save();
-    return res.json(newTomato);
+    await tomato.save()
+    return res.json(tomato)
   } catch (err) {
-    console.error(err);
-    return res.status(500).send('Error while saving tomato');
+    return res.status(500).send('Error while creating tomato')
   }
-});
+})
 
-
-// prendere i dati dell'ultimo pomodoro dell'utente
+// ottenere il pomodoro modificato per ultimo
 router.get('/last', auth, async (req, res) => {
   try {
-    const timer = await Tomato.findOne({
+    const tomato = await Tomato.find({
       owner: req.user.username
-    }).sort({ modification: 'desc' });
-    // se non ne trova nessuno invia un oggetto vuoto
-    return res.json(timer || {})
+    }).sort({ modification: 'desc' }).limit(1)
+    return res.json(tomato[0])
   } catch (err) {
     return res.status(500).send('Error while getting last tomato')
   }
 })
 
-// prendere i dati di un pomodoro specifico
+// ottenere un pomodoro specifico
 router.get('/:id', auth, async (req, res) => {
   try {
-    const timer = await Tomato.findById(req.params.id)
-    if (!timer) return res.status(404).send(`No tomato found with id ${req.params.id}`)
-    return res.json(timer)
+    const tomato = await Tomato.findById(req.params.id)
+    if (!tomato) {
+      return res.status(404).send(`No tomato found with id ${req.params.id}`)
+    }
+    return res.json(tomato)
   } catch (err) {
     return res.status(500).send('Error while getting specific tomato')
   }
 })
 
 // modificare un pomodoro specifico
+// interrupted := 'n' (not interrupted), 's' (interrupted during study time),
+// 'p' (interrupted during pause time), 'f' (finished)
 router.put('/:id', auth, async (req, res) => {
   try {
-    const upd = await Tomato.findById(req.params.id)
-    if (!upd) return res.status(404).send(`No tomato found with id ${req.params.id}`)
+    const tomato = await Tomato.findById(req.params.id)
+    if (!tomato) {
+      return res.status(404).send(`No tomato found with id ${req.params.id}`)
+    }
     // modifiche
-    upd.interrupted = req.body.interrupted || upd.interrupted
-    upd.remainingMinutes = req.body.remainingMinutes || upd.remainingMinutes
-    upd.remainingLoops = req.body.remainingLoops || upd.remainingLoops
-    upd.modification = new Date(await getTime(req.user.username))
-    await upd.save()
-    return res.send('ok')
+    const { interrupted, remainingMinutes, remainingLoops } = req.body
+    tomato.interrupted = interrupted || tomato.interrupted
+    tomato.remainingMinutes = remainingMinutes ?? tomato.remainingMinutes
+    tomato.remainingLoops = remainingLoops ?? tomato.remainingLoops
+    tomato.modification = new Date(getTime(req.user))
+    await tomato.save()
+    return res.json(tomato)
   } catch (err) {
     return res.status(500).send('Error while updating tomato')
   }  
 })
 
-// eliminare un pomodoro specifico (finito o eliminato)
+// eliminare un pomodoro specifico
 router.delete('/:id', auth, async (req, res) => {
   try {
     const deletion = await findByIdAndDelete(req.params.id)
-    if (!deletion) return res.status(404).send(`No tomato found with id ${req.params.id}`)
+    if (!deletion) {
+      return res.status(404).send(`No tomato found with id ${req.params.id}`)
+    }
     return res.send('ok')
   } catch (err) {
     return res.status(500).send('Error while deleting tomato')
