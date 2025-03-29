@@ -29,7 +29,7 @@ const eventRoutes = require('./routes/events')
 const taskRoutes = require('./routes/tasks')
 const tomatoRoutes = require('./routes/tomatoes')
 const noteRoutes = require('./routes/notes')
-const { notificationRoutes } = require('./routes/notifications')
+const notificationRoutes = require('./routes/notifications')
 
 app.use('/api/users', userRoutes)
 app.use('/api/events', eventRoutes)
