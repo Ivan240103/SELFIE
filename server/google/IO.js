@@ -1,19 +1,22 @@
 /**
- * Servizio intermedio per fare import-export di eventi
- * e task da e verso Google Calendar
+ * Intermediate service to handle import-export of events
+ * between SELFIE and Google Calendar
 */
 
 const Event = require('../models/Event')
-const { addDtstartToRrule, removeDtstartFromRrule } = require('../services/RRule')
+const {
+  addDtstartToRrule,
+  removeDtstartFromRrule
+} = require('../services/RRule')
 
 /**
- * Traduce un evento google in un evento selfie
+ * Traduce un evento Google in un evento selfie
  * 
- * @param gEvent event resource from google
- * @param owner utente che lo importa
- * @returns event object selfie
+ * @param gEvent event resource da Google
+ * @param owner username dell'utente che lo importa
+ * @returns oggetto Event di selfie
  */
-const eventFromGoogleToSelfie = async (gEvent, owner) => {
+function eventFromGoogleToSelfie(gEvent, owner) {
   const { id, summary, description, start, end, recurrence, location } = gEvent
   return new Event({
     title: summary || 'Senza titolo',
@@ -21,22 +24,21 @@ const eventFromGoogleToSelfie = async (gEvent, owner) => {
     start: start.date || start.dateTime,
     end: end.date || end.dateTime,
     isAllDay: 'date' in start,
-    rrule: recurrence ? await addDtstartToRrule(recurrence[0], start) : null,
+    rrule: recurrence ? addDtstartToRrule(recurrence[0], start) : null,
     place: location || undefined,
-    owner: owner,
     googleId: id,
-    reminders: ''
+    reminders: '',
+    owner: owner
   })
 }
 
 /**
- * Traduce un evento selfie in un evento google
+ * Traduce un evento selfie in un evento Google
  * 
- * @param sEvent event object selfie
- * @param owner utente che lo esporta
- * @returns event resource for google
+ * @param sEvent oggetto Event di selfie
+ * @returns event resource per Google
  */
-const eventFromSelfieToGoogle = (sEvent) => {
+function eventFromSelfieToGoogle(sEvent) {
   const { title, description, start, end, isAllDay, rrule, place, googleId } = sEvent
   return {
     id: googleId,
