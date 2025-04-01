@@ -1,5 +1,5 @@
 /**
- * Context per la verifica dell'autenticazione
+ * Authentication handling context
  */
 import React, { createContext, useState, useContext } from "react"
 
@@ -10,18 +10,19 @@ const AuthenticationContext = createContext({
 })
 
 export const AuthenticationProvider = ({ children }) => {
-  // stato per l'autenticazione dell'utente
-  const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('token') || false)
+  // stato dell'autenticazione dell'utente
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'))
   
   /**
    * Effettua il login e imposta l'autenticazione
    */
-  const login = () => {
+  const login = (token) => {
+    localStorage.setItem('token', token)
     setIsAuthenticated(true)
   }
 
   /**
-   * Esegue il logout e reimposta l'autenticazione
+   * Effettua il logout e reimposta l'autenticazione
    */
   const logout = () => {
     localStorage.removeItem('token')
@@ -29,8 +30,9 @@ export const AuthenticationProvider = ({ children }) => {
   }
 
   return(
-    <AuthenticationContext.Provider 
-      value={{ isAuthenticated, login, logout }} >
+    <AuthenticationContext.Provider
+      value={{ isAuthenticated, login, logout }}
+    >
       {children}
     </AuthenticationContext.Provider>
   )

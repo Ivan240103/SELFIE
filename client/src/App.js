@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { TimeMachineProvider } from './contexts/TimeContext';
+import { TimeProvider } from './contexts/TimeContext';
 import { AuthenticationProvider } from './contexts/AuthenticationContext';
 import Dashboard from './components/Dashboard';
 import Access from './components/User/Access';
@@ -14,7 +14,7 @@ import Tomato from './components/Tomato/Tomato';
 function App() {
   return (
     <AuthenticationProvider>
-      <TimeMachineProvider>
+      <TimeProvider>
         <div className="App">
           <Router>
             <Routes>
@@ -29,7 +29,7 @@ function App() {
             </Routes>
           </Router>
         </div>
-      </TimeMachineProvider>
+      </TimeProvider>
     </AuthenticationProvider>
   );
 }

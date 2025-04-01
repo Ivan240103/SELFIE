@@ -1,23 +1,22 @@
 /**
- * Context per la gestione del tempo
- * USO DI Claude PER LA GENERAZIONE DEL CONTEXT TEMPLATE
+ * Time handling context
  */
 import React, { createContext, useState, useEffect, useContext } from "react"
 import axios from 'axios'
 import { useAuth } from "./AuthenticationContext"
 
-const TimeMachineContext = createContext({
+const TimeContext = createContext({
   time: new Date(),
   isTimeLoading: true,
   updateTime: async () => {},
   resetTime: async () => {}
 })
 
-export const TimeMachineProvider = ({ children }) => {
+export const TimeProvider = ({ children }) => {
   const { isAuthenticated } = useAuth()
-  // stato per il tempo in vigore
+  // tempo in vigore
   const [time, setTime] = useState(new Date())
-  // stato per il caricamento del tempo dal backend
+  // stato del caricamento del tempo dal backend
   const [isTimeLoading, setIsTimeLoading] = useState(true)
 
   // recuperare il tempo in vigore dell'utente
@@ -30,10 +29,14 @@ export const TimeMachineProvider = ({ children }) => {
           })
           setTime(new Date(response.data))
           setIsTimeLoading(false)
-        } catch (err) {
+        } catch (error) {
+          setTime(new Date())
           setIsTimeLoading(false)
           alert('fetchTime failed in context')
         }
+      } else {
+        setTime(new Date())
+        setIsTimeLoading(false)
       }
     }
 
@@ -43,9 +46,7 @@ export const TimeMachineProvider = ({ children }) => {
   // interval per aggiornare il tempo ogni minuto
   useEffect(() => {
     const interval = setInterval(() => {
-      setTime(prevTime => {
-        return new Date(prevTime.getTime() + 60000)
-      })
+      setTime(prev => new Date(prev.getTime() + 60000))
     }, 59990)
 
     return () => clearInterval(interval)
@@ -59,18 +60,17 @@ export const TimeMachineProvider = ({ children }) => {
   const updateTime = async (newTime) => {
     try {
       setIsTimeLoading(true)
-      const response = await axios.put(`${process.env.REACT_APP_API}/api/users/time`, {
-        time: newTime.toISOString()
-      },
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      })
+      const response = await axios.put(
+        `${process.env.REACT_APP_API}/api/users/time`,
+        { time: newTime.toISOString() },
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      )
 
       setTime(new Date(response.data))
       setIsTimeLoading(false)
     } catch (error) {
       setIsTimeLoading(false)
-      alert('Time update failed in context')
+      alert('updateTime failed in context')
     }
   }
 
@@ -88,19 +88,20 @@ export const TimeMachineProvider = ({ children }) => {
       setIsTimeLoading(false)
     } catch (error) {
       setIsTimeLoading(false)
-      alert('Time reset failed in context')
+      alert('resetTime failed in context')
     }
   }
 
   return(
-    <TimeMachineContext.Provider 
-      value={{ time, isTimeLoading, updateTime, resetTime }} >
+    <TimeContext.Provider
+      value={{ time, isTimeLoading, updateTime, resetTime }}
+    >
       {children}
-    </TimeMachineContext.Provider>
+    </TimeContext.Provider>
   )
 }
 
-// custom hook per usare il TimeMachineContext
-export const useTimeMachine = () => {
-  return useContext(TimeMachineContext)
+// custom hook per usare il TimeContext
+export const useTime = () => {
+  return useContext(TimeContext)
 }

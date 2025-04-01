@@ -4,7 +4,7 @@ import axios from 'axios';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import rrulePlugin from '@fullcalendar/rrule';
-import { useTimeMachine } from '../contexts/TimeContext'
+import { useTime } from '../contexts/TimeContext'
 import { useAuth } from '../contexts/AuthenticationContext';
 import { getDateString } from '../utils/dates';
 import { marked } from 'marked';
@@ -21,7 +21,7 @@ import "../css/Dashboard.css";
 const Dashboard = () => {
   const navigate = useNavigate()
   const { isAuthenticated, logout } = useAuth()
-  const { time, isTimeLoading } = useTimeMachine()
+  const { time, isTimeLoading } = useTime()
 
   const [user, setUser] = useState({})
   const [events, setEvents] = useState([])

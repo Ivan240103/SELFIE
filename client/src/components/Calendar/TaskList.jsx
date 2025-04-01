@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import TimeMachine from '../Header/TimeMachine';
-import { useTimeMachine } from '../../contexts/TimeContext';
+import { useTime } from '../../contexts/TimeContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthenticationContext';
 import '../../css/Tasks.css';
@@ -9,7 +9,7 @@ const TaskList = () => {
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate()
 
-    const { time, isTimeLoading } = useTimeMachine()
+    const { time, isTimeLoading } = useTime()
     const [tasks, setTasks] = useState([]);
     const [error, setError] = useState(null);
     

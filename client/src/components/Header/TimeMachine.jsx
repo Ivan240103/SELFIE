@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import Modal from 'react-modal'
-import { useTimeMachine } from "../../contexts/TimeContext"
+import { useTime } from "../../contexts/TimeContext"
 import { getDatetimeString } from '../../utils/dates'
 
 import '../../css/TimeMachine.css'
@@ -9,7 +9,7 @@ import '../../css/TimeMachine.css'
 Modal.setAppElement('#root');
 
 function TimeMachine() {
-  const { time, updateTime, resetTime } = useTimeMachine()
+  const { time, updateTime, resetTime } = useTime()
   const [modalIsOpen, setModalIsOpen] = useState(false)
   const [selectedTime, setSelectedTime] = useState(time)
 

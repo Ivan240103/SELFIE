@@ -26,8 +26,7 @@ function Access() {
       }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
-      localStorage.setItem("token", response.data); // TODO: spostare in auth context
-      login();
+      login(response.data);
       navigate("/");
     } catch (error) {
       setError("Login failed: " + error.response?.data || 'no response');

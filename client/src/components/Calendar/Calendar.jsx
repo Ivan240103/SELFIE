@@ -6,7 +6,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import rrulePlugin from '@fullcalendar/rrule';
 import { useAuth } from '../../contexts/AuthenticationContext';
-import { useTimeMachine } from '../../contexts/TimeContext';
+import { useTime } from '../../contexts/TimeContext';
 import Header from '../Header/Header'
 import Event from "./Event";
 import Task from "./Task";
@@ -20,7 +20,7 @@ I TASK IN ROSSO VANNO PROPOSTI TEMPORANEAMENTE ANCHE NEL GIORNO ATTUALE
 
 function Calendar() {
   const { isAuthenticated } = useAuth()
-  const { time, isTimeLoading } = useTimeMachine()
+  const { time, isTimeLoading } = useTime()
   const [user, setUser] = useState({})
   const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTimeMachine } from '../../contexts/TimeContext'
+import { useTime } from '../../contexts/TimeContext'
 import { getDatetimeString } from '../../utils/dates';
 
 import '../../css/Task.css';
@@ -16,7 +16,7 @@ mettere un button per segnarlo come completato (usare la route)
 */
 
 function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTasks, user }) {
-  const { time } = useTimeMachine();
+  const { time } = useTime();
 
   const [showModal, setShowModal] = useState(false);
   const [task, setTask] = useState({});

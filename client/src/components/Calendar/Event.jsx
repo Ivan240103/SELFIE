@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import _ from 'lodash';
-import { useTimeMachine } from '../../contexts/TimeContext'
+import { useTime } from '../../contexts/TimeContext'
 import {
   getDatetimeString,
   getDateString
@@ -31,7 +31,7 @@ tornino ai valori default.
 
 function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }) {
   // tempo in vigore per l'utente (fuso orario UTC)
-  const { time } = useTimeMachine();
+  const { time } = useTime();
 
   const [event, setEvent] = useState({})
   const [modalIsOpen, setModalIsOpen] = useState(false)
