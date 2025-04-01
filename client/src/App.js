@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { TimeMachineProvider } from './contexts/TimeMachineContext';
+import { TimeMachineProvider } from './contexts/TimeContext';
 import { AuthenticationProvider } from './contexts/AuthenticationContext';
 import Dashboard from './components/Dashboard';
 import Access from './components/User/Access';

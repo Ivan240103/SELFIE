@@ -4,7 +4,7 @@ import axios from 'axios';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import rrulePlugin from '@fullcalendar/rrule';
-import { useTimeMachine } from '../contexts/TimeMachineContext'
+import { useTimeMachine } from '../contexts/TimeContext'
 import { useAuth } from '../contexts/AuthenticationContext';
 import { datetimeToDateString } from '../utils/dates';
 import { marked } from 'marked';

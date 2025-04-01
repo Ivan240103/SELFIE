@@ -6,7 +6,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import rrulePlugin from '@fullcalendar/rrule';
 import { useAuth } from '../../contexts/AuthenticationContext';
-import { useTimeMachine } from '../../contexts/TimeMachineContext';
+import { useTimeMachine } from '../../contexts/TimeContext';
 import Header from '../Header/Header'
 import Event from "./Event";
 import Task from "./Task";
