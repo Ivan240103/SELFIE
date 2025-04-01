@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import _ from 'lodash';
-import { useTimeMachine } from '../TimeMachine/TimeMachineContext'
+import { useTimeMachine } from '../../contexts/TimeMachineContext'
 import {
   datetimeToString,
   datetimeToDateString

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Importa useNavigate;
 import { Link } from "react-router-dom"; //Importa il linking per la registrazione dell'utente
 import CryptoJS from 'crypto-js'
-import { useAuth } from "../Auth/AuthenticationContext";
+import { useAuth } from "../../contexts/AuthenticationContext";
 import axios from 'axios'
 import eyeIcon from "../../images/eye.png";
 import hideIcon from "../../images/hide.png";

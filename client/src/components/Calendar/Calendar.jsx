@@ -5,9 +5,9 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import rrulePlugin from '@fullcalendar/rrule';
-import { useAuth } from '../Auth/AuthenticationContext';
-import { useTimeMachine } from '../TimeMachine/TimeMachineContext';
-import Header from '../Layout/Header'
+import { useAuth } from '../../contexts/AuthenticationContext';
+import { useTimeMachine } from '../../contexts/TimeMachineContext';
+import Header from '../Header/Header'
 import Event from "./Event";
 import Task from "./Task";
 import { useRef } from 'react';

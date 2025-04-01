@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import CryptoJS from 'crypto-js'
-import { useAuth } from '../Auth/AuthenticationContext'
-import Header from '../Layout/Header'
+import { useAuth } from '../../contexts/AuthenticationContext'
+import Header from '../Header/Header'
 
 import { datetimeToDateString } from '../../utils/dates'
 

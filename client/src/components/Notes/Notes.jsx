@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../Auth/AuthenticationContext';
-import Header from '../Layout/Header';
+import { useAuth } from '../../contexts/AuthenticationContext';
+import Header from '../Header/Header';
 import { marked } from 'marked';
 
 import '../../css/Note.css';

@@ -1,32 +1,20 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from "react-router-dom"
 import axios from 'axios'
-import { useAuth } from '../Auth/AuthenticationContext'
-import TimeMachine from '../TimeMachine/TimeMachine'
-import '../../css/Header.css'
+import { useAuth } from '../../contexts/AuthenticationContext'
 
-function Header() {
-  const navigate = useNavigate()
+function Notification() {
   const { isAuthenticated } = useAuth()
-
+  
   const [notifyPermission, setNotifyPermission] = useState(false)
-  const [error, setError] = useState('')
-
-  // verifica l'autenticazione
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login')
-    }
-  }, [isAuthenticated, navigate])
 
   useEffect(() => {
     const registerServiceWorker = async () => {
       if ("serviceWorker" in navigator) {
         try {
           await navigator.serviceWorker.register('/sw.js')
-          setError('')
+          // setError('')
         } catch (error) {
-          setError('Service worker registration failed')
+          // setError('Service worker registration failed')
         }
       }
     }
@@ -43,9 +31,9 @@ function Header() {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setNotifyPermission(response.data.notification)
-          setError('')
+          // setError('')
         } catch (error) {
-          setError(error.response?.data || 'Error fetchUser')
+          // setError(error.response?.data || 'Error fetchUser')
         }
       }
     }
@@ -65,9 +53,9 @@ function Header() {
         { subscription: subscription },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       )
-      setError('')
+      // setError('')
     } catch (error) {
-      setError('subscribeToPush error')
+      // setError('subscribeToPush error')
     }
   }
 
@@ -82,9 +70,9 @@ function Header() {
           }, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
-          setError('')
+          // setError('')
         } catch (error) {
-          setError(error.response?.data || 'Error in askNotifyPermission')
+          // setError(error.response?.data || 'Error in askNotifyPermission')
         }
         await subscribeToPush()
       }
@@ -100,20 +88,15 @@ function Header() {
         }, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
-        setError('')
+        // setError('')
       } catch (error) {
-        setError(error.response?.data || 'Error in revokeNotifyPermission')
+        // setError(error.response?.data || 'Error in revokeNotifyPermission')
       }
     }
   }
 
   return (
-    <header className='header-container'>
-      <button onClick={() => navigate(-1)}>
-        Go back
-      </button>
-      <TimeMachine />
-      {error && <p>{error}</p>}
+    <div>
       {notifyPermission ? (
         <button onClick={revokeNotifyPermission}>
           Disattiva le notifiche
@@ -123,9 +106,8 @@ function Header() {
           Attiva le notifiche
         </button>
       )}
-      {/* TODO: aggiungere eventually timezone per geolocalizzazione */}
-    </header>
+    </div>
   )
 }
 
-export default Header
+export default Notification

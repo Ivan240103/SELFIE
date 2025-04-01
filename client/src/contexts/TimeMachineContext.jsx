@@ -4,7 +4,7 @@
  */
 import React, { createContext, useState, useEffect, useContext } from "react"
 import axios from 'axios'
-import { useAuth } from "../Auth/AuthenticationContext"
+import { useAuth } from "./AuthenticationContext"
 
 const TimeMachineContext = createContext({
   time: new Date(),

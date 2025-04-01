@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import TimeMachine from '../TimeMachine/TimeMachine';
-import { useTimeMachine } from '../TimeMachine/TimeMachineContext';
+import TimeMachine from '../Header/TimeMachine';
+import { useTimeMachine } from '../../contexts/TimeMachineContext';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../Auth/AuthenticationContext';
+import { useAuth } from '../../contexts/AuthenticationContext';
 import '../../css/Tasks.css';
 
-const Tasks = () => {
+const TaskList = () => {
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate()
 
@@ -83,4 +83,4 @@ const Tasks = () => {
     );
 };
 
-export default Tasks;
+export default TaskList;

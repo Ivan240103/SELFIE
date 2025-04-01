@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTimeMachine } from '../TimeMachine/TimeMachineContext'
+import { useTimeMachine } from '../../contexts/TimeMachineContext'
 import { datetimeToString } from '../../utils/dates';
 
 import '../../css/Task.css';
