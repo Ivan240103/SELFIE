@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from "react-router-dom"
 import { useAuth } from '../../contexts/AuthenticationContext'
 import TimeMachine from './TimeMachine'
-import Notification from './Notification'
+import Notifier from './Notifier'
 
 import '../../css/Header.css'
 
@@ -25,7 +25,7 @@ function Header() {
         Go back
       </button>
       <TimeMachine />
-      <Notification />
+      <Notifier />
       {error && <p>{error}</p>}
     </header>
   )

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useAuth } from '../../contexts/AuthenticationContext'
 
-function Notification() {
+function Notifier() {
   const { isAuthenticated } = useAuth()
   
   const [notifyPermission, setNotifyPermission] = useState(false)
@@ -110,4 +110,4 @@ function Notification() {
   )
 }
 
-export default Notification
+export default Notifier
