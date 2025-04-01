@@ -5,7 +5,7 @@ import CryptoJS from 'crypto-js'
 import { useAuth } from '../../contexts/AuthenticationContext'
 import Header from '../Header/Header'
 
-import { datetimeToDateString } from '../../utils/dates'
+import { getDateString } from '../../utils/dates'
 
 import '../../css/Profile.css'
 
@@ -54,7 +54,7 @@ function Profile() {
     setModifiedPsw('12345678')
     setName(profile.name || '')
     setSurname(profile.surname || '')
-    setBirthday(profile.birthday ? datetimeToDateString(new Date(profile.birthday)) : '')
+    setBirthday(profile.birthday ? getDateString(new Date(profile.birthday)) : '')
     setGoogle(profile.google ? true : false)
   }, [profile])
 
@@ -68,7 +68,7 @@ function Profile() {
     setModifiedPsw('12345678')
     setName(profile.name)
     setSurname(profile.surname)
-    setBirthday(profile.birthday ? datetimeToDateString(new Date(profile.birthday)) : '')
+    setBirthday(profile.birthday ? getDateString(new Date(profile.birthday)) : '')
     setGoogle(profile.google ? true : false)
   }
 

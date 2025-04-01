@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTimeMachine } from '../../contexts/TimeContext'
-import { datetimeToString } from '../../utils/dates';
+import { getDatetimeString } from '../../utils/dates';
 
 import '../../css/Task.css';
 
@@ -236,7 +236,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
               <label>Scadenza:</label>
               <input
                 type="datetime-local"
-                value={datetimeToString(deadline)}
+                value={getDatetimeString(deadline)}
                 onChange={(e) => setDeadline(new Date(e.target.value))}
               />
               <label>Descrizione:</label>

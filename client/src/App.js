@@ -7,9 +7,9 @@ import Access from './components/User/Access';
 import Registration from './components/User/Registration';
 import Profile from './components/User/Profile';
 import Calendar from './components/Calendar/Calendar';
-import Notes from './components/Notes/Notes';
 import TaskList from './components/Calendar/TaskList';
-import Tomato from './components/Tomato/tomato';
+import Notes from './components/Notes/Notes';
+import Tomato from './components/Tomato/Tomato';
 
 function App() {
   return (
@@ -23,8 +23,8 @@ function App() {
               <Route path="/register" element={<Registration />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/calendar" element={<Calendar />} />
-              <Route path="/notes" element={<Notes />} />
               <Route path="/task" element={<TaskList />} />
+              <Route path="/notes" element={<Notes />} />
               <Route path="/tomato" element={<Tomato />} />
             </Routes>
           </Router>

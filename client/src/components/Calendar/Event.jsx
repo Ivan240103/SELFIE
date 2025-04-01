@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import _ from 'lodash';
 import { useTimeMachine } from '../../contexts/TimeContext'
 import {
-  datetimeToString,
-  datetimeToDateString
+  getDatetimeString,
+  getDateString
 } from '../../utils/dates';
 import Modal from 'react-modal'
 
@@ -349,7 +349,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
           <label>Giorno:</label>
           <input
             type="date"
-            value={datetimeToDateString(start)}
+            value={getDateString(start)}
             onChange={(e) => {
               setStart(new Date(e.target.value))
               setEnd(new Date(e.target.value))
@@ -362,7 +362,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
           </label>
           <input
             type="datetime-local"
-            value={datetimeToString(start)}
+            value={getDatetimeString(start)}
             onChange={(e) => setStart(new Date(e.target.value))}
           />
         </div>
@@ -370,7 +370,7 @@ function Event({ onSaveEvent, onUpdateEvent, onDeleteEvent, eventDetails, user }
           <label>Fine:</label>
           <input
             type="datetime-local"
-            value={datetimeToString(end)}
+            value={getDatetimeString(end)}
             onChange={(e) => setEnd(new Date(e.target.value))}
           />
         </div>

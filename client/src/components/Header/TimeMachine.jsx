@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import Modal from 'react-modal'
 import { useTimeMachine } from "../../contexts/TimeContext"
-import { datetimeToString } from '../../utils/dates'
+import { getDatetimeString } from '../../utils/dates'
 
 import '../../css/TimeMachine.css'
 
@@ -59,7 +59,7 @@ function TimeMachine() {
             <input
               type="datetime-local"
               name="picker"
-              value={datetimeToString(selectedTime)}
+              value={getDatetimeString(selectedTime)}
               onChange={(e) => setSelectedTime(new Date(e.target.value))} />
           </div>
           <button

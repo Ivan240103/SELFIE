@@ -6,7 +6,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import rrulePlugin from '@fullcalendar/rrule';
 import { useTimeMachine } from '../contexts/TimeContext'
 import { useAuth } from '../contexts/AuthenticationContext';
-import { datetimeToDateString } from '../utils/dates';
+import { getDateString } from '../utils/dates';
 import { marked } from 'marked';
 import Header from './Header/Header'
 
@@ -242,7 +242,7 @@ const Dashboard = () => {
                     className={`dash-task${Date.parse(t.deadline) < time.getTime() ? ' task-late' : ''}`}
                   >
                     <p>
-                      <strong>{t.title}</strong> | <time>{datetimeToDateString(new Date(t.deadline))}</time>
+                      <strong>{t.title}</strong> | <time>{getDateString(new Date(t.deadline))}</time>
                     </p>
                     <p>{t.description.substring(0, 45)}{t.description.length > 45 && '...'}</p>
                   </div>
