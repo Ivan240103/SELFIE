@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -7,16 +7,14 @@ import interactionPlugin from '@fullcalendar/interaction';
 import rrulePlugin from '@fullcalendar/rrule';
 import { useAuth } from '../../contexts/AuthenticationContext';
 import { useTime } from '../../contexts/TimeContext';
+import { showError } from '../../utils/toasts';
 import Header from '../Header/Header'
 import Event from "./Event";
 import Task from "./Task";
-import { useRef } from 'react';
 
-/* TODO: X PAYAM
-PER I TASK. CONFRONTARE DEADLINE CON time, SE PASSATA COLORARE DI ROSSO.
-I TASK IN ROSSO VANNO PROPOSTI TEMPORANEAMENTE ANCHE NEL GIORNO ATTUALE
-(OLTRE A QUELLO IN CUI AVEVANO LA DEADLINE)
-*/
+/* import {
+  
+} from "@heroui/react" */
 
 function Calendar() {
   const { isAuthenticated } = useAuth()
@@ -29,7 +27,6 @@ function Calendar() {
   const [calendarTasks, setCalendarTasks] = useState([]);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
-  const [error, setError] = useState('');
 
   // recupera il profilo utente
   useEffect(() => {
@@ -40,23 +37,14 @@ function Calendar() {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setUser(response.data)
-          setError('')
         } catch (error) {
-          setError(error.response?.data || 'Error fetchUser')
+          showError('fetchUser error')
         }
       }
     }
 
     fetchUser()
   }, [isAuthenticated])
-
-
-  // Funzione per calcolare il livello di urgenza
-  const calculateUrgencyLevel = (deadline, isDone) => {
-    if (isDone || !deadline) return 0;
-    return Math.max(0, Math.floor((new Date(time) - new Date(deadline)) / (1000 * 60 * 60 * 24)));
-  };
-
 
   // Carica gli eventi dal backend
   useEffect(() => {
@@ -133,6 +121,12 @@ function Calendar() {
       }
     });
   }, [calendarTasks]);
+
+  // Funzione per calcolare il livello di urgenza
+  const calculateUrgencyLevel = (deadline, isDone) => {
+    if (isDone || !deadline) return 0;
+    return Math.max(0, Math.floor((new Date(time) - new Date(deadline)) / (1000 * 60 * 60 * 24)));
+  };
 
 
   function handleTaskSave(newTask) {
@@ -336,36 +330,36 @@ function Calendar() {
             user={user}
           />
           <div>
-      <h3>Lista Attività</h3>
-      <ul>
-        {calendarTasks.map(task => (
-          <li key={task.id}>
-            <input
-              type="checkbox"
-              checked={selectedTasks.includes(task.id)}
-              onChange={() => handleTaskSelect(task.id)}
-            />
-            {task.title} - Scadenza: {new Date(task.start).toLocaleDateString('it-IT')}
-            {task.isDone && <span style={{ color: 'green', marginLeft: '10px' }}>✅ Completata</span>}
-          </li>
-        ))}
-      </ul>
-      {/* Mostra il bottone di modifica solo se una singola task è selezionata */}
-      {selectedTasks.length === 1 && (
-        <button onClick={() => handleTaskClick(calendarTasks.find(task => task.id === selectedTasks[0]))}>
-          Modifica Task
-        </button>
-      )}
-    </div>
-    <Task
-      onSaveTask={handleTaskSave}
-      onUpdateTask={handleTaskUpdate}
-      onDeleteTask={handleTaskDelete}
-      taskDetails={taskToEdit} // Passiamo la task da modificare
-      selectedTasks={selectedTasks}
-      user={user}
-    />
-  </div>
+            <h3>Lista Attività</h3>
+            <ul>
+              {calendarTasks.map(task => (
+                <li key={task.id}>
+                  <input
+                    type="checkbox"
+                    checked={selectedTasks.includes(task.id)}
+                    onChange={() => handleTaskSelect(task.id)}
+                  />
+                  {task.title} - Scadenza: {new Date(task.start).toLocaleDateString('it-IT')}
+                  {task.isDone && <span style={{ color: 'green', marginLeft: '10px' }}>✅ Completata</span>}
+                </li>
+              ))}
+            </ul>
+            {/* Mostra il bottone di modifica solo se una singola task è selezionata */}
+            {selectedTasks.length === 1 && (
+              <button onClick={() => handleTaskClick(calendarTasks.find(task => task.id === selectedTasks[0]))}>
+                Modifica Task
+              </button>
+            )}
+          </div>
+          <Task
+            onSaveTask={handleTaskSave}
+            onUpdateTask={handleTaskUpdate}
+            onDeleteTask={handleTaskDelete}
+            taskDetails={taskToEdit} // Passiamo la task da modificare
+            selectedTasks={selectedTasks}
+            user={user}
+          />
+        </div>
       </>}
     </div >
   );
