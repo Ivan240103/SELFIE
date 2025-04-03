@@ -15,7 +15,7 @@ le stesse funzionalità, e in più solo in modalità visualizzazione
 mettere un button per segnarlo come completato (usare la route)
 */
 
-function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTasks, user }) {
+function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskId, selectedTasks, user }) {
   const { time } = useTime();
 
   const [showModal, setShowModal] = useState(false);
@@ -33,9 +33,9 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
 
   useEffect(() => {
     const fetchTask = async () => {
-      if (taskDetails) {
+      if (taskId) {
         try {
-          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskDetails}`, {
+          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -53,13 +53,13 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
     }
 
     fetchTask()
-  }, [taskDetails])
+  }, [taskId])
 
   useEffect(() => {
-    if (taskDetails) {
+    if (taskId) {
       setShowModal(true); // Apri il Modal automaticamente quando c'è un task selezionato
     }
-  }, [taskDetails]);
+  }, [taskId]);
 
   // popola i campi per riempire il form
   useEffect(() => {
@@ -147,7 +147,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
       reminders: reminders
     };
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskDetails.id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -157,7 +157,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
       });
       const result = await response.json();
       alert('Task aggiornata con successo!');
-      onUpdateTask({ ...updatedTask, id: taskDetails });
+      onUpdateTask({ ...updatedTask, id: taskId });
     } catch (error) {
       alert('Errore nella chiamata PUT:', error.message || 'no response');
     }
@@ -177,7 +177,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
 
           if (response.ok) {
             alert(`Task con ID ${taskId} eliminata con successo!`);
-            onDeleteTask(taskDetails);
+            onDeleteTask(taskId);
             // Puoi inviare una richiesta GET per aggiornare la lista delle task
           } else {
             alert('Errore durante l\'eliminazione delle task!');
@@ -225,7 +225,7 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
         // TODO: passare ad un tag Modal
         <div className="modal">
           <div className="modal-content">
-            <h2>{taskDetails ? 'Modifica Task' : 'Crea una nuova Task'}</h2>
+            <h2>{taskId ? 'Modifica Task' : 'Crea una nuova Task'}</h2>
             <form>
               <label>Titolo:</label>
               <input
@@ -310,8 +310,8 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskDetails, selectedTas
                 </select> prima
               </div>}
             </form>
-            <button onClick={taskDetails ? handleUpdateTask : handleSaveTask}>
-              {taskDetails ? 'Aggiorna Task' : 'Salva Task'}
+            <button onClick={taskId ? handleUpdateTask : handleSaveTask}>
+              {taskId ? 'Aggiorna Task' : 'Salva Task'}
             </button>
             <button onClick={() => setShowModal(false)}>Chiudi</button>
           </div>

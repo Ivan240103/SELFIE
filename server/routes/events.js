@@ -31,7 +31,7 @@ router.post('/', auth, async (req, res) => {
 
   try {
     await event.save()
-    return res.send('ok')
+    return res.json(event)
   } catch(err) {
     return res.status(500).send('Error while creating the event')
   }

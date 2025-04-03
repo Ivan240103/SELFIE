@@ -9,3 +9,11 @@ export function showError(title, description) {
     color: "danger"
   })
 }
+
+export function showSuccess(title, description) {
+  addToast({
+    title: title,
+    description: description,
+    color: "success"
+  })
+}

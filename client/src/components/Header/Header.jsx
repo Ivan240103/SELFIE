@@ -17,7 +17,7 @@ function Header() {
     if (!isAuthenticated) {
       navigate('/login')
     }
-  }, [isAuthenticated, navigate])
+  }, [])
 
   return (
     <header className='header-container'>
