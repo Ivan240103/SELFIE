@@ -1,6 +1,6 @@
 /**
  * Converte un datetime in una stringa nel formato yyyy-MM-ddThh:mm  
- * (leggibile da un <input type="datetime-local">)
+ * (leggibile da un input type="datetime-local")
  * 
  * @param {Date} datetime datetime da convertire
  * @returns stringa in formato yyyy-MM-ddThh:mm
@@ -20,7 +20,7 @@ export function getDatetimeString(datetime) {
 
 /**
  * Converte un datetime in una stringa nel formato yyyy-MM-dd  
- * (leggibile da un <input type="date">)
+ * (leggibile da un input type="date")
  * 
  * @param {Date} datetime datetime da convertire
  * @returns stringa in formato yyyy-MM-dd

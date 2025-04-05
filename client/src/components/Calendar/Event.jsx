@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import _ from 'lodash';
+import React, { useState, useEffect } from 'react';
 import { useTime } from '../../contexts/TimeContext'
+import TitleDescription from './FormFields/TitleDescription';
+import Place from './FormFields/Place';
+import Reminder from './FormFields/Reminder';
 import {
   getDatetimeString,
   getDateString
@@ -14,25 +16,20 @@ import {
   Modal,
   ModalContent,
   ModalHeader,
-  ModalBody
+  ModalBody,
+  Form,
+  NumberInput,
+  DatePicker,
+  DateRangePicker,
+  Checkbox,
+  Select,
+  SelectItem,
+  RadioGroup,
+  Radio,
+  ButtonGroup,
+  Button
 } from "@heroui/react";
-
-/* PER PAYAM
-Trasformare il componente ritornato in un <Modal> che mostri il form con i
-campi dell'evento (prendi spunto da TimeMachine.jsx se serve).
-Interazioni dell'utente (il form deve essere sempre lo stesso):
-- quando l'utente clicca su un evento si apre con i campi readOnly (già riempiti). Devono
-  esserci due bottoni: per entrare in modalità di modifica e per eliminare l'evento.
-- per la modalità di modifica consiglio uno useState boolean, il cui valore viene assegnato
-  negato agli attr readOnly, così gestisci i campi modificabili. In modifica ci devono
-  essere i button annulla e salva.
-- mettere una modalità su Calendar per creare un evento (bottone?, click sulle caselle?), che
-  fa aprire il Modal con i campi vuoti editabili e due bottoni per salvare o annullare.
-Quando il Modal viene chiuso in Calendar rimettere eventDetails a null, così che i campi
-tornino ai valori default.
-*/
-
-// FIXME: la scelta della data inizialmente non rispetta il tempo dell'utente
+import { parseDate, parseDateTime } from "@internationalized/date";
 
 function Event({
   eventId, user, onSaveEvent, onUpdateEvent, onDeleteEvent, isModalOpen, setIsModalOpen
@@ -46,17 +43,17 @@ function Event({
   const [end, setEnd] = useState(new Date());
   const [isAllDay, setIsAllDay] = useState(true);
   const [place, setPlace] = useState('');
-  const [suggestions, setSuggestions] = useState([])
   const [mapsLocated, setMapsLocated] = useState(false)
   const [googleId, setGoogleId] = useState('')
   const [isRecurrent, setIsRecurrent] = useState(false);
   const [freq, setFreq] = useState('');
-  const [interval, setInterval] = useState('');
+  const [interval, setInterval] = useState(0);
   const [term, setTerm] = useState('');
   const [until, setUntil] = useState(new Date())
-  const [count, setCount] = useState('')
+  const [count, setCount] = useState(0)
   const [emailReminder, setEmailReminder] = useState({})
   const [pushReminder, setPushReminder] = useState({})
+  const [isEditing, setIsEditing] = useState(!!!eventId)
 
   // recupera l'evento specifico dal backend
   useEffect(() => {
@@ -91,8 +88,8 @@ function Event({
   // popola i campi
   useEffect(() => {
     const setFields = () => {
-      setTitle(event.title || "Senza titolo")
-      setDescription(event.description || "Nessuna descrizione")
+      setTitle(event.title || "")
+      setDescription(event.description || "")
       setStart(event.start ? new Date(event.start) : time)
       setEnd(event.end ? new Date(event.end) : time)
       setIsAllDay(event.isAllDay ?? true)
@@ -101,19 +98,19 @@ function Event({
       setGoogleId(event.googleId ?? '')
       setIsRecurrent(event.rrule ? true : false)
       setFreq(event.rrule?.freq || 'daily')
-      setInterval(event.rrule?.interval || '1')
+      setInterval(event.rrule?.interval || 1)
       if (event.rrule?.until) {
         setTerm('u')
         setUntil(event.rrule.until)
-        setCount('1')
+        setCount(1)
       } else if (event.rrule?.count) {
         setTerm('c')
-        setUntil(getDateString(time))
+        setUntil(time)
         setCount(event.rrule.count)
       } else {
         setTerm('n')
-        setUntil(getDateString(time))
-        setCount('1')
+        setUntil(time)
+        setCount(1)
       }
       if (event.reminders) {
         event.reminders.split(',').forEach(reminder => {
@@ -248,6 +245,7 @@ function Event({
   }
 
   const handleDelete = async () => {
+    setIsEditing(false)
     try {
       const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventId}`, {
         method: 'DELETE',
@@ -266,39 +264,28 @@ function Event({
     }
   }
 
-  const debouncedFetchSuggestions = useCallback(
-    _.debounce(async (loc) => {
-      if (loc.length < 3) {
-        setSuggestions([])
-        return
-      }
-      
-      // usa LocationIQ (OpenStreetMap) che è gratis
-      try {
-        const response = await fetch(
-          `https://us1.locationiq.com/v1/search?key=pk.7116bbd07a01adaf5eb1e5740b977e7e&q=${encodeURIComponent(loc)}&format=json`
-        )
+  const handleReset = () => {
+    setIsEditing(false)
+    setEvent(JSON.parse(JSON.stringify(event)))
+  }
 
-        if (!response.ok) {
-          throw new Error()
-        }
-        const data = await response.json()
-        setSuggestions(data)
-      } catch (error) {
-        setSuggestions([])
-      }
-    }, 300),
-    []
-  )
+  function getDatePickerValue() {
+    const s = isAllDay ? getDateString(start) : getDatetimeString(start)
+    const e = isAllDay ? getDateString(end) : getDatetimeString(end)
+    return {
+      start: isAllDay ? parseDate(s) : parseDateTime(s),
+      end: isAllDay ? parseDate(e) : parseDateTime(e)
+    }
+  }
 
-  // apre google maps alla destinazione impostata
-  const openMaps = () => {
-    const encodedDest = encodeURIComponent(place)
-    // se siamo su un mobile usa il geo protocol
-    const isMobile = /Android|webOS|iPhone|iPad/i.test(navigator.userAgent)
-    
-    const url = isMobile ? `geo:0,0?q=${encodedDest}` : `https://www.google.com/maps/search/?api=1&query=${encodedDest}`
-    window.open(url, '_blank')
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setIsEditing(false)
+    if (eventId) {
+      await handleUpdate()
+    } else {
+      await handleSave()
+    }
   }
 
   return (
@@ -306,227 +293,142 @@ function Event({
       <ModalContent>
         <ModalHeader>Evento</ModalHeader>
         <ModalBody>
-          <div>
-            <label>Titolo:</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+          <Form
+            className="flex flex-col items-center"
+            validationBehavior="native"
+            onSubmit={handleSubmit}
+          >
+            <TitleDescription
+              title={title}
+              setTitle={setTitle}
+              description={description}
+              setDescription={setDescription}
+              isEditing={isEditing}
             />
-          </div>
-          <div>
-            <label>Descrizione:</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            ></textarea>
-          </div>
-          <div>
-            <label>Evento per tutto il giorno:</label>
-            <input
-              type="checkbox"
-              checked={isAllDay}
-              onChange={(e) => setIsAllDay(e.target.checked)}
-            />
-          </div>
-          <div hidden={!isAllDay}>
-            <label>Giorno:</label>
-            <input
-              type="date"
-              value={getDateString(start)}
+            <Checkbox
+              color='primary'
+              isSelected={isAllDay}
+              onValueChange={setIsAllDay}
+              isReadOnly={!isEditing}
+            >
+              Evento per tutto il giorno
+            </Checkbox>
+            <DateRangePicker
+              label='Durata'
+              description='Seleziona uno o più giorni'
+              firstDayOfWeek='mon'
+              hourCycle={24}
+              // TODO: format date in dd/MM/yyyy
+              value={getDatePickerValue()}
               onChange={(e) => {
-                setStart(new Date(e.target.value))
-                setEnd(new Date(e.target.value))
+                setStart(e.start.toDate())
+                setEnd(e.end.toDate())
               }}
+              isReadOnly={!isEditing}
+              isRequired
+              // TODO: add validation with error
             />
-          </div>
-          <div hidden={isAllDay}>
-            <label>
-              Inizio:
-            </label>
-            <input
-              type="datetime-local"
-              value={getDatetimeString(start)}
-              onChange={(e) => setStart(new Date(e.target.value))}
-            />
-          </div>
-          <div hidden={isAllDay}>
-            <label>Fine:</label>
-            <input
-              type="datetime-local"
-              value={getDatetimeString(end)}
-              onChange={(e) => setEnd(new Date(e.target.value))}
-            />
-          </div>
-          <div>
-            <label>Evento ricorrente:</label>
-            <input
-              type="checkbox"
-              checked={isRecurrent}
-              onChange={(e) => setIsRecurrent(e.target.checked)}
-            />
-          </div>
-          <div hidden={!isRecurrent}>
-            <label>Ripeti ogni:</label>
-            <input
-              type="number"
-              min='1'
-              value={interval}
-              onChange={(e) => setInterval(e.target.value)}
-            />
-            <select
-              value={freq}
-              onChange={(e) => setFreq(e.target.value)}
+            <Checkbox
+              color='primary'
+              isSelected={isRecurrent}
+              onValueChange={setIsRecurrent}
+              isReadOnly={!isEditing}
             >
-              <option value='daily'>{interval === '1' ? 'Giorno' : 'Giorni'}</option>
-              <option value='weekly'>{interval === '1' ? 'Settimana' : 'Settimane'}</option>
-              <option value='monthly'>{interval === '1' ? 'Mese' : 'Mesi'}</option>
-              <option value='yearly'>{interval === '1' ? 'Anno' : 'Anni'}</option>
-            </select>
-            <label>Scade...</label>
-            <input
-              type="radio"
-              name="end"
-              value='n'
-              checked={term === 'n'}
-              onChange={(e) => setTerm(e.target.value)}
-            /> Mai
-            <br />
-            <input
-              type="radio"
-              name="end"
-              value='u'
-              checked={term === 'u'}
-              onChange={(e) => setTerm(e.target.value)}
-            /> Il <input
-              type="date"
-              value={until}
-              onChange={(e) => setUntil(e.target.value)}
+              Evento ricorrente
+            </Checkbox>
+            <div hidden={!isRecurrent}>
+              Ripeti ogni
+              <NumberInput
+                minValue={1}
+                value={interval}
+                onValueChange={setInterval}
+                isReadOnly={!isEditing}
+              />
+              <Select
+                selectedKeys={[freq]}
+                onChange={(e) => setFreq(e.target.value)}
+                isDisabled={!isEditing}
+              >
+                <SelectItem key='daily'>{interval === 1 ? 'Giorno' : 'Giorni'}</SelectItem>
+                <SelectItem key='weekly'>{interval === 1 ? 'Settimana' : 'Settimane'}</SelectItem>
+                <SelectItem key='monthly'>{interval === 1 ? 'Mese' : 'Mesi'}</SelectItem>
+                <SelectItem key='yearly'>{interval === 1 ? 'Anno' : 'Anni'}</SelectItem>
+              </Select>
+              <RadioGroup
+                label='Scade'
+                value={term}
+                onValueChange={setTerm}
+                isReadOnly={!isEditing}
+              >
+                <Radio value='n'>mai</Radio>
+                <Radio value='u'>il</Radio>
+                <DatePicker
+                  showMonthAndYearPickers
+                  value={parseDate(getDateString(until))}
+                  onChange={(e) => setUntil(e.toDate())}
+                  isReadOnly={!isEditing}
+                />
+                <Radio value='c'>dopo</Radio>
+                <NumberInput
+                  minValue={1}
+                  value={count}
+                  onValueChange={setCount}
+                  isReadOnly={!isEditing}
+                />
+                {count === 1 ? 'ripetizione' : 'ripetizioni'}
+              </RadioGroup>
+            </div>
+            <Place
+              place={place}
+              setPlace={setPlace}
+              mapsLocated={mapsLocated}
+              setMapsLocated={setMapsLocated}
+              isEditing={isEditing}
             />
-            <br />
-            <input
-              type="radio"
-              name="end"
-              value='c'
-              checked={term === 'c'}
-              onChange={(e) => setTerm(e.target.value)}
-            /> Dopo <input
-              type="number"
-              value={count}
-              onChange={(e) => setCount(e.target.value)}
-            /> {count === '1' ? 'ripetizione' : 'ripetizioni'}
-          </div>
-          <div>
-            <label>Luogo:</label>
-            <input
-              type="text"
-              value={place}
-              onChange={(e) => {
-                setPlace(e.target.value);
-                setMapsLocated(false)
-                debouncedFetchSuggestions(e.target.value);
-              }}
-              placeholder="Enter location"
-            />
-            {suggestions.length > 0 && (
-              <ul>
-                {suggestions.map((s) => (
-                  <li
-                    key={s.place_id}
-                    onClick={() => {
-                      setPlace(s.display_name);
-                      setMapsLocated(true)
-                      setSuggestions([]);
-                    }}
-                  >
-                    {s.display_name}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {mapsLocated && <button type="button" onClick={() => openMaps()}>Mappa</button>}
-          </div>
-          {user.notification && <div>
-            <label>Promemoria</label>
-            <br />
-            <input
-              type="checkbox"
-              checked={emailReminder.checked}
-              onChange={e => setEmailReminder(prev => ({
-                ...prev,
-                checked: e.target.checked
-              }))}
-            /> Email
-            <input
-              type="number"
-              min={emailReminder.time === 'm' ? 5 : 1}
-              disabled={!emailReminder.checked}
-              value={emailReminder.before}
-              onChange={e => setEmailReminder(prev => ({
-                ...prev,
-                before: e.target.value
-              }))}
-            />
-            <select
-              disabled={!emailReminder.checked}
-              value={emailReminder.time}
-              onChange={e => setEmailReminder(prev => ({
-                ...prev,
-                time: e.target.value
-              }))}
-            >
-              <option value='m'>{emailReminder.before === '1' ? 'Minuto' : 'Minuti'}</option>
-              <option value='h'>{emailReminder.before === '1' ? 'Ora' : 'Ore'}</option>
-              <option value='d'>{emailReminder.before === '1' ? 'Giorno' : 'Giorni'}</option>
-            </select> prima
-            <br />
-            <input
-              type="checkbox"
-              checked={pushReminder.checked}
-              onChange={e => setPushReminder(prev => ({
-                ...prev,
-                checked: e.target.checked
-              }))}
-            /> Push
-            <input
-              type="number"
-              min={pushReminder.time === 'm' ? 5 : 1}
-              disabled={!pushReminder.checked}
-              value={pushReminder.before}
-              onChange={e => setPushReminder(prev => ({
-                ...prev,
-                before: e.target.value
-              }))}
-            />
-            <select
-              disabled={!pushReminder.checked}
-              value={pushReminder.time}
-              onChange={e => setPushReminder(prev => ({
-                ...prev,
-                time: e.target.value
-              }))}
-            >
-              <option value='m'>{pushReminder.before === '1' ? 'Minuto' : 'Minuti'}</option>
-              <option value='h'>{pushReminder.before === '1' ? 'Ora' : 'Ore'}</option>
-              <option value='d'>{pushReminder.before === '1' ? 'Giorno' : 'Giorni'}</option>
-            </select> prima
-          </div>}
-          {!googleId && <>
-            {eventId ? (
-              <>
-                <button onClick={handleUpdate}>
-                  Aggiorna Evento
-                </button>
-                <button onClick={handleDelete}>
-                  Elimina Evento
-                </button>
-              </>
-            ) : (
-              <button onClick={handleSave}>
-                Salva Evento
-              </button>
-            )}
-          </>}
+            {user.notification && <div>
+              Promemoria
+              <Reminder
+                type='Email'
+                reminder={emailReminder}
+                setReminder={setEmailReminder}
+                isEditing={isEditing}
+              />
+              <Reminder
+                type='Push'
+                reminder={pushReminder}
+                setReminder={setPushReminder}
+                isEditing={isEditing}
+              />
+            </div>}
+            {!googleId && <>
+              {!eventId ? (
+                <ButtonGroup>
+                  <Button type='submit' color='primary' variant='solid'>
+                    Crea evento
+                  </Button>
+                </ButtonGroup>
+              ) : isEditing && (
+                <ButtonGroup>
+                  <Button type='button' color='primary' variant='flat' onPress={handleReset}>
+                    Annulla modifiche
+                  </Button>
+                  <Button type='submit' color='primary' variant='solid'>
+                    Aggiorna evento
+                  </Button>
+                </ButtonGroup>
+              )}
+            </>}
+          </Form>
+          {!googleId && eventId && !isEditing && (
+            <ButtonGroup>
+              <Button color='danger' variant='flat' onPress={handleDelete}>
+                Elimina evento
+              </Button>
+              <Button color='primary' variant='solid' onPress={() => setIsEditing(true)}>
+                Modifica evento
+              </Button>
+            </ButtonGroup>
+          )}
         </ModalBody>
       </ModalContent>
     </Modal>

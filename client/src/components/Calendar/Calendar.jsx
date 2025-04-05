@@ -305,10 +305,29 @@ function Calendar() {
         weekendsVisible={weekendsVisible}
         handleWeekendsToggle={toggleWeekends}
       />
+      <button
+        type="button"
+        onClick={() => {
+          setSelectedEventId(null)
+          setIsEventOpen(true)
+        }}
+      >
+        Crea evento
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setSelectedTaskId(null)
+          setIsTaskOpen(true)
+        }}
+      >
+        Crea task
+      </button>
       {isTimeLoading ? (
         // TODO: add skeleton?
         <p>Skeleton</p>
       ) : (
+        // TODO: visualizzazione di eventi su più giorni non include la end date (forse problema con il salvataggio)
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
           headerToolbar={{
@@ -318,6 +337,7 @@ function Calendar() {
           }}
           initialView='dayGridMonth'
           locale='it'
+          firstDay={1}
           initialDate={time}
           scrollTime='07:00'
           now={time}
@@ -336,7 +356,7 @@ function Calendar() {
           eventDrop={async (info) => await handleDrop(info)}
         />
       )}
-      <Event
+      {isEventOpen && <Event
         eventId={selectedEventId}
         user={user}
         onSaveEvent={handleEventSave}
@@ -344,7 +364,7 @@ function Calendar() {
         onDeleteEvent={handleEventDelete}
         isModalOpen={isEventOpen}
         setIsModalOpen={setIsEventOpen}
-      />
+      />}
       {/* <Task
         taskId={selectedTaskId}
         user={user}

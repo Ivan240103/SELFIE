@@ -109,23 +109,17 @@
 
 ## HeroUI
 - Accordion per i task ???
-- Alert per error e success
 - Avatar per la foto profilo
 - Card per la dashboard
-- Checkbox per completamento di task
+- Checkbox lineThrough per completamento di task
 - Toast con timer in caso di non-authenticated
-- DatePicker nei form
-- DateRangePicker per gli events
 - Dropdown per le settings delle notes
 - Drawer oppure Navbar per menu
 - Form ovunque con validazione
 - Image per le immagini
-- Input, NumberInput, RadioGroup, Select nei form
-- Link external per la mappa dell'event
 - Modal per eventi, task, time machine...
 - Popover o Tooltip per info aggiuntive
 - ScrollShadow in anteprima nota
 - Spinner nei caricamenti ???
 - Switch per le notifiche
 - Tabs per suddividere lista di task completati e non?
-- Textarea per le description
