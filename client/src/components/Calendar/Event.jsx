@@ -3,14 +3,9 @@ import { useTime } from '../../contexts/TimeContext'
 import TitleDescription from './FormFields/TitleDescription';
 import Place from './FormFields/Place';
 import Reminder from './FormFields/Reminder';
-import {
-  getDatetimeString,
-  getDateString
-} from '../../utils/dates';
-import {
-  showError,
-  showSuccess
-} from '../../utils/toasts';
+import { getDatetimeString, getDateString } from '../../utils/dates';
+import { calcReminder, remindersToString } from '../../utils/reminders';
+import { showError, showSuccess } from '../../utils/toasts';
 
 import {
   Modal,
@@ -152,30 +147,6 @@ function Event({
     }
   }
 
-  function calcReminder(minutes) {
-    if (minutes < 60) {
-      return { before: minutes, time: 'm' }
-    } else if (minutes < 60*24) {
-      return { before: minutes / 60, time: 'h' }
-    } else {
-      return { before: minutes / (60*24), time: 'd' }
-    }
-  }
-
-  function remindersToString() {
-    const calcMinutes = (t, b) => t === 'm' ? b : (t === 'h' ? b * 60 : b * 60 * 24)
-    const rem = []
-    if (emailReminder.checked) {
-      const minutes = calcMinutes(emailReminder.time, emailReminder.before)
-      rem.push(`${emailReminder.method}:${minutes}`)
-    }
-    if (pushReminder.checked) {
-      const minutes = calcMinutes(pushReminder.time, pushReminder.before)
-      rem.push(`${pushReminder.method}:${minutes}`)
-    }
-    return rem.length > 0 ? rem.join(',') : ''
-  }
-
   const handleSave = async () => {
     const eventData = {
       title: title,
@@ -186,7 +157,7 @@ function Event({
       rrule: isRecurrent ? createRRule() : null,
       place: place,
       mapsLocated: mapsLocated,
-      reminders: remindersToString()
+      reminders: remindersToString(emailReminder, pushReminder)
     };
 
     try {
@@ -220,7 +191,7 @@ function Event({
       rrule: isRecurrent ? createRRule() : null,
       place: place,
       mapsLocated: mapsLocated,
-      reminders: remindersToString()
+      reminders: remindersToString(emailReminder, pushReminder)
     };
 
     try {
@@ -364,6 +335,7 @@ function Event({
                 <Radio value='u'>il</Radio>
                 <DatePicker
                   showMonthAndYearPickers
+                  firstDayOfWeek='mon'
                   value={parseDate(getDateString(until))}
                   onChange={(e) => setUntil(e.toDate())}
                   isReadOnly={!isEditing}

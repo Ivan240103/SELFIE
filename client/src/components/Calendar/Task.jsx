@@ -1,36 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { useTime } from '../../contexts/TimeContext'
+import { useTime } from '../../contexts/TimeContext';
+import TitleDescription from './FormFields/TitleDescription';
+import Reminder from './FormFields/Reminder';
 import { getDatetimeString } from '../../utils/dates';
+import { calcReminder, remindersToString } from '../../utils/reminders';
+import { showError, showSuccess } from '../../utils/toasts';
 
-import '../../css/Task.css';
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  Form,
+  DatePicker,
+  Checkbox,
+  ButtonGroup,
+  Button
+} from "@heroui/react";
+import { parseDateTime } from "@internationalized/date";
 
-/* X PAYAM
-Fai una cosa come ho fatto in Event.jsx --> alla selezione del task
-passa l'id al componente. Nel componente metti uno useEffect che prende
-i dati dalla route specifica e un secondo useEffect che imposta i valori
-degli state (da creare uno per ogni campo del task ESCLUSO owner).
-
-Come in Event.jsx creare un <Modal> da 'react-modal' che abbia
-le stesse funzionalità, e in più solo in modalità visualizzazione 
-mettere un button per segnarlo come completato (usare la route)
-*/
-
-function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskId, selectedTasks, user }) {
+function Task({
+  taskId, user, onSaveTask, onUpdateTask, onDeleteTask, isModalOpen, setIsModalOpen
+}) {
+  // tempo in vigore per l'utente (fuso orario UTC)
   const { time } = useTime();
-
-  const [showModal, setShowModal] = useState(false);
   const [task, setTask] = useState({});
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [deadline, setDeadline] = useState(time);
+  const [deadline, setDeadline] = useState(new Date());
   const [isDone, setIsDone] = useState(false);
-  const [emailReminder, setEmailReminder] = useState(
-    { checked: false, method: 'email', before: 15, time: 'm' }
-  )
-  const [pushReminder, setPushReminder] = useState(
-    { checked: false, method: 'push', before: 15, time: 'm' }
-  )
+  const [emailReminder, setEmailReminder] = useState({})
+  const [pushReminder, setPushReminder] = useState({})
+  const [isEditing, setIsEditing] = useState(!!!taskId)
 
+  // recupera il task specifico dal backend
   useEffect(() => {
     const fetchTask = async () => {
       if (taskId) {
@@ -42,10 +45,15 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskId, selectedTasks, u
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
           });
-          const task = await response.json();
-          setTask(task)
+          if (response.ok) { 
+            const task = await response.json();
+            setTask(task)
+          } else {
+            throw new Error()
+          }
         } catch (error) {
-          alert(error.message || 'no response')
+          showError('fetchTask error')
+          setTask({})
         }
       } else {
         setTask({})
@@ -55,19 +63,14 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskId, selectedTasks, u
     fetchTask()
   }, [taskId])
 
-  useEffect(() => {
-    if (taskId) {
-      setShowModal(true); // Apri il Modal automaticamente quando c'è un task selezionato
-    }
-  }, [taskId]);
-
-  // popola i campi per riempire il form
+  // popola i campi
   useEffect(() => {
     const setFields = () => {
       setTitle(task.title || "")
       setDescription(task.description || "")
       setDeadline(task.deadline ? new Date(task.deadline) : time)
-      if (task?.reminders) {
+      setIsDone(task.isDone ?? false)
+      if (task.reminders) {
         task.reminders.split(',').forEach(reminder => {
           const r = reminder.split(':')
           const calc = calcReminder(parseInt(r[1]))
@@ -77,52 +80,24 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskId, selectedTasks, u
             setPushReminder({ checked: true, method: r[0], ...calc })
           }
         })
+      } else {
+        setEmailReminder({ checked: false, method: 'email', before: 15, time: 'm' })
+        setPushReminder({ checked: false, method: 'push', before: 15, time: 'm' })
       }
     }
 
     setFields()
   }, [task])
 
-  function calcReminder(minutes) {
-    if (minutes < 60) {
-      return { before: minutes, time: 'm' }
-    } else if (minutes < 60*24) {
-      return { before: minutes / 60, time: 'h' }
-    } else {
-      return { before: minutes / (60*24), time: 'd'}
-    }
-  }
-
-  function remindersToString() {
-    const rem = []
-    if (emailReminder.checked) {
-      const minutes = emailReminder.time === 'm' ? emailReminder.before :
-        emailReminder.time === 'h' ? emailReminder.before * 60 : emailReminder.before * 60 * 24
-      rem.push(`${emailReminder.method}:${minutes}`)
-    }
-    if (pushReminder.checked) {
-      const minutes = pushReminder.time === 'm' ? pushReminder.before :
-        pushReminder.time === 'h' ? pushReminder.before * 60 : pushReminder.before * 60 * 24
-      rem.push(`${pushReminder.method}:${minutes}`)
-    }
-    return rem.length > 0 ? rem.join(',') : ''
-  }
-
-  function handleInputChange(e) {
-    const { name, value } = e.target;
-    setTask({ ...task, [name]: value });
-  }
-
-  const handleSaveTask = async () => {
-    const reminders = remindersToString()
+  const handleSave = async () => {
     const taskData = {
       title: title,
       description: description,
       deadline: deadline.toISOString(),
-      reminders: reminders
+      reminders: remindersToString(emailReminder, pushReminder)
     };
+
     try {
-      // Preparazione della chiamata POST
       const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/`, {
         method: 'POST',
         headers: {
@@ -132,198 +107,187 @@ function Task({ onSaveTask, onUpdateTask, onDeleteTask, taskId, selectedTasks, u
         body: JSON.stringify(taskData)
       });
 
-      setShowModal(false);
+      if (!response.ok) {
+        throw new Error();
+      }
+      const result = await response.json()
+      showSuccess('Attività salvata')
+      onSaveTask(result)
     } catch (error) {
-      alert('Errore nella chiamata POST:', error.message || 'no response');
+      showError('Errore nel salvataggio')
     }
   }
 
-  async function handleUpdateTask() {
-    const reminders = remindersToString()
-    const updatedTask = {
+  const handleUpdate = async () => {
+    const taskData = {
       title: title,
       description: description,
       deadline: deadline.toISOString(),
-      reminders: reminders
+      reminders: remindersToString(emailReminder, pushReminder)
     };
+
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId.id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify(updatedTask)
+        body: JSON.stringify(taskData)
       });
+
+      if (!response.ok) {
+        throw new Error();
+      }
       const result = await response.json();
-      alert('Task aggiornata con successo!');
-      onUpdateTask({ ...updatedTask, id: taskId });
+      showSuccess('Attività aggiornata');
+      onUpdateTask(result);
     } catch (error) {
-      alert('Errore nella chiamata PUT:', error.message || 'no response');
+      showError("Errore nell'aggiornamento")
     }
   }
 
-  async function handleDeleteTask() {
-    if (selectedTasks.length > 0) {
-      selectedTasks.forEach(async (taskId) => {
-        try {
-          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-          });
-
-          if (response.ok) {
-            alert(`Task con ID ${taskId} eliminata con successo!`);
-            onDeleteTask(taskId);
-            // Puoi inviare una richiesta GET per aggiornare la lista delle task
-          } else {
-            alert('Errore durante l\'eliminazione delle task!');
-          }
-        } catch (error) {
-          alert('Errore nella chiamata DELETE:', error.message || 'no response');
+  const handleDelete = async () => {
+    setIsEditing(false)
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
+
+      if (!response.ok) {
+        throw new Error();
+      }
+      showSuccess('Attività eliminata');
+      onDeleteTask(taskId);
+    } catch (error) {
+      showError("Errore nell'eliminazione")
     }
   }
 
-  async function handleCompleteTask() {
-    const completedTask = {
-      isDone: isDone
-    };
-    if (selectedTasks.length > 0) {
-      selectedTasks.forEach(async (taskId) => {
-        try {
-          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/toggle/${taskId}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(completedTask)
-          });
-          if (response.ok) {
-            const result = await response.json();
-            // Aggiorna il colore e lo stato della task localmente
-            onUpdateTask({ id: taskId, color: 'green', isDone: true })
-            alert('Task completata con successo!');
-          }
-        } catch (error) {
-          alert('Errore nella chiamata PUT:', error.message || 'no response');
-        }
+  const handleComplete = async (v) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/toggle/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ isDone: v })
       });
+
+      if (!response.ok) {
+        throw new Error()
+      }
+      const result = await response.json()
+      setIsDone(v)
+      setTimeout(() => {
+        showSuccess(`Attività segnata come ${v ? '' : 'non'} completata`)
+        onUpdateTask(result)
+      }, 500);
+    } catch (error) {
+      showError("Errore nel completamento")
+    }
+  }
+
+  const handleReset = () => {
+    setIsEditing(false)
+    setTask(JSON.parse(JSON.stringify(task)))
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setIsEditing(false)
+    if (taskId) {
+      await handleUpdate()
+    } else {
+      await handleSave()
     }
   }
 
   return (
-    <div>
-      <button onClick={() => setShowModal(true)}>Aggiungi Task</button>
-
-      {showModal && (
-        // TODO: passare ad un tag Modal
-        <div className="modal">
-          <div className="modal-content">
-            <h2>{taskId ? 'Modifica Task' : 'Crea una nuova Task'}</h2>
-            <form>
-              <label>Titolo:</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+    <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <ModalContent>
+        <ModalHeader>Attività</ModalHeader>
+        <ModalBody>
+          {!isEditing && <Checkbox
+            color='success'
+            isSelected={isDone}
+            onValueChange={handleComplete}
+          >
+            Completata
+          </Checkbox>}
+          <Form
+            className="flex flex-col items-center"
+            validationBehavior="native"
+            onSubmit={handleSubmit}
+          >
+            <TitleDescription
+              title={title}
+              setTitle={setTitle}
+              description={description}
+              setDescription={setDescription}
+              isEditing={isEditing}
+            />
+            <DatePicker
+              label='Scadenza'
+              description='Entro quando deve essere completata'
+              showMonthAndYearPickers
+              firstDayOfWeek='mon'
+              hourCycle={24}
+              value={parseDateTime(getDatetimeString(deadline))}
+              onChange={(d) => setDeadline(d.toDate())}
+              isRequired
+              isReadOnly={!isEditing}
+            />
+            {user.notification && <div>
+              Promemoria
+              <Reminder
+                type='Email'
+                reminder={emailReminder}
+                setReminder={setEmailReminder}
+                isEditing={isEditing}
               />
-              <label>Scadenza:</label>
-              <input
-                type="datetime-local"
-                value={getDatetimeString(deadline)}
-                onChange={(e) => setDeadline(new Date(e.target.value))}
+              <Reminder
+                type='Push'
+                reminder={pushReminder}
+                setReminder={setPushReminder}
+                isEditing={isEditing}
               />
-              <label>Descrizione:</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-              {user.notification && <div>
-                <label>Promemoria</label>
-                <br />
-                <input
-                  type="checkbox"
-                  checked={emailReminder.checked}
-                  onChange={e => setEmailReminder(prev => ({
-                    ...prev,
-                    checked: e.target.checked
-                  }))}
-                /> Email
-                <input
-                  type="number"
-                  min={emailReminder.time === 'm' ? 5 : 1}
-                  disabled={!emailReminder.checked}
-                  value={emailReminder.before}
-                  onChange={e => setEmailReminder(prev => ({
-                    ...prev,
-                    before: e.target.value
-                  }))}
-                />
-                <select
-                  disabled={!emailReminder.checked}
-                  value={emailReminder.time}
-                  onChange={e => setEmailReminder(prev => ({
-                    ...prev,
-                    time: e.target.value
-                  }))}
-                >
-                  <option value='m'>{emailReminder.before === '1' ? 'Minuto' : 'Minuti'}</option>
-                  <option value='h'>{emailReminder.before === '1' ? 'Ora' : 'Ore'}</option>
-                  <option value='d'>{emailReminder.before === '1' ? 'Giorno' : 'Giorni'}</option>
-                </select> prima
-                <br />
-                <input
-                  type="checkbox"
-                  checked={pushReminder.checked}
-                  onChange={e => setPushReminder(prev => ({
-                    ...prev,
-                    checked: e.target.checked
-                  }))}
-                /> Push
-                <input
-                  type="number"
-                  min={pushReminder.time === 'm' ? 5 : 1}
-                  disabled={!pushReminder.checked}
-                  value={pushReminder.before}
-                  onChange={e => setPushReminder(prev => ({
-                    ...prev,
-                    before: e.target.value
-                  }))}
-                />
-                <select
-                  disabled={!pushReminder.checked}
-                  value={pushReminder.time}
-                  onChange={e => setPushReminder(prev => ({
-                    ...prev,
-                    time: e.target.value
-                  }))}
-                >
-                  <option value='m'>{pushReminder.before === '1' ? 'Minuto' : 'Minuti'}</option>
-                  <option value='h'>{pushReminder.before === '1' ? 'Ora' : 'Ore'}</option>
-                  <option value='d'>{pushReminder.before === '1' ? 'Giorno' : 'Giorni'}</option>
-                </select> prima
-              </div>}
-            </form>
-            <button onClick={taskId ? handleUpdateTask : handleSaveTask}>
-              {taskId ? 'Aggiorna Task' : 'Salva Task'}
-            </button>
-            <button onClick={() => setShowModal(false)}>Chiudi</button>
-          </div>
-        </div>
-      )}
-      {selectedTasks.length > 0 && (
-        <div>
-          <button onClick={handleDeleteTask}>Elimina Task Selezionate</button>
-          <button onClick={handleCompleteTask}>Task Completata</button>
-        </div>
-      )}
-    </div>
+            </div>}
+            {!taskId ? (
+              <ButtonGroup>
+                <Button type='submit' color='primary' variant='solid'>
+                  Crea attività
+                </Button>
+              </ButtonGroup>
+            ) : isEditing && (
+              <ButtonGroup>
+                <Button type='button' color='primary' variant='flat' onPress={handleReset}>
+                  Annulla modifiche
+                </Button>
+                <Button type='submit' color='primary' variant='solid'>
+                  Aggiorna attività
+                </Button>
+              </ButtonGroup>
+            )}
+          </Form>
+          {taskId && !isEditing && (
+            <ButtonGroup>
+              <Button color='danger' variant='flat' onPress={handleDelete}>
+                Elimina attività
+              </Button>
+              <Button color='primary' variant='solid' onPress={() => setIsEditing(true)}>
+                Modifica attività
+              </Button>
+            </ButtonGroup>
+          )}
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   );
 }
 

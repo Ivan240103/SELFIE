@@ -23,7 +23,7 @@ router.post('/', auth, async (req, res) => {
 
   try {
     await task.save()
-    return res.send('ok')
+    return res.json(task)
   } catch(err) {
     return res.status(500).send('Error while creating task')
   }
@@ -91,14 +91,14 @@ router.put('/:id', auth, async (req, res) => {
 // isDone := true se completato, false altrimenti
 router.put('/toggle/:id', auth, async (req, res) => {
   try {
-    const toggle = await Task.findByIdAndUpdate(
-      req.params.id,
-      { $set: { isDone: req.body.isDone } }
-    )
-    if (!toggle) {
+    const task = await Task.findById(req.params.id)
+    if (!task) {
       return res.status(404).send(`No task found with id ${req.params.id}`)
     }
-    return res.send('ok')
+    // modifica
+    task.isDone = req.body.isDone ?? task.isDone
+    await task.save()
+    return res.json(task)
   } catch (err) {
     return res.status(500).send('Error while toggling task')
   }

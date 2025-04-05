@@ -15,7 +15,7 @@ root.render(
       <ToastProvider
         placement='top-center'
         toastProps={{
-          timeout: 2000,
+          timeout: 3000,
           closeIcon: (
             <svg
               fill="none"

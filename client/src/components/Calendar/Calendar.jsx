@@ -229,7 +229,7 @@ function Calendar() {
     }
   }
 
-  // TODO: check function
+  // TODO: check function forse togliere
   //Chiamata PUT per eventDrop quando trascino l'evento, vado a prendere le info dell'evento selezionato e lo modifico con la data rilasciata
   const handleEventDrop = async (event) => {
     const newStartDate = event.start
@@ -365,13 +365,15 @@ function Calendar() {
         isModalOpen={isEventOpen}
         setIsModalOpen={setIsEventOpen}
       />}
-      {/* <Task
+      {isTaskOpen && <Task
         taskId={selectedTaskId}
         user={user}
         onSaveTask={handleTaskSave}
         onUpdateTask={handleTaskUpdate}
         onDeleteTask={handleTaskDelete}
-      /> */}
+        isModalOpen={isTaskOpen}
+        setIsModalOpen={setIsTaskOpen}
+      />}
     </div>
   );
 }
