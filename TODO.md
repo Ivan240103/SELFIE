@@ -115,7 +115,5 @@
 - Toast con timer in caso di non-authenticated
 - Dropdown per le settings delle notes
 - Drawer oppure Navbar per menu
-- Image per le immagini
-- Popover o Tooltip per info aggiuntive
 - ScrollShadow in anteprima nota
-- Spinner nei caricamenti ???
+- Spinner o skeleton nei caricamenti ???

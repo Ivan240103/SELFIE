@@ -3,7 +3,7 @@ import axios from 'axios'
 import { useAuth } from '../../contexts/AuthenticationContext'
 import { showError, showSuccess } from '../../utils/toasts'
 
-import { Switch } from '@heroui/react'
+import { Switch, Tooltip } from '@heroui/react'
 
 function BellOnIcon() {
   return (
@@ -140,14 +140,18 @@ function Notifier() {
   }
 
   return (
-    <Switch
-      color='secondary'
-      size='lg'
-      isSelected={notifyPermission}
-      onValueChange={handleSwitch}
-      isDisabled={!isAuthenticated}
-      thumbIcon={notifyPermission ? <BellOnIcon /> : <BellOffIcon />}
-    />
+    <Tooltip
+      content={`Notifiche ${notifyPermission ? 'abilitate' : 'disabilitate'}`}
+    >
+      <Switch
+        color='secondary'
+        size='lg'
+        isSelected={notifyPermission}
+        onValueChange={handleSwitch}
+        isDisabled={!isAuthenticated}
+        thumbIcon={notifyPermission ? <BellOnIcon /> : <BellOffIcon />}
+      />
+    </Tooltip>
   )
 }
 
