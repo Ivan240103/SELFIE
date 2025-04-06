@@ -1,32 +1,28 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from "react-router-dom"
-import { useAuth } from '../../contexts/AuthenticationContext'
+import React from 'react'
+import { useNavigate, useLocation } from "react-router-dom"
 import TimeMachine from './TimeMachine'
 import Notifier from './Notifier'
 
-import '../../css/Header.css'
+import { Button } from '@heroui/react'
 
 function Header() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
-
-  const [error, setError] = useState('')
-
-  // verifica l'autenticazione
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login')
-    }
-  }, [])
+  const { pathname } = useLocation()
 
   return (
-    <header className='header-container'>
-      <button onClick={() => navigate(-1)}>
-        Go back
-      </button>
+    <header className='flex flex-row justify-between m-4'>
+      {/* TODO: aggiungere icona freccia indietro */}
+      <Button
+        color='default'
+        variant='solid'
+        onPress={() => navigate(-1)}
+        isDisabled={pathname === '/'}
+        // isIconOnly
+      >
+        Indietro
+      </Button>
       <TimeMachine />
       <Notifier />
-      {error && <p>{error}</p>}
     </header>
   )
 }

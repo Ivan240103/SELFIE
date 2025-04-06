@@ -40,13 +40,14 @@ function TimeMachine() {
   return(
     <div>
       <Button
-        color="default"
+        color="secondary"
         variant="light"
         onPress={() => {
           setSelectedTime(time)
           setIsModalOpen(true)
         }}
         isDisabled={!isAuthenticated}
+        style={{ color: 'black' }}
       >
         {time.toLocaleString('it-IT').slice(0, -3).replace(', ', ' - ')}
       </Button>
