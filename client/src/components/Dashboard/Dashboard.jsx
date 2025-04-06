@@ -10,13 +10,13 @@ import { getDateString } from '../../utils/dates';
 import { marked } from 'marked';
 import Header from '../Header/Header'
 
-import calendarIcon from "../images/calendar-icon.png";
-import notesIcon from "../images/notebook-pen-icon.png";
-import tomatoIcon from "../images/speed-icon.png";
-import logoutIcon from "../images/door-check-out-icon.png";
-import taskIcon from "../images/checklist-icon.png";
+import calendarIcon from "../../images/calendar-icon.png";
+import notesIcon from "../../images/notebook-pen-icon.png";
+import tomatoIcon from "../../images/speed-icon.png";
+import logoutIcon from "../../images/door-check-out-icon.png";
+import taskIcon from "../../images/checklist-icon.png";
 
-import "../css/Dashboard.css";
+import "../../css/Dashboard.css";
 
 const Dashboard = () => {
   const navigate = useNavigate()

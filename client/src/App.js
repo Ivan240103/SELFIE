@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { TimeProvider } from './contexts/TimeContext';
 import { AuthenticationProvider } from './contexts/AuthenticationContext';
-import Dashboard from './components/Dashboard';
+import Dashboard from './components/Dashboard/Dashboard';
 import Access from './components/User/Access';
 import Registration from './components/User/Registration';
 import Profile from './components/User/Profile';
