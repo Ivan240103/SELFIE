@@ -4,6 +4,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react"
 import axios from 'axios'
 import { useAuth } from "./AuthenticationContext"
+import { showError } from '../utils/toasts'
 
 const TimeContext = createContext({
   time: new Date(),
@@ -32,7 +33,7 @@ export const TimeProvider = ({ children }) => {
         } catch (error) {
           setTime(new Date())
           setIsTimeLoading(false)
-          alert('fetchTime failed in context')
+          showError('fetchTime failed in context')
         }
       } else {
         setTime(new Date())
@@ -70,7 +71,7 @@ export const TimeProvider = ({ children }) => {
       setIsTimeLoading(false)
     } catch (error) {
       setIsTimeLoading(false)
-      alert('updateTime failed in context')
+      showError('updateTime failed in context')
     }
   }
 
@@ -88,7 +89,7 @@ export const TimeProvider = ({ children }) => {
       setIsTimeLoading(false)
     } catch (error) {
       setIsTimeLoading(false)
-      alert('resetTime failed in context')
+      showError('resetTime failed in context')
     }
   }
 
