@@ -4,11 +4,11 @@ import axios from 'axios';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import rrulePlugin from '@fullcalendar/rrule';
-import { useTime } from '../contexts/TimeContext'
-import { useAuth } from '../contexts/AuthenticationContext';
-import { getDateString } from '../utils/dates';
+import { useTime } from '../../contexts/TimeContext'
+import { useAuth } from '../../contexts/AuthenticationContext';
+import { getDateString } from '../../utils/dates';
 import { marked } from 'marked';
-import Header from './Header/Header'
+import Header from '../Header/Header'
 
 import calendarIcon from "../images/calendar-icon.png";
 import notesIcon from "../images/notebook-pen-icon.png";
