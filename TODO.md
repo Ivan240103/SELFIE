@@ -106,6 +106,8 @@
 - [x] geolocalizzazione per gli eventi --> NON SPECIFICATO/APPROFONDITO
   - [x] selezione luogo con auto-completamento di google maps api
   - [x] se auto-completato, nella visualizzazione link per andare su google maps (campo aggiuntivo nel model?)
+- [ ] sistemare autenticazione in modo da poter guardare ma non toccare
+- [ ] controllare notifiche push
 
 ## HeroUI
 - Avatar per la foto profilo

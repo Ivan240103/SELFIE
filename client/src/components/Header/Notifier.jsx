@@ -1,6 +1,41 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useAuth } from '../../contexts/AuthenticationContext'
+import { showError, showSuccess } from '../../utils/toasts'
+
+import { Switch } from '@heroui/react'
+
+function BellOnIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
+      role="presentation"
+      viewBox="0 0 24 24"
+      height="1.1em"
+      width="1.1em"
+    >
+      <path d="M20 18H4l2-2v-6a6 6 0 0 1 5-5.91V3a1 1 0 0 1 2 0v1.09a5.9 5.9 0 0 1 1.3.4A3.992 3.992 0 0 0 18 10v6zm-8 4a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-18a2 2 0 1 0 2 2 2 2 0 0 0-2-2z"/>
+    </svg>
+  )
+}
+
+function BellOffIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
+      role="presentation"
+      viewBox="0 0 24 24"
+      height="1em"
+      width="1em"
+    >
+      <path d="M10 20h4a2 2 0 0 1-4 0zm2-18a1 1 0 0 0-1 1v1.093A5.961 5.961 0 0 0 9 4.8l9 9.2v-4a6 6 0 0 0-5-5.91V3a1 1 0 0 0-1-1zM6.417 7.831A5.967 5.967 0 0 0 6 10v6l-2 2h12.586l2.707 2.707a1 1 0 0 0 1.414-1.414l-16-16a1 1 0 0 0-1.414 1.414z"/>
+    </svg>
+  )
+}
 
 function Notifier() {
   const { isAuthenticated } = useAuth()
@@ -12,9 +47,8 @@ function Notifier() {
       if ("serviceWorker" in navigator) {
         try {
           await navigator.serviceWorker.register('/sw.js')
-          // setError('')
         } catch (error) {
-          // setError('Service worker registration failed')
+          showError('Service worker registration error')
         }
       }
     }
@@ -31,10 +65,12 @@ function Notifier() {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setNotifyPermission(response.data.notification)
-          // setError('')
         } catch (error) {
-          // setError(error.response?.data || 'Error fetchUser')
+          showError('Retrieve notification permission error')
+          setNotifyPermission(false)
         }
+      } else {
+        setNotifyPermission(false)
       }
     }
 
@@ -49,64 +85,69 @@ function Notifier() {
     })
 
     try {
-      await axios.post(`${process.env.REACT_APP_API}/api/notifications/push/subscribe`,
-        { subscription: subscription },
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-      )
-      // setError('')
+      await axios.post(`${process.env.REACT_APP_API}/api/notifications/push/subscribe`, {
+        subscription: subscription
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      })
     } catch (error) {
-      // setError('subscribeToPush error')
+      showError('subscribeToPush error')
+      throw new Error()
     }
   }
 
   async function askNotifyPermission() {
-    if (!notifyPermission) {
-      const permission = await Notification.requestPermission()
-      if (permission === "granted") {
-        setNotifyPermission(true)
-        try {
-          await axios.put(`${process.env.REACT_APP_API}/api/users/notification`, {
-            state: true
-          }, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          })
-          // setError('')
-        } catch (error) {
-          // setError(error.response?.data || 'Error in askNotifyPermission')
-        }
+    const permission = await Notification.requestPermission()
+    if (permission === "granted") {
+      try {
         await subscribeToPush()
+        await axios.put(`${process.env.REACT_APP_API}/api/users/notification`, {
+          state: true
+        }, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        })
+        setNotifyPermission(true)
+        showSuccess('Notifiche abilitate')
+      } catch (error) {
+        setNotifyPermission(false)
+        showError('askNotifyPermission error')
       }
+    } else {
+      setNotifyPermission(false)
     }
   }
 
   async function revokeNotifyPermission() {
-    if (notifyPermission) {
+    try {
+      await axios.put(`${process.env.REACT_APP_API}/api/users/notification`, {
+        state: false
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      })
       setNotifyPermission(false)
-      try {
-        await axios.put(`${process.env.REACT_APP_API}/api/users/notification`, {
-          state: false
-        }, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        // setError('')
-      } catch (error) {
-        // setError(error.response?.data || 'Error in revokeNotifyPermission')
-      }
+      showSuccess('Notifiche disabilitate')
+    } catch (error) {
+      showError('revokeNotifyPermission error')
+    }
+  }
+
+  async function handleSwitch(v) {
+    if (v) {
+      await askNotifyPermission()
+    } else {
+      await revokeNotifyPermission()
     }
   }
 
   return (
-    <div>
-      {notifyPermission ? (
-        <button onClick={revokeNotifyPermission}>
-          Disattiva le notifiche
-        </button>
-      ) : (
-        <button onClick={askNotifyPermission}>
-          Attiva le notifiche
-        </button>
-      )}
-    </div>
+    <Switch
+      color='secondary'
+      size='lg'
+      isSelected={notifyPermission}
+      onValueChange={handleSwitch}
+      isDisabled={!isAuthenticated}
+      thumbIcon={notifyPermission ? <BellOnIcon /> : <BellOffIcon />}
+    />
   )
 }
 
