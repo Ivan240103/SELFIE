@@ -1,86 +1,215 @@
-import React, { useEffect, useState } from 'react';
-import TimeMachine from '../Header/TimeMachine';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios'
 import { useTime } from '../../contexts/TimeContext';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthenticationContext';
-import '../../css/Tasks.css';
+import { showError, showSuccess } from '../../utils/toasts'
+import { getDateString } from '../../utils/dates';
+import Header from '../Header/Header'
+import Task from "./Task";
 
-const TaskList = () => {
-    const { isAuthenticated } = useAuth();
-    const navigate = useNavigate()
+import {
+  Tabs,
+  Tab,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  DatePicker,
+  Textarea,
+  Button
+} from '@heroui/react'
+import { parseDate } from "@internationalized/date";
 
-    const { time, isTimeLoading } = useTime()
-    const [tasks, setTasks] = useState([]);
-    const [error, setError] = useState(null);
-    
-    // verifica l'autenticazione
-    useEffect(() => {
-        if (!isAuthenticated) {
-        navigate('/login')
+function TaskCard({ task, onComplete, onDetails }) {
+  const { time } = useTime()
+
+  const notDoneColor = () => time > new Date(task.deadline) ? '#ff8080' : '#ffff80'
+
+  return (
+    <Card
+      key={task._id}
+      style={{ backgroundColor: task.isDone ? '#b3ffb3' : notDoneColor()}}
+    >
+      <CardHeader>
+        <h3>{task.title}</h3>
+      </CardHeader>
+      <CardBody>
+        <DatePicker
+          label='Scadenza'
+          value={parseDate(getDateString(new Date(task.deadline)))}
+          isReadOnly
+        />
+        <Textarea
+          label='Descrizione'
+          value={task.description}
+          minRows={2}
+          maxRows={4}
+          isReadOnly
+        />
+      </CardBody>
+      <CardFooter>
+        <Button color='primary' variant='light' onPress={() => onDetails(task._id)}>
+          Dettagli
+        </Button>
+        <Button
+          color={task.isDone ? 'default' : 'success'}
+          variant='flat'
+          onPress={() => onComplete(!task.isDone, task._id)}
+        >
+          {task.isDone ? "Non completata" : "Completata"}
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+
+function TaskList() {
+  const { isAuthenticated } = useAuth();
+  const [user, setUser] = useState({})
+  const [tasks, setTasks] = useState([]);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [isTaskOpen, setIsTaskOpen] = useState(false);
+
+  // recupera il profilo utente
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setUser(response.data)
+        } catch (error) {
+          showError('fetchUser error')
+          setUser({})
         }
-    }, [isAuthenticated, navigate])
+      } else {
+        setUser({})
+      }
+    }
 
-    useEffect(() => {
-        if (isAuthenticated) {
-            fetch(`${process.env.REACT_APP_API}/api/tasks/`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`, // Includi il token se necessario
-                },
-                })
-                .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Errore nel recupero delle note');
-                }
-                return response.json();
-                })
-                .then((data) => {
-                    setTasks(data)
-                    setError('')
-                })
-                .catch((error) => setError('Errore:', error.message));
-        };
-    }, [isAuthenticated]);
+    fetchUser()
+  }, [isAuthenticated])
 
+  // recupera tutti i task dell'utente
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          
+          if (response.ok) {
+            const tasks = await response.json()
+            setSortedTasks(tasks)
+          } else {
+            throw new Error()
+          }
+        } catch (error) {
+          showError('fetchTasks error')
+          setTasks([])
+        }
+      } else {
+        setTasks([])
+      }
+    }
 
-    return (
-        <div>
-            {isAuthenticated &&
-                <>
-                    <TimeMachine />
-                    {!isTimeLoading && <div className="tasks-container">
-                        <h1>My Tasks</h1>
-                        {tasks.length === 0 ? (
-                            <p>No tasks found.</p>
-                        ) : (
-                            <ul className="task-list">
-                                {tasks.map((task) => {
-                                    const deadline = new Date(task.deadline);
-                                    const isExpired = deadline < time;
-                                    const isHighlighted = !task.isDone && !isExpired;
-                                    return (
-                                        <li
-                                            key={task._id}
-                                            className={`task-item ${task.isDone ? 'completed' : isHighlighted ? 'highlighted' : 'not-completed'}`}
-                                        >
-                                            <h2>
-                                                {task.isDone ? '✅ ' : isHighlighted ? '📌 ' : '❌ '}
-                                                {task.title}
-                                            </h2>
-                                            <p>Descrizione: {task.description}</p>
-                                            <p>Deadline: {deadline.toLocaleString('it-IT')}</p>
-                                            <p>Status: {task.isDone ? 'Completed' : 'Not Completed'}</p>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        )}
-                    </div>
-                }
-            </>}
-        </div>
-    );
+    fetchTasks()
+  }, [isAuthenticated]);
+
+  function setSortedTasks(tasks) {
+    const sorted = tasks.sort((a, b) => {
+      return new Date(a.deadline) - new Date(b.deadline)
+    })
+    setTasks(sorted)
+  }
+
+  function handleTaskSave(task) {
+    setIsTaskOpen(false)
+    setSortedTasks(prev => [...prev, task]);
+  }
+
+  function handleTaskUpdate(task) {
+    setIsTaskOpen(false)
+    const updatedTasks = tasks.map(t => t._id === task._id ? task : t)
+    setSortedTasks(updatedTasks);
+  }
+
+  function handleTaskDelete(taskId) {
+    setIsTaskOpen(false)
+    const updatedTasks = tasks.filter(t => t._id !== taskId)
+    setSortedTasks(updatedTasks);
+  }
+
+  async function handleComplete(v, id) {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/toggle/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ isDone: v })
+      });
+
+      if (!response.ok) {
+        throw new Error()
+      }
+      const result = await response.json()
+      setTimeout(() => {
+        showSuccess(`Attività segnata come ${v ? '' : 'non'} completata`)
+        handleTaskUpdate(result)
+      }, 500);
+    } catch (error) {
+      showError("Errore nel completamento")
+    }
+  }
+
+  function openDetails(id) {
+    setSelectedTaskId(id)
+    setIsTaskOpen(true)
+  }
+
+  return (
+    <div>
+      <Header />
+      <h2>Le tue attività</h2>
+      <Tabs color='secondary'>
+        <Tab title={`Da completare (${tasks.filter(t => !t.isDone).length})`}>
+          {tasks.filter(t => !t.isDone).map(t => (
+            <TaskCard
+              task={t}
+              onComplete={handleComplete}
+              onDetails={openDetails}
+            />
+          ))}
+        </Tab>
+        <Tab title='Completate'>
+          {tasks.filter(t => t.isDone).map(t => (
+            <TaskCard
+              task={t}
+              onComplete={handleComplete}
+              onDetails={openDetails}
+            />
+          ))}
+        </Tab>
+      </Tabs>
+      {isTaskOpen && <Task
+        taskId={selectedTaskId}
+        user={user}
+        onSaveTask={handleTaskSave}
+        onUpdateTask={handleTaskUpdate}
+        onDeleteTask={handleTaskDelete}
+        isModalOpen={isTaskOpen}
+        setIsModalOpen={setIsTaskOpen}
+      />}
+    </div>
+  );
 };
 
 export default TaskList;

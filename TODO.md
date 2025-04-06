@@ -108,10 +108,8 @@
   - [x] se auto-completato, nella visualizzazione link per andare su google maps (campo aggiuntivo nel model?)
 
 ## HeroUI
-- Accordion per i task ???
 - Avatar per la foto profilo
 - Card per la dashboard
-- Checkbox lineThrough per completamento di task
 - Toast con timer in caso di non-authenticated
 - Dropdown per le settings delle notes
 - Drawer oppure Navbar per menu
@@ -122,4 +120,3 @@
 - ScrollShadow in anteprima nota
 - Spinner nei caricamenti ???
 - Switch per le notifiche
-- Tabs per suddividere lista di task completati e non?

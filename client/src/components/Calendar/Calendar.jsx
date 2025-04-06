@@ -137,29 +137,18 @@ function Calendar() {
   }
 
   function mapTask(task) {
+    const notDoneColor = () => time > new Date(task.deadline) ? '#ff8080' : '#ffff80'
     return {
       id: task._id,
       title: task.title,
       start: task.deadline,
-      allDay: false,
-      // TODO: change colors accordingly
-      color: task.isDone ? 'green' : (getUrgency(task) > 0 ? 'red' : 'yellow'),
+      allDay: true,
+      color: task.isDone ? '#b3ffb3' : notDoneColor(),
       textColor: 'black',
       eventType: 'task',
-      urgencyLevel: getUrgency(task),
       isDone: task.isDone
     }
   }
-
-  // Funzione per calcolare il livello di urgenza di un task
-  const getUrgency = (task) => {
-    // TODO: check urgency levels
-    const { deadline, isDone } = task
-    if (isDone || !deadline) {
-      return 0;
-    }
-    return Math.max(0, Math.floor((time - deadline) / (1000 * 60 * 60 * 24)));
-  };
 
   function handleEventSave(event) {
     setIsEventOpen(false)
@@ -218,85 +207,41 @@ function Calendar() {
     }
   }
 
+  // TODO: check function
   async function handleDrop(info) {
     const { event } = info;
-    if (event.extendedProps.eventType === 'event') {
-      // Gestisci il trascinamento degli eventi
-      await handleEventDrop(event);
-    } else {
+    if (event.extendedProps.eventType === 'task') {
       // Gestisci il trascinamento dei task
-      await handleTaskDrop(event);
+      const newEndDate = event.start; // Data di fine corretta
+      const taskId = event.id
+
+      try {
+        // Aggiorna la data dell'evento nel backend
+        const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({ deadline: newEndDate ? newEndDate.toISOString() : null })
+        });
+
+        if (response.ok) {
+          // Aggiorna lo stato locale
+          setCalendarTasks(prevTasks =>
+            prevTasks.map(task =>
+              task.id === taskId ? { ...task, start: newEndDate } : task
+            )
+          );
+        } else {
+          throw new Error()
+        }
+      } catch (error) {
+        showError('handleTaskDrop error')
+        event.revert()
+      }
     }
   }
-
-  // TODO: check function forse togliere
-  //Chiamata PUT per eventDrop quando trascino l'evento, vado a prendere le info dell'evento selezionato e lo modifico con la data rilasciata
-  const handleEventDrop = async (event) => {
-    const newStartDate = event.start
-    const newEndDate = event.end ? new Date(event.end) : null; // Data di fine corretta
-    const eventId = event.id
-
-    console.log("Nuova data di inizio (locale):", newStartDate.toLocaleString('it-IT'));
-    console.log("Nuova data di fine (locale):", newEndDate ? newEndDate.toLocaleString('it-IT') : "Nessuna data di fine");
-
-    try {
-      // Aggiorna la data dell'evento nel backend
-      const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ start: newStartDate.toISOString(), end: newEndDate ? newEndDate.toISOString() : null })
-      });
-
-      if (response.ok) {
-        // Aggiorna lo stato locale
-        setCalendarEvents(prevEvents =>
-          prevEvents.map(ev =>
-            ev.id === eventId ? { ...ev, start: newStartDate, end: newEndDate } : ev
-          )
-        );
-      } else {
-        throw new Error()
-      }
-    } catch (error) {
-      showError('handleEventDrop error')
-      event.revert()
-    }
-  };
-
-  // TODO: check function
-  const handleTaskDrop = async (task) => {
-    const newEndDate = task.start; // Data di fine corretta
-    const taskId = task.id
-
-    try {
-      // Aggiorna la data dell'evento nel backend
-      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ deadline: newEndDate ? newEndDate.toISOString() : null })
-      });
-
-      if (response.ok) {
-        // Aggiorna lo stato locale
-        setCalendarTasks(prevTasks =>
-          prevTasks.map(task =>
-            task.id === taskId ? { ...task, start: newEndDate } : task
-          )
-        );
-      } else {
-        throw new Error()
-      }
-    } catch (error) {
-      showError('handleTaskDrop error')
-      task.revert()
-    }
-  };
 
   return (
     <div>
@@ -327,7 +272,7 @@ function Calendar() {
         // TODO: add skeleton?
         <p>Skeleton</p>
       ) : (
-        // TODO: visualizzazione di eventi su più giorni non include la end date (forse problema con il salvataggio)
+        // TODO: visualizzazione di eventi allDay su più giorni non include la end date (forse problema con il salvataggio)
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
           headerToolbar={{
@@ -352,8 +297,8 @@ function Calendar() {
             ...calendarEvents,
             ...calendarTasks
           ]}
-          eventClick={(info) => handleClick(info)}
-          eventDrop={async (info) => await handleDrop(info)}
+          eventClick={handleClick}
+          eventDrop={handleDrop}
         />
       )}
       {isEventOpen && <Event

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTime } from '../../contexts/TimeContext';
 import TitleDescription from './FormFields/TitleDescription';
 import Reminder from './FormFields/Reminder';
-import { getDatetimeString } from '../../utils/dates';
+import { getDateString } from '../../utils/dates';
 import { calcReminder, remindersToString } from '../../utils/reminders';
 import { showError, showSuccess } from '../../utils/toasts';
 
@@ -17,7 +17,7 @@ import {
   ButtonGroup,
   Button
 } from "@heroui/react";
-import { parseDateTime } from "@internationalized/date";
+import { parseDate } from "@internationalized/date";
 
 function Task({
   taskId, user, onSaveTask, onUpdateTask, onDeleteTask, isModalOpen, setIsModalOpen
@@ -237,8 +237,7 @@ function Task({
               description='Entro quando deve essere completata'
               showMonthAndYearPickers
               firstDayOfWeek='mon'
-              hourCycle={24}
-              value={parseDateTime(getDatetimeString(deadline))}
+              value={parseDate(getDateString(deadline))}
               onChange={(d) => setDeadline(d.toDate())}
               isRequired
               isReadOnly={!isEditing}
