@@ -260,7 +260,12 @@ function Event({
   }
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      draggable
+      tabIndex={2}
+    >
       <ModalContent>
         <ModalHeader>Evento</ModalHeader>
         <ModalBody>

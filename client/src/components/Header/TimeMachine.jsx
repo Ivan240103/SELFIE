@@ -1,75 +1,96 @@
 import React, { useState } from "react"
-import Modal from 'react-modal'
 import { useTime } from "../../contexts/TimeContext"
+import { useAuth } from "../../contexts/AuthenticationContext"
 import { getDatetimeString } from '../../utils/dates'
 
-import '../../css/TimeMachine.css'
-
-// per accessibilità, scritto nella documentazione
-Modal.setAppElement('#root');
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  Form,
+  DatePicker,
+  Button
+} from '@heroui/react'
+import { parseDateTime } from "@internationalized/date"
 
 function TimeMachine() {
   const { time, updateTime, resetTime } = useTime()
-  const [modalIsOpen, setModalIsOpen] = useState(false)
+  const { isAuthenticated } = useAuth()
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTime, setSelectedTime] = useState(time)
 
   /**
    * Sposta il tempo in avanti o indietro
    */
-  const backToTheFuture = async (e) => {
+  async function backToTheFuture(e) {
     e.preventDefault()
     await updateTime(selectedTime)
-    setModalIsOpen(false)
+    setIsModalOpen(false)
   }
 
   /**
    * Riporta il tempo al presente
    */
-  const reset = async () => {
+  async function reset() {
     await resetTime()
-    setModalIsOpen(false)
+    setIsModalOpen(false)
   }
 
   return(
-    <div className="time-container">
-      <button
-        type="button"
-        className="time-btn"
-        onClick={() => setModalIsOpen(true)}
+    <div>
+      <Button
+        color="default"
+        variant="light"
+        onPress={() => {
+          setSelectedTime(time)
+          setIsModalOpen(true)
+        }}
+        isDisabled={!isAuthenticated}
       >
         {time.toLocaleString('it-IT').slice(0, -3).replace(', ', ' - ')}
-      </button>
-
+      </Button>
       <Modal
-        isOpen={modalIsOpen}
-        onAfterOpen={() => setSelectedTime(time)}
-        onRequestClose={() => setModalIsOpen(false)}
-        className='time-modal'
-        overlayClassName='time-overlay'
+        isOpen={isModalOpen}
+        backdrop="blur"
+        onClose={() => setIsModalOpen(false)}
+        tabIndex={2}
       >
-        <h2>Time Machine</h2>
-        <form
-          onSubmit={(e) => backToTheFuture(e)}
-        >
-          <div>
-            <label htmlFor="picker">
-              Seleziona data e ora
-            </label>
-            <br />
-            <input
-              type="datetime-local"
-              name="picker"
-              value={getDatetimeString(selectedTime)}
-              onChange={(e) => setSelectedTime(new Date(e.target.value))} />
-          </div>
-          <button
-            type="button"
-            className="time-reset"
-            onClick={reset}>Resetta</button>
-          <button
-            type="submit"
-            className="time-submit">Viaggia</button>
-        </form>
+        <ModalContent>
+          <ModalHeader>Time Machine</ModalHeader>
+          <ModalBody>
+            <Form
+              className="flex flex-col items-center"
+              validationBehavior="native"
+              onSubmit={backToTheFuture}
+            >
+              <DatePicker
+                label='Seleziona data e ora'
+                showMonthAndYearPickers
+                firstDayOfWeek='mon'
+                hourCycle={24}
+                value={parseDateTime(getDatetimeString(selectedTime))}
+                onChange={(d) => setSelectedTime(d.toDate())}
+              />
+              <div>
+                <Button
+                  color="primary"
+                  variant="flat"
+                  onPress={() => reset()}
+                  >
+                  Resetta
+                </Button>
+                <Button
+                  type="submit"
+                  color="primary"
+                  variant="solid"
+                >
+                  Viaggia
+                </Button>
+              </div>
+            </Form>
+          </ModalBody>
+        </ModalContent>
       </Modal>
     </div>
   )
