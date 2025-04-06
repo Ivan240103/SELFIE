@@ -148,7 +148,6 @@ function Task({
   }
 
   const handleDelete = async () => {
-    setIsEditing(false)
     try {
       const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
         method: 'DELETE',

@@ -1,20 +1,23 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Importa useNavigate;
-import { Link } from "react-router-dom"; //Importa il linking per la registrazione dell'utente
+import { useNavigate } from "react-router-dom";
+import axios from 'axios'
 import CryptoJS from 'crypto-js'
 import { useAuth } from "../../contexts/AuthenticationContext";
-import axios from 'axios'
-import eyeIcon from "../../images/eye.png";
-import hideIcon from "../../images/hide.png";
-import "../../css/Access.css";
+import { showError } from '../../utils/toasts'
+import Header from "../Header/Header";
+
+import {
+  Form,
+  Input,
+  Button,
+  Link
+} from '@heroui/react'
 
 function Access() {
+  const navigate = useNavigate();
+  const { login } = useAuth()
   const [usr, setUsr] = useState("");
   const [psw, setPsw] = useState("");
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate(); // Inizializza useNavigate
-  const { login } = useAuth()
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -29,71 +32,42 @@ function Access() {
       login(response.data);
       navigate("/");
     } catch (error) {
-      setError("Login failed: " + error.response?.data || 'no response');
-    }
-  }
-
-  function showPwd() {
-    var input = document.getElementById('psw');
-    if (input.type === "password") {
-      input.type = "text";
-    } else {
-      input.type = "password";
+      showError("Login failed");
     }
   }
 
   return (
-    <div className="corpo">
-      <div className="log">
-        <h1>Login</h1>
-        <p>{error}</p>
-        <form onSubmit={handleLogin}>
-          <label
-            htmlFor="username"
-            id="username"
-          >
-            <b>Username</b>
-          </label>
-          <input
-            id="usr"
-            type="text"
-            placeholder="Enter Username"
-            value={usr}
-            onChange={(e) => setUsr(e.target.value)}
-            required />
-          <label
-            htmlFor="password"
-            id="password"
-          >
-            <b>Password</b>
-          </label>
-          <div className="password-container">
-            <input
-              id="psw"
-              type={showPassword ? "text" : "password"}
-              placeholder="Enter Password"
-              value={psw}
-              onChange={(e) => setPsw(e.target.value)}
-              required />
-            <button
-              type="button"
-              className="toggle-password"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              <img
-                src={showPassword ? hideIcon : eyeIcon}
-                alt={showPassword ? "Nascondi password" : "Mostra password"}
-              />
-            </button>
-          </div>
-          <button className="btt" type="submit">Login</button>
-        </form>
-        {/*Per registrare un nuovo utente*/}
-        <p> Not registered yet? <Link to="/register">Click here</Link> </p>
-      </div>
+    <div>
+      <Header />
+      <h2>Login</h2>
+      <Form
+        className="flex flex-col items-center"
+        validationBehavior="native"
+        onSubmit={handleLogin}
+      >
+        <Input
+          type="text"
+          label='Username'
+          value={usr}
+          onChange={(e) => setUsr(e.target.value)}
+          isRequired
+        />
+        <Input
+          type="password"
+          label='Password'
+          value={psw}
+          onChange={(e) => setPsw(e.target.value)}
+          isRequired
+        />
+        <p>
+          Non hai un profilo? <Link href="/register" color="primary" underline="focus">Registrati</Link>
+        </p>
+        <Button type="submit" color="primary" variant="solid">
+          Accedi
+        </Button>
+      </Form>
     </div>
   )
-
 }
 
 export default Access;

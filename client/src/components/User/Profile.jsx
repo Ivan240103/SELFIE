@@ -3,91 +3,85 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import CryptoJS from 'crypto-js'
 import { useAuth } from '../../contexts/AuthenticationContext'
+import { getDateString } from '../../utils/dates'
+import { showError, showSuccess } from '../../utils/toasts'
 import Header from '../Header/Header'
 
-import { getDateString } from '../../utils/dates'
-
-import '../../css/Profile.css'
+import {
+  Avatar,
+  Form,
+  Input,
+  DatePicker,
+  Button
+} from '@heroui/react'
+import { parseDate } from '@internationalized/date'
 
 function Profile() {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
-
   const [profile, setProfile] = useState({})
-  // modalità di modifica del form
-  const [editMode, setEditMode] = useState(false)
-  // stati dei valori nel form
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')  // vecchia psw per validazione
   const [modifiedPsw, setModifiedPsw] = useState('12345678')  // nuova psw | mock
   const [name, setName] = useState('')
   const [surname, setSurname] = useState('')
-  const [birthday, setBirthday] = useState('')  // di tipo String
+  const [birthday, setBirthday] = useState(new Date())
   const [pic, setPic] = useState(null)
   const [google, setGoogle] = useState(false)
-
-  const [error, setError] = useState('')
-
+  const [isEditing, setIsEditing] = useState(false)
+  
   // recupera i dati del profilo dal backend
   useEffect(() => {
     const fetchProfile = async () => {
-      try {
-        const profile = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        setProfile(profile.data)
-        setError('')
-      } catch (err) {
-        setError(err.response?.data || 'Errore fetchProfile')
+      if (isAuthenticated) { 
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setProfile(response.data)
+        } catch (err) {
+          showError('fetchProfile error')
+          setProfile({})
+        }
+      } else {
+        setProfile({})
       }
     }
 
     fetchProfile()
-  }, [])
+  }, [isAuthenticated])
 
-  // sincronizza gli stati
+  // popola i campi
   useEffect(() => {
-    setUsername(profile.username || '')
-    setEmail(profile.email || '')
-    setPassword('')
-    setModifiedPsw('12345678')
-    setName(profile.name || '')
-    setSurname(profile.surname || '')
-    setBirthday(profile.birthday ? getDateString(new Date(profile.birthday)) : '')
-    setGoogle(profile.google ? true : false)
+    const populate = () => {
+      setUsername(profile.username || '???')
+      setEmail(profile.email || '???')
+      setPassword('')
+      setModifiedPsw('12345678')
+      setName(profile.name ?? '')
+      setSurname(profile.surname ?? '')
+      setBirthday(profile.birthday ? new Date(profile.birthday) : null)
+      setGoogle(!!profile.google ?? false)
+    }
+
+    populate()
   }, [profile])
 
   /**
    * Reimposta i valori dei campi
    */
-  const resetFields = () => {
-    setUsername(profile.username)
-    setEmail(profile.email)
-    setPassword('')
-    setModifiedPsw('12345678')
-    setName(profile.name)
-    setSurname(profile.surname)
-    setBirthday(profile.birthday ? getDateString(new Date(profile.birthday)) : '')
-    setGoogle(profile.google ? true : false)
+  function handleReset() {
+    setIsEditing(false)
+    setProfile(JSON.parse(JSON.stringify(profile)))
   }
 
   /**
    * Entrare in modalità di modifica
    */
-  const enterEdit = () => {
-    document.getElementById('profile-toplevel').classList.add('profile-editmode')
+  function enterEdit() {
     setModifiedPsw('')
-    setEditMode(!editMode)
-  }
-
-  /**
-   * Annullare le modifiche ai dati
-   */
-  const cancelEdit = () => {
-    document.getElementById('profile-toplevel').classList.remove('profile-editmode')
-    setEditMode(!editMode)
-    resetFields()
+    setIsEditing(true)
   }
 
   /**
@@ -95,15 +89,18 @@ function Profile() {
    * 
    * @param e evento di submit
    */
-  const confirmEdit = async (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault()
-    document.getElementById('profile-toplevel').classList.remove('profile-editmode')
-    setEditMode(!editMode)
+    setIsEditing(false)
     // formData per poter inviare l'immagine
     const formData = new FormData()
     formData.append('email', email)
-    if (password !== '') formData.append('oldPsw', CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex))
-    if (modifiedPsw !== '') formData.append('newPsw', CryptoJS.SHA1(modifiedPsw).toString(CryptoJS.enc.Hex))
+    if (password !== '') {
+      formData.append('oldPsw', CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex))
+    }
+    if (modifiedPsw !== '') {
+      formData.append('newPsw', CryptoJS.SHA1(modifiedPsw).toString(CryptoJS.enc.Hex))
+    }
     formData.append('name', name)
     formData.append('surname', surname)
     formData.append('birthday', birthday)
@@ -114,28 +111,25 @@ function Profile() {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
       setProfile(response.data)
-      setError('')
+      showSuccess('Profilo aggiornato')
     } catch (err) {
-      setError(err.response?.data || 'Errore PUT')
-      resetFields()
+      showError("Errore nell'aggiornamento")
+      handleReset()
     }
   }
 
   /**
    * Cancellare il profilo, previa conferma
    */
-  const deleteProfile = async () => {
-    const proceed = window.confirm('Sei assolutamente sicuro di voler eliminare il profilo?')
-    if (proceed === true) {
-      try {
-        await axios.delete(`${process.env.REACT_APP_API}/api/users/`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        setError('')
-        navigate('/login')
-      } catch (err) {
-        setError(err.response?.data || 'Errore DELETE')
-      }
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`${process.env.REACT_APP_API}/api/users/`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      })
+      showSuccess('Profilo eliminato')
+      navigate('/login')
+    } catch (err) {
+      showError("Errore nell'eliminazione")
     }
   }
 
@@ -144,29 +138,34 @@ function Profile() {
       await axios.put(`${process.env.REACT_APP_API}/api/users/google`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
-      setError('')
-      setGoogle(true)
+      setProfile(prev => ({ ...prev, google: true }))
+      showSuccess('Profilo Google associato')
     } catch (err) {
-      setError(err.response?.data || 'Errore Google sync')
+      showError('Profilo Google non associato')
     }
   }
 
+  /* TODO: modale const proceed = window.confirm('Sei assolutamente sicuro di voler eliminare il profilo?') */
+
   return (
     <div>
-      {isAuthenticated && <>
-        <Header />
-        <p className='error'>{error}</p>
-        <div className='profile-container' id='profile-toplevel'>
-          <h2 className='profile-header'>Ciao, {username}</h2>
-          <div className='profile-pic-container'>
-            <img
-              src={`${process.env.REACT_APP_API}/pics/${profile.picName}`}
-              className='profile-pic'
-              hidden={editMode}
-              alt='Profile' />
-          </div>
-          <form className='profile-form' onSubmit={confirmEdit}>
-            <div className='profile-form-group' hidden={!editMode}>
+      <Header />
+      <div>
+        <h2>Ciao, {username}</h2>
+        <Form
+          className="flex flex-col items-center"
+          validationBehavior="native"
+          onSubmit={handleUpdate}
+        >
+          {!isEditing && <Avatar
+            src={`${process.env.REACT_APP_API}/pics/${profile.picName}`}
+            className='w-32 h-32'
+            alt='Profile'
+          />}
+        </Form>
+            {/* TODO: ripartire da qui (scelta della pic) */}
+          <form className='profile-form' onSubmit={handleUpdate}>
+            <div className='profile-form-group' hidden={!isEditing}>
               <label className='profile-label' htmlFor='pic'>
                 Carica una foto profilo (tip: quadrata!)
               </label>
@@ -187,7 +186,7 @@ function Profile() {
                 name='email'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                readOnly={!editMode} />
+                readOnly={!isEditing} />
             </div>
             <div className='profile-form-group'>
               <label className='profile-label' htmlFor='name'>
@@ -199,7 +198,7 @@ function Profile() {
                 name='name'
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                readOnly={!editMode} />
+                readOnly={!isEditing} />
             </div>
             <div className='profile-form-group'>
               <label className='profile-label' htmlFor='surname'>
@@ -211,7 +210,7 @@ function Profile() {
                 name='surname'
                 value={surname}
                 onChange={(e) => setSurname(e.target.value)}
-                readOnly={!editMode} />
+                readOnly={!isEditing} />
             </div>
             <div className='profile-form-group'>
               <label className='profile-label' htmlFor='bday'>
@@ -223,9 +222,9 @@ function Profile() {
                 name='bday'
                 value={birthday}
                 onChange={(e) => setBirthday(e.target.value)}
-                readOnly={!editMode} />
+                readOnly={!isEditing} />
             </div>
-            <div className='profile-form-group' hidden={!editMode}>
+            <div className='profile-form-group' hidden={!isEditing}>
               <label className='profile-label' htmlFor="oldPsw">
                 Vecchia password
               </label>
@@ -240,7 +239,7 @@ function Profile() {
             </div>
             <div className='profile-form-group'>
               <label className='profile-label' htmlFor="newPsw">
-                {editMode ? 'Nuova password' : 'Password'}
+                {isEditing ? 'Nuova password' : 'Password'}
               </label>
               <input
                 type="password"
@@ -250,21 +249,21 @@ function Profile() {
                 placeholder='Lascia vuoto per non modificarla'
                 value={modifiedPsw}
                 onChange={(e) => setModifiedPsw(e.target.value)}
-                readOnly={!editMode}
+                readOnly={!isEditing}
                 required={password} />
             </div>
             <button
               type='button'
               className='profile-cancel-btn'
-              onClick={cancelEdit}
-              hidden={!editMode}>Annulla</button>
+              onClick={handleReset}
+              hidden={!isEditing}>Annulla</button>
             <button
               type='submit'
               className='profile-submit-btn'
-              hidden={!editMode}>Conferma</button>
+              hidden={!isEditing}>Conferma</button>
           </form>
           <div className='profile-button-group'>
-            {!editMode && <>
+            {!isEditing && <>
               {google ? (
                 <p>Google Calendar sincronizzato</p>
               ) : (
@@ -278,15 +277,14 @@ function Profile() {
               type='button'
               className='profile-edit-btn'
               onClick={enterEdit}
-              hidden={editMode}>Modifica</button>
+              hidden={isEditing}>Modifica</button>
             <button
               type='button'
               className='profile-delete-btn'
-              onClick={deleteProfile}
-              hidden={editMode}>Elimina profilo</button>
+              onClick={handleDelete}
+              hidden={isEditing}>Elimina profilo</button>
           </div>
         </div>
-      </>}
     </div>
   )
 }
