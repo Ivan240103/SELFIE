@@ -144,6 +144,7 @@ function Task({
       onUpdateTask(result);
     } catch (error) {
       showError("Errore nell'aggiornamento")
+      handleReset()
     }
   }
 

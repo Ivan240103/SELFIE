@@ -8,17 +8,39 @@ import { showError, showSuccess } from '../../utils/toasts'
 import Header from '../Header/Header'
 
 import {
+  Alert,
   Avatar,
   Form,
   Input,
   DatePicker,
+  ButtonGroup,
   Button
 } from '@heroui/react'
 import { parseDate } from '@internationalized/date'
 
+function GoogleButton({ isSync, onClick }) {
+  return (
+    <Button
+      className={`flex items-center justify-center gap-3 bg-white ${isSync ? 'disabled:opacity-100' : 'border border-gray-300 hover:bg-gray-100'}`}
+      onPress={onClick}
+      isDisabled={isSync}
+    >
+      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+        <g fill="none" fillRule="evenodd">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4" />
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853" />
+          <path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05" />
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335" />
+        </g>
+      </svg>
+      <span>{isSync ? 'Google Calendar sincronizzato' : 'Sincronizza con Google Calendar'}</span>
+    </Button>
+  );
+};
+
 function Profile() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, logout } = useAuth()
   const [profile, setProfile] = useState({})
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -26,10 +48,11 @@ function Profile() {
   const [modifiedPsw, setModifiedPsw] = useState('12345678')  // nuova psw | mock
   const [name, setName] = useState('')
   const [surname, setSurname] = useState('')
-  const [birthday, setBirthday] = useState(new Date())
+  const [birthday, setBirthday] = useState(null)
   const [pic, setPic] = useState(null)
   const [google, setGoogle] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [isAlertVisible, setIsAlertVisible] = useState(false)
   
   // recupera i dati del profilo dal backend
   useEffect(() => {
@@ -126,8 +149,9 @@ function Profile() {
       await axios.delete(`${process.env.REACT_APP_API}/api/users/`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
+      logout()
       showSuccess('Profilo eliminato')
-      navigate('/login')
+      navigate('/')
     } catch (err) {
       showError("Errore nell'eliminazione")
     }
@@ -145,146 +169,114 @@ function Profile() {
     }
   }
 
-  /* TODO: modale const proceed = window.confirm('Sei assolutamente sicuro di voler eliminare il profilo?') */
-
   return (
     <div>
       <Header />
+      {isAlertVisible && <Alert
+        className='my-3 fade-in'
+        title={<b>Stai eliminando il tuo profilo</b>}
+        description="Se procedi non sarai più in grado di recuperarlo"
+        color="danger"
+        variant="faded"
+        endContent={
+          <>
+            <Button color="danger" variant="light" onPress={() => setIsAlertVisible(false)}>
+              Annulla
+            </Button>
+            <Button color="danger" variant="flat" onPress={handleDelete}>
+              Elimina
+            </Button>
+          </>
+        }
+      />}
       <div>
         <h2>Ciao, {username}</h2>
+        {!isEditing && <Avatar
+          src={`${process.env.REACT_APP_API}/pics/${profile.picName ?? 'default.png'}`}
+          className='w-32 h-32'
+          alt='Profile'
+          isBordered
+        />}
         <Form
           className="flex flex-col items-center"
           validationBehavior="native"
           onSubmit={handleUpdate}
         >
-          {!isEditing && <Avatar
-            src={`${process.env.REACT_APP_API}/pics/${profile.picName}`}
-            className='w-32 h-32'
-            alt='Profile'
+          {isEditing && <Input
+            type='file'
+            label='Carica una foto profilo'
+            description='Quadrata è meglio!'
+            accept='.png,.jpg,.jpeg'
+            onChange={(e) => setPic(e.target.files[0])}
           />}
+          <Input
+            type="email"
+            label='Email'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            isReadOnly={!isEditing}
+          />
+          <Input
+            type="text"
+            label='Nome'
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            isReadOnly={!isEditing}
+          />
+          <Input
+            type="text"
+            label='Cognome'
+            value={surname}
+            onChange={(e) => setSurname(e.target.value)}
+            isReadOnly={!isEditing}
+          />
+          <DatePicker
+            label='Data di nascita'
+            showMonthAndYearPickers
+            firstDayOfWeek='mon'
+            value={birthday ? parseDate(getDateString(birthday)) : null}
+            onChange={(d) => setBirthday(d.toDate())}
+            isReadOnly={!isEditing}
+          />
+          {isEditing && <Input
+            type="password"
+            label='Vecchia password'
+            description='Lascia vuoto per non modificarla'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />}
+          <Input
+            type="password"
+            label={isEditing ? 'Nuova password' : 'Password'}
+            description={isEditing ? 'Lascia vuoto per non modificarla' : ''}
+            value={modifiedPsw}
+            onChange={(e) => setModifiedPsw(e.target.value)}
+            isReadOnly={!isEditing}
+            isRequired={!!password}
+          />
+          {isEditing && (
+            <ButtonGroup>
+              <Button type='button' color='primary' variant='flat' onPress={handleReset}>
+                Annulla modifiche
+              </Button>
+              <Button type='submit' color='primary' variant='solid'>
+                Aggiorna profilo
+              </Button>
+            </ButtonGroup>
+          )}
         </Form>
-            {/* TODO: ripartire da qui (scelta della pic) */}
-          <form className='profile-form' onSubmit={handleUpdate}>
-            <div className='profile-form-group' hidden={!isEditing}>
-              <label className='profile-label' htmlFor='pic'>
-                Carica una foto profilo (tip: quadrata!)
-              </label>
-              <input 
-                type='file'
-                className='profile-input'
-                name='pic'
-                accept='.png,.jpg,.jpeg'
-                onChange={(e) => setPic(e.target.files[0])} />
-            </div>
-            <div className='profile-form-group'>
-              <label className='profile-label' htmlFor='email'>
-                Email
-              </label>
-              <input
-                type='email'
-                className='profile-input'
-                name='email'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                readOnly={!isEditing} />
-            </div>
-            <div className='profile-form-group'>
-              <label className='profile-label' htmlFor='name'>
-                Nome
-              </label>
-              <input
-                type='text'
-                className='profile-input'
-                name='name'
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                readOnly={!isEditing} />
-            </div>
-            <div className='profile-form-group'>
-              <label className='profile-label' htmlFor='surname'>
-                Cognome
-              </label>
-              <input
-                type='text'
-                className='profile-input'
-                name='surname'
-                value={surname}
-                onChange={(e) => setSurname(e.target.value)}
-                readOnly={!isEditing} />
-            </div>
-            <div className='profile-form-group'>
-              <label className='profile-label' htmlFor='bday'>
-                Data di nascita
-              </label>
-              <input
-                type='date'
-                className='profile-input'
-                name='bday'
-                value={birthday}
-                onChange={(e) => setBirthday(e.target.value)}
-                readOnly={!isEditing} />
-            </div>
-            <div className='profile-form-group' hidden={!isEditing}>
-              <label className='profile-label' htmlFor="oldPsw">
-                Vecchia password
-              </label>
-              <input
-                type="password"
-                className='profile-input'
-                id='profile-psw'
-                name="oldPsw"
-                placeholder='Lascia vuoto per non modificarla'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)} />
-            </div>
-            <div className='profile-form-group'>
-              <label className='profile-label' htmlFor="newPsw">
-                {isEditing ? 'Nuova password' : 'Password'}
-              </label>
-              <input
-                type="password"
-                className='profile-input'
-                id='profile-psw'
-                name="newPsw"
-                placeholder='Lascia vuoto per non modificarla'
-                value={modifiedPsw}
-                onChange={(e) => setModifiedPsw(e.target.value)}
-                readOnly={!isEditing}
-                required={password} />
-            </div>
-            <button
-              type='button'
-              className='profile-cancel-btn'
-              onClick={handleReset}
-              hidden={!isEditing}>Annulla</button>
-            <button
-              type='submit'
-              className='profile-submit-btn'
-              hidden={!isEditing}>Conferma</button>
-          </form>
-          <div className='profile-button-group'>
-            {!isEditing && <>
-              {google ? (
-                <p>Google Calendar sincronizzato</p>
-              ) : (
-                <button
-                  type='button'
-                  className='profile-google'
-                  onClick={syncGoogle}>Sincronizza con Google</button>
-              )}
-            </>}
-            <button
-              type='button'
-              className='profile-edit-btn'
-              onClick={enterEdit}
-              hidden={isEditing}>Modifica</button>
-            <button
-              type='button'
-              className='profile-delete-btn'
-              onClick={handleDelete}
-              hidden={isEditing}>Elimina profilo</button>
-          </div>
-        </div>
+        {!isEditing && <div>
+          <GoogleButton isSync={google} onClick={syncGoogle} />
+          <ButtonGroup>
+            <Button color='danger' variant='flat' onPress={() => setIsAlertVisible(true)}>
+              Elimina profilo
+            </Button>
+            <Button color='primary' variant='solid' onPress={enterEdit}>
+              Modifica profilo
+            </Button>
+          </ButtonGroup>
+        </div>}
+      </div>
     </div>
   )
 }
