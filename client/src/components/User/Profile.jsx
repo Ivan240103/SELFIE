@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthenticationContext'
 import { getDateString } from '../../utils/dates'
 import { showError, showSuccess } from '../../utils/toasts'
 import Header from '../Header/Header'
+import Password from './Password'
 
 import {
   Alert,
@@ -192,7 +193,7 @@ function Profile() {
       <div>
         <h2>Ciao, {username}</h2>
         {!isEditing && <Avatar
-          src={`${process.env.REACT_APP_API}/pics/${profile.picName ?? 'default.png'}`}
+          src={`${process.env.REACT_APP_API}/pics/${profile.picName || 'default.png'}`}
           className='w-32 h-32'
           alt='Profile'
           isBordered
@@ -238,19 +239,17 @@ function Profile() {
             onChange={(d) => setBirthday(d.toDate())}
             isReadOnly={!isEditing}
           />
-          {isEditing && <Input
-            type="password"
+          {isEditing && <Password
             label='Vecchia password'
             description='Lascia vuoto per non modificarla'
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            setValue={setPassword}
           />}
-          <Input
-            type="password"
+          <Password
             label={isEditing ? 'Nuova password' : 'Password'}
             description={isEditing ? 'Lascia vuoto per non modificarla' : ''}
             value={modifiedPsw}
-            onChange={(e) => setModifiedPsw(e.target.value)}
+            setValue={setModifiedPsw}
             isReadOnly={!isEditing}
             isRequired={!!password}
           />

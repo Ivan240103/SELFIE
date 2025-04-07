@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import CryptoJS from 'crypto-js'
 import { showError, showSuccess } from '../../utils/toasts'
 import Header from "../Header/Header";
+import Password from "./Password";
 
 import { Form, Input, Button } from '@heroui/react'
 
@@ -58,12 +59,10 @@ function Registration() {
           onChange={(e) => setUsr(e.target.value)}
           isRequired
         />
-        <Input
-          type="password"
-          label='Password'
+        <Password
           value={psw}
-          onChange={(e) => setPsw(e.target.value)}
-          isRequired
+          setValue={setPsw}
+          isRequired={true}
         />
         <Input
           type="text"

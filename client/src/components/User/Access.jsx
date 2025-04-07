@@ -5,6 +5,7 @@ import CryptoJS from 'crypto-js'
 import { useAuth } from "../../contexts/AuthenticationContext";
 import { showError } from '../../utils/toasts'
 import Header from "../Header/Header";
+import Password from "./Password";
 
 import {
   Form,
@@ -52,12 +53,10 @@ function Access() {
           onChange={(e) => setUsr(e.target.value)}
           isRequired
         />
-        <Input
-          type="password"
-          label='Password'
+        <Password
           value={psw}
-          onChange={(e) => setPsw(e.target.value)}
-          isRequired
+          setValue={setPsw}
+          isRequired={true}
         />
         <p>
           Non hai un profilo? <Link href="/register" color="primary" underline="focus">Registrati</Link>
