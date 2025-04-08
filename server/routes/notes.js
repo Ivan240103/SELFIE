@@ -24,7 +24,7 @@ router.post('/', auth, async (req, res) => {
 
   try {
     await note.save()
-    return res.send('ok')
+    return res.json(note)
   } catch (err) {
     return res.status(500).send('Error while creating note')
   }
@@ -49,19 +49,6 @@ router.get('/last', auth, async (req, res) => {
     return res.json(note[0])
   } catch (err) {
     return res.status(500).send('Error while getting last modified note')
-  }
-})
-
-// ottenere una nota specifica
-router.get('/:id', auth, async (req, res) => {
-  try {
-    const note = await Note.findById(req.params.id)
-    if (!note) {
-      return res.status(404).send(`No note found with id ${req.params.id}`)
-    }
-    return res.json(note)
-  } catch (err) {
-    return res.status(500).send('Error while getting specific note')
   }
 })
 
