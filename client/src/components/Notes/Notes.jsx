@@ -46,7 +46,18 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy }) {
         onDuplicate(note)
         break
       case 'down':
-        // TODO: download del file .md
+        // genera un "file virtuale" temporaneo
+        const blob = new Blob([note.text], { type: "text/markdown" })
+        // crea un url ed un link per il download
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement("a")
+        link.href = url
+        link.download = `${note.title}.md`
+        document.body.appendChild(link)
+        link.click()
+        // dopo il download elimina entrambi
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
         break
       case 'del':
         await onDelete(note)
@@ -90,6 +101,7 @@ function Notes() {
   const { isAuthenticated } = useAuth();
   const [notes, setNotes] = useState([]);
   const [sortCriteria, setSortCriteria] = useState('edit');
+  const [search, setSearch] = useState('');
   const [noteId, setNoteId] = useState('');
   const [title, setTitle] = useState('');
   const [text, setText] = useState('');
@@ -144,6 +156,8 @@ function Notes() {
   }
 
   const clearCategories = (cat) => cat.split('#').map(c => c.trim()).filter(c => c !== '')
+
+  const checkSearch = (n, s) => n.title.includes(s) || n.text.includes(s) || n.categories.includes(s)
 
   // salvare una nuova nota
   async function handleSave() {
@@ -320,7 +334,13 @@ function Notes() {
       ) : (
         <div>
           <div>
-            {/* TODO: lista note: barra di ricerca per mostrare solo le note filtrate da un campo search sui campi */}
+            {/* TODO: icona della lente */}
+            <Input
+              type='text'
+              label='Cerca'
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
             <Select
               label='Ordina per'
               selectedKeys={[sortCriteria]}
@@ -340,7 +360,7 @@ function Notes() {
           </div>
           <div>
             {notes ? (
-              notes.map(n => (
+              notes.filter(n => checkSearch(n, search)).map(n => (
                 <NoteCard
                   key={n._id}
                   note={n}
