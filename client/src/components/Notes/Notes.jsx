@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { marked } from 'marked';
 import { useAuth } from '../../contexts/AuthenticationContext';
+import { getDatetimeString } from '../../utils/dates';
 import { showError, showSuccess } from '../../utils/toasts';
 import Header from '../Header/Header';
 
@@ -29,26 +30,61 @@ marked.setOptions({
 const displayCategories = (cat) => cat.split(',').map(c => `#${c}`).join(' ')
 
 function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy }) {
-  const showTime = (d) => d.toLocaleString('it-IT').slice(0, 16).replace('T', ' alle ');
-  {/* TODO: creare card con dropdown menu, pulsante per esportare in file .md  */}
+  const displayTime = (d) => getDatetimeString(d).replace('T', ' alle ');
+  const creationStr = `Creata il ${displayTime(new Date(note.creation))}`
+  const modificationStr = `ultima modifica il ${displayTime(new Date(note.modification))}`
+
+  async function handleAction(k) {
+    switch (k) {
+      case 'edit':
+        await onEdit(note)
+        break;
+      case 'copy':
+        onCopy(note)
+        break
+      case 'duplicate':
+        onDuplicate(note)
+        break
+      case 'down':
+        // TODO: download del file .md
+        break
+      case 'del':
+        await onDelete(note)
+        break
+      default:
+        showError("Dropdown menu error")
+        break;
+    }
+  }
+
   return (
-    <Card key={note._id}>
+    <Card>
       <CardHeader>
         <h3>{note.title}</h3>
+        <Dropdown>
+          <DropdownTrigger>
+            {/* TODO: icona trigger dei tre puntini */}
+            <Button color='default' variant='light'>
+              ...
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu onAction={handleAction}>
+            <DropdownItem key='edit'>Modifica</DropdownItem>
+            <DropdownItem key='copy'>Copia testo</DropdownItem>
+            <DropdownItem key='duplicate'>Duplica</DropdownItem>
+            <DropdownItem key='down'>Scarica</DropdownItem>
+            <DropdownItem key='del'>Elimina</DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
       </CardHeader>
       <CardBody>
         <span>{note.categories ? displayCategories(note.categories) : 'Nessun tag'}</span>
         <div dangerouslySetInnerHTML={{ __html: marked(note.text) }} />
+        <span>{creationStr}, {modificationStr}</span>
       </CardBody>
     </Card>
   )
 }
-{/* <strong>Creata il:</strong> {showTime(new Date(n.creation))}
-    <strong>Ultima modifica:</strong> {showTime(new Date(n.modification))}
-    <button onClick={() => handleStartEdit(index)}>Modifica</button>
-    <button onClick={() => handleDelete(index)}>Elimina</button>
-    <button onClick={() => handleDuplicate(index)}>Duplica</button>
-    <button onClick={() => handleCopyText(index)}>Copia</button> */}
 
 function Notes() {
   const { isAuthenticated } = useAuth();
@@ -75,7 +111,7 @@ function Notes() {
 
           if (response.ok) {
             const result = await response.json()
-            setSortedNotes(result)
+            setSortedNotes(result, sortCriteria)
           } else {
             throw new Error()
           }
@@ -92,13 +128,13 @@ function Notes() {
   }, [isAuthenticated]);
 
   // Per l'ordinamento delle note
-  function setSortedNotes(notes) {
+  function setSortedNotes(notes, order) {
     const sorted = notes.sort((a, b) => {
-      if (sortCriteria === 'create') {
+      if (order === 'create') {
         return new Date(b.creation) - new Date(a.creation);
-      } else if (sortCriteria === 'length') {
+      } else if (order === 'length') {
         return a.text.length - b.text.length;
-      } else if (sortCriteria === 'title') {
+      } else if (order === 'title') {
         return a.title.replace(/[^a-zA-Z0-9]/g, '').localeCompare(b.title.replace(/[^a-zA-Z0-9]/g, ''));
       } else {
         return new Date(b.modification) - new Date(a.modification);
@@ -135,7 +171,7 @@ function Notes() {
       const result = await response.json()
       showSuccess('Nota salvata')
       setIsEditorOpen(false)
-      setSortedNotes([...notes, result])
+      setSortedNotes([...notes, result], sortCriteria)
     } catch (error) {
       showError('Errore nel salvataggio');
     }
@@ -168,16 +204,16 @@ function Notes() {
       showSuccess('Nota aggiornata')
       setIsEditorOpen(false)
       const updatedNotes = notes.map(n => n._id === result._id ? result : n)
-      setSortedNotes(updatedNotes)
+      setSortedNotes(updatedNotes, sortCriteria)
     } catch (error) {
       showError("Errore nell'aggiornamento");
     }
   }
 
   // eliminare una nota
-  async function handleDelete() {
+  async function handleDelete(note) {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/notes/${noteId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/notes/${note._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -190,7 +226,7 @@ function Notes() {
       // Aggiorna le note dopo l'eliminazione
       showSuccess('Nota eliminata')
       setIsEditorOpen(false)
-      setSortedNotes(notes.filter(n => n._id !== noteId))
+      setSortedNotes(notes.filter(n => n._id !== note._id), sortCriteria)
     } catch (error) {
       showError("Errore nell'eliminazione");
     }
@@ -206,7 +242,7 @@ function Notes() {
   }
 
   // duplicare una nota
-  async function handleDuplicate(note) {
+  function handleDuplicate(note) {
     // Prepara i dati per la nuova nota (copia il titolo, categorie e testo)
     setTitle(`Copia di ${note.title}`);
     setText(note.text);
@@ -229,34 +265,13 @@ function Notes() {
       await handleSave()
     }
   }
-  
-  // incollare il contenuto della nota
-  /* async function handlePasteNoteContent() {
-    try {
-      const pastedContent = await navigator.clipboard.readText();
-      const lines = pastedContent.split('\n').map(line => line.trim());
-  
-      // Rimuove eventuali righe vuote all'inizio
-      const filteredLines = lines.filter(line => line !== '');
-  
-      setTitle(filteredLines[0] || '');
-  
-      // La seconda riga viene considerata come categorie
-      setCategories(filteredLines[1] || '');
-  
-      // Tutte le righe successive alla seconda diventano il contenuto
-      setText(filteredLines.slice(2).join('\n') || '');
-    } catch (error) {
-      alert('Errore durante l\'incolla del contenuto: ' + error.message);
-    }
-  } */
 
   return (
     <div>
       <Header />
       {isEditorOpen ? (
         <div>
-          <h2>{noteId ? 'Crea' : 'Modifica'} nota</h2>
+          <h2>{noteId ? 'Modifica' : 'Crea'} nota</h2>
           <Form
             className="flex flex-col items-center"
             validationBehavior="native"
@@ -309,7 +324,10 @@ function Notes() {
             <Select
               label='Ordina per'
               selectedKeys={[sortCriteria]}
-              onChange={(e) => setSortCriteria(e.target.value)}
+              onChange={(e) => {
+                setSortCriteria(e.target.value)
+                setSortedNotes(notes, e.target.value)
+              }}
             >
               <SelectItem key="edit">Ultima modifica</SelectItem>
               <SelectItem key="title">Titolo</SelectItem>
@@ -324,7 +342,12 @@ function Notes() {
             {notes ? (
               notes.map(n => (
                 <NoteCard
+                  key={n._id}
                   note={n}
+                  onEdit={openEditor}
+                  onCopy={handleCopyText}
+                  onDuplicate={handleDuplicate}
+                  onDelete={handleDelete}
                 />
               ))
             ) : (

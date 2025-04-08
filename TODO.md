@@ -113,7 +113,6 @@
 ## HeroUI
 - Card per la dashboard
 - Toast con timer in caso di non-authenticated
-- Dropdown per le settings delle notes
 - Drawer oppure Navbar per menu
 - ScrollShadow in anteprima nota
 - Spinner o skeleton nei caricamenti ???

@@ -12,10 +12,9 @@ export function getDatetimeString(datetime) {
   const dd = pad(datetime.getDate());
   const MM = pad(datetime.getMonth() + 1);
   const yyyy = datetime.getFullYear();
-  const hh = pad(datetime.getHours());
-  const mm = pad(datetime.getMinutes());
+  const hhmm = datetime.toLocaleString('it-IT').slice(12, 17)
   
-  return `${yyyy}-${MM}-${dd}T${hh}:${mm}`;
+  return `${yyyy}-${MM}-${dd}T${hhmm}`;
 }
 
 /**
