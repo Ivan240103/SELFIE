@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-import FullCalendar from '@fullcalendar/react';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import rrulePlugin from '@fullcalendar/rrule';
-import { useTime } from '../../contexts/TimeContext'
 import { useAuth } from '../../contexts/AuthenticationContext';
-import { getDateString } from '../../utils/dates';
-import { marked } from 'marked';
 import Header from '../Header/Header'
 
 import calendarIcon from "../../images/calendar-icon.png";
@@ -18,22 +12,13 @@ import taskIcon from "../../images/checklist-icon.png";
 
 import "../../css/Dashboard.css";
 
+// TODO: creare PreviewCard
+
 const Dashboard = () => {
   const navigate = useNavigate()
   const { isAuthenticated, logout } = useAuth()
-  const { time, isTimeLoading } = useTime()
-
   const [user, setUser] = useState({})
-  const [events, setEvents] = useState([])
-  const [note, setNote] = useState({})
-  const [tasks, setTasks] = useState([])
-  const [tomato, setTomato] = useState({})
   const [error, setError] = useState('')
-
-  marked.setOptions({
-    gfm: true,       //Con true usa le specifiche markdown di Github (quelle classiche direi es: # a, *a*, - a, ecc)
-    breaks: true,    //Con true aggiunge una singola linea di break
-  });
 
   // recupera il profilo utente
   useEffect(() => {
@@ -53,88 +38,6 @@ const Dashboard = () => {
 
     fetchUser()
   }, [isAuthenticated])
-
-  // recupera gli eventi dal backend e li mappa
-  useEffect(() => {
-    const fetchEvents = async () => {
-      if (isAuthenticated) {
-        try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/events`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          })
-          const mapped = response.data.map(ev => ({
-            ...ev,
-            // color: #, TODO: impostare colore eventi nella preview
-            id: ev._id,
-            allDay: ev.isAllDay
-          }))
-          setEvents(mapped)
-        } catch (error) {
-          setError('Error while fetching events')
-          setEvents([])
-        }
-      }
-    }
-
-    fetchEvents()
-  }, [isAuthenticated])
-
-  // recupera l'ultima nota modificata dal backend
-  useEffect(() => {
-    const fetchNote = async () => {
-      if (isAuthenticated) {
-        try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/notes/last`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          })
-          setNote(response.data)
-        } catch (error) {
-          setError('Error while fetching note')
-          setNote({})
-        }
-      }
-    }
-
-    fetchNote()
-  }, [isAuthenticated])
-
-  // recupera i task dal backend
-  useEffect(() => {
-    const fetchTasks = async () => {
-      if (isAuthenticated) {
-        try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/tasks/notdone`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          })
-          setTasks(response.data)
-        } catch (error) {
-          setError('Error while fetching tasks')
-          setTasks([])
-        }
-      }
-    }
-
-    fetchTasks()
-  }, [isAuthenticated])
-
-  // recupera l'ultimo pomodoro dal backend
-  useEffect(() => {
-    const fetchTomato = async () => {
-      if (isAuthenticated) {
-        try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/tomatoes/last`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          });
-          setTomato(response.data);
-        } catch (error) {
-          setError('Error while fetching tomato');
-          setTomato({});
-        }
-      }
-    };
-  
-    fetchTomato();
-  }, [isAuthenticated]);
 
   return(
     <div>
@@ -174,7 +77,7 @@ const Dashboard = () => {
                 <p>Organizza la tua routine!</p>
               </div>
             </div>
-            <div className='dash-card-preview'>
+            {/* <div className='dash-card-preview'>
             {!isTimeLoading && <FullCalendar
                 plugins={[timeGridPlugin, rrulePlugin]}
                 headerToolbar={{left: '', center: '', right: ''}}
@@ -186,7 +89,7 @@ const Dashboard = () => {
                 nowIndicator={true}
                 events={[...events]}
             />}
-            </div>
+            </div> */}
           </div>
           <div
             className='dash-card'
@@ -203,19 +106,18 @@ const Dashboard = () => {
                 <p>Scrivi qualunque appunto!</p>
               </div>
             </div>
-            <div className='dash-card-preview'>
+            {/* <div className='dash-card-preview'>
               {Object.keys(note).length === 0 ? (
                 <span className='dash-empty-prev'>Nessuna nota presente</span>
               ) : (
-                <div className='dash-note-container'> {/*Container per dividere le note visualizzate normalmente e tradotte in Markdown*/}
-                  {/*Visualizzazione in Markdown uguale a quello del listamento in Notes.jsx*/}
+                <div className='dash-note-container'>
                   <div className='dash-note-markdown' dangerouslySetInnerHTML={{
                     __html: marked(`${note.title}\n\n${note.categories.split(',').map(c => `#${c.trim()}`).join(' ')}\n\n${note.text.substring(0, 200)}${note.text.length > 200 ? '...' : ''}`)
                   }}>
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
           <div
             className='dash-card'
@@ -232,7 +134,7 @@ const Dashboard = () => {
                 <p>Traccia le cose da fare!</p>
               </div>
             </div>
-            <div className='dash-card-preview'>
+            {/* <div className='dash-card-preview'>
               {tasks.length === 0 ? (
                 <span className='dash-empty-prev'>Nessun task previsto</span>
               ) : (
@@ -248,7 +150,7 @@ const Dashboard = () => {
                   </div>
                 ))
               )}
-            </div>
+            </div> */}
           </div>
           <div
             className='dash-card'
@@ -265,7 +167,7 @@ const Dashboard = () => {
                 <p>Imposta il tempo di studio!</p>
               </div>
             </div>
-            <div className='dash-card-preview'>
+            {/* <div className='dash-card-preview'>
               {Object.keys(tomato).length === 0 ? (
                 <span className='dash-empty-prev'>Nessun timer presente</span>
               ) : (
@@ -281,7 +183,7 @@ const Dashboard = () => {
                     tomato.interrupted === 'f' ? 'concluso' : 'da concludere'}</p>
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
           <div
             className='dash-card'
