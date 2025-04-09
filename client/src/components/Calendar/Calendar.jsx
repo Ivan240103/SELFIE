@@ -7,6 +7,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import rrulePlugin from '@fullcalendar/rrule';
 import { useAuth } from '../../contexts/AuthenticationContext';
 import { useTime } from '../../contexts/TimeContext';
+import { mapEvent, mapTask } from '../../utils/calendar'
 import { showError } from '../../utils/toasts';
 import Header from '../Header/Header'
 import Event from "./Event";
@@ -125,30 +126,6 @@ function Calendar() {
 
     fetchTasks();
   }, [isAuthenticated]);
-
-  function mapEvent(event) {
-    // TODO: customize color?
-    return {
-      ...event,
-      id: event.googleId || event._id,
-      eventType: 'event',
-      allDay: event.isAllDay
-    }
-  }
-
-  function mapTask(task) {
-    const notDoneColor = () => time > new Date(task.deadline) ? '#ff8080' : '#ffff80'
-    return {
-      id: task._id,
-      title: task.title,
-      start: task.deadline,
-      allDay: true,
-      color: task.isDone ? '#b3ffb3' : notDoneColor(),
-      textColor: 'black',
-      eventType: 'task',
-      isDone: task.isDone
-    }
-  }
 
   function handleEventSave(event) {
     setIsEventOpen(false)

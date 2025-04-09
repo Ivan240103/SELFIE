@@ -27,7 +27,6 @@ function TaskCard({ task, onComplete, onDetails }) {
 
   return (
     <Card
-      key={task._id}
       style={{ backgroundColor: task.isDone ? '#b3ffb3' : notDoneColor()}}
     >
       <CardHeader>
@@ -192,6 +191,7 @@ function TaskList() {
         <Tab title='Completate'>
           {tasks.filter(t => t.isDone).map(t => (
             <TaskCard
+              key={t._id}
               task={t}
               onComplete={handleComplete}
               onDetails={openDetails}

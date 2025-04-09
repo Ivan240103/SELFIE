@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios';
-import { useAuth } from '../../contexts/AuthenticationContext';
 import { marked } from 'marked';
-
-marked.setOptions({
-  gfm: true,       //Con true usa le specifiche markdown di Github (quelle classiche direi es: # a, *a*, - a, ecc)
-  breaks: true,    //Con true aggiunge una singola linea di break
-});
+import { useAuth } from '../../contexts/AuthenticationContext';
+import { showError } from '../../utils/toasts';
 
 export default function PreviewNote() {
   const { isAuthenticated } = useAuth()
-  const [note, setNote] = useState({})
+  const [note, setNote] = useState(null)
+
+  marked.setOptions({
+    gfm: true,       // usa le specifiche markdown di Github
+    breaks: true,    // aggiunge una singola linea di break
+  });
 
   // recupera l'ultima nota modificata dal backend
   useEffect(() => {
@@ -22,27 +23,31 @@ export default function PreviewNote() {
           })
           setNote(response.data)
         } catch (error) {
-          setError('Error while fetching note')
-          setNote({})
+          showError('fetchNote error')
+          setNote(null)
         }
+      } else {
+        setNote(null)
       }
     }
 
     fetchNote()
   }, [isAuthenticated])
 
+  const displayCategories = (cat) => cat.split(',').map(c => `#${c}`).join(' ')
+
   return (
     <div className='dash-card-preview'>
-      {Object.keys(note).length === 0 ? (
-        <span className='dash-empty-prev'>Nessuna nota presente</span>
-      ) : (
-        <div className='dash-note-container'> {/*Container per dividere le note visualizzate normalmente e tradotte in Markdown*/}
-          {/*Visualizzazione in Markdown uguale a quello del listamento in Notes.jsx*/}
-          <div className='dash-note-markdown' dangerouslySetInnerHTML={{
-            __html: marked(`${note.title}\n\n${note.categories.split(',').map(c => `#${c.trim()}`).join(' ')}\n\n${note.text.substring(0, 200)}${note.text.length > 200 ? '...' : ''}`)
-          }}>
+      {note ? (
+        <>
+          <div dangerouslySetInnerHTML={{ __html: marked(`# ${note.title}`) }}/>
+          <div>
+            <span>{note.categories ? displayCategories(note.categories) : 'Nessun tag'}</span>
           </div>
-        </div>
+          <div dangerouslySetInnerHTML={{ __html: marked(note.text) }}/>
+        </>
+      ) : (
+        <span className='dash-empty-prev'>Nessuna nota presente</span>
       )}
     </div>
   )

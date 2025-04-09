@@ -317,7 +317,7 @@ function Notes() {
             <div>
               <div dangerouslySetInnerHTML={{ __html: marked(`# ${title}`) }} />
               <div>
-                <p>{categories ? clearCategories(categories).map(c => `#${c}`).join(' ') : 'Nessun tag'}</p>
+                <span>{categories ? clearCategories(categories).map(c => `#${c}`).join(' ') : 'Nessun tag'}</span>
               </div>
               <div dangerouslySetInnerHTML={{ __html: marked(text) }} />
             </div>
