@@ -9,24 +9,34 @@ import PreviewNote from './PreviewNote'
 import PreviewTasks from './PreviewTasks'
 import PreviewTomato from './PreviewTomato'
 
-import calendarIcon from "../../images/calendar-icon.png";
-import notesIcon from "../../images/notebook-pen-icon.png";
-import tomatoIcon from "../../images/speed-icon.png";
-import logoutIcon from "../../images/door-check-out-icon.png";
-import taskIcon from "../../images/checklist-icon.png";
-
 import "../../css/Dashboard.css";
 import {
   Card,
   CardHeader,
-  CardBody
+  CardBody,
+  Avatar
 } from '@heroui/react'
 
-// TODO: creare PreviewCard
-function PreviewCard({ children }) {
+function PreviewCard({
+  onClick, imgSrc, imgAlt, title, description, children
+}) {
   return (
-    <Card>
-      <p>ciao</p>
+    <Card isPressable onPress={onClick}>
+      <CardHeader>
+        <Avatar
+          src={imgSrc}
+          alt={imgAlt}
+          radius='sm'
+          style={{ backgroundColor: 'white' }}
+        />
+        <div>
+          <h2>{title}</h2>
+          <span>{description}</span>
+        </div>
+      </CardHeader>
+      <CardBody>
+        {children}
+      </CardBody>
     </Card>
   )
 }
@@ -61,107 +71,70 @@ function Dashboard() {
     <div>
       <Header />
       <div className='dash-container'>
-        <div
-          className='dash-card'
-          id='dash-profile'
-          onClick={() => navigate('/profile')}
-        >
-          <div className='dash-card-header'>
-            <img
+        <Card isPressable onPress={() => navigate('/profile')}>
+          <CardHeader>
+            <Avatar
               src={`${process.env.REACT_APP_API}/pics/${user.picName || 'default.png'}`}
               alt='icona del profilo'
-              className='dash-icon' />
-            <div className='dash-text'>
+              className='w-24 h-24'
+            />
+            <div>
               <h2>Profilo personale</h2>
-              <p>Personalizza il tuo profilo!</p>
-              <p>{user.name || ''} {user.surname || ''}, {user.email || 'nessuna email'}</p>
+              <span>Personalizza il tuo profilo!</span>
+              <span>{user.name || ''} {user.surname || ''}, {user.email || 'nessuna email'}</span>
             </div>
-          </div>
-        </div>
-        <div
-          className='dash-card'
-          id='dash-calendar'
+          </CardHeader>
+        </Card>
+        <PreviewCard
           onClick={() => navigate('/calendar')}
+          imgSrc="/images/calendar-icon.png"
+          imgAlt="icona del calendario"
+          title="Calendario"
+          description="Organizza la tua routine!"
         >
-          <div className='dash-card-header'>
-            <img
-              src={calendarIcon}
-              alt='icona del calendario'
-              className='dash-icon' />
-            <div className='dash-text'>
-              <h2>Calendario</h2>
-              <p>Organizza la tua routine!</p>
-            </div>
-          </div>
           <PreviewCalendar />
-        </div>
-        <div
-          className='dash-card'
-          id='dash-note'
+        </PreviewCard>
+        <PreviewCard
           onClick={() => navigate('/notes')}
+          imgSrc='/images/note-icon.png'
+          imgAlt='icona delle note'
+          title='Note'
+          description='Scrivi qualunque appunto!'
         >
-          <div className='dash-card-header'>
-            <img
-              src={notesIcon}
-              alt='icona delle note'
-              className='dash-icon' />
-            <div className='dash-text'>
-              <h2>Note</h2>
-              <p>Scrivi qualunque appunto!</p>
-            </div>
-          </div>
           <PreviewNote />
-        </div>
-        <div
-          className='dash-card'
-          id='dash-task'
+        </PreviewCard>
+        <PreviewCard
           onClick={() => navigate('/task')}
+          imgSrc='/images/task-icon.png'
+          imgAlt='icona dei task'
+          title='Task'
+          description='Traccia le cose da fare!'
         >
-          <div className='dash-card-header'>
-            <img
-              src={taskIcon}
-              alt='icona dei task'
-              className='dash-icon' />
-            <div className='dash-text'>
-              <h2>Task</h2>
-              <p>Traccia le cose da fare!</p>
-            </div>
-          </div>
           <PreviewTasks />
-        </div>
-        <div
-          className='dash-card'
-          id='dash-tomato'
+        </PreviewCard>
+        <PreviewCard
           onClick={() => navigate('/tomato')}
+          imgSrc='/images/tomato-icon.png'
+          imgAlt='icona del timer'
+          title='Pomodoro'
+          description='Imposta il tempo di studio!'
         >
-          <div className='dash-card-header'>
-            <img
-              src={tomatoIcon}
-              alt='icona del timer'
-              className='dash-icon' />
-            <div className='dash-text'>
-              <h2>Pomodoro</h2>
-              <p>Imposta il tempo di studio!</p>
-            </div>
-          </div>
           <PreviewTomato />
-        </div>
-        <div
-          className='dash-card'
-          id='dash-logout'
-          onClick={() => { logout() }}
-        >
-          <div className='dash-card-header'>
-            <img
-              src={logoutIcon}
+        </PreviewCard>
+        <Card isPressable onPress={() => logout()}>
+          <CardHeader>
+            <Avatar
+              src='/images/logout-icon.png'
               alt='icona del logout'
-              className='dash-icon' />
-            <div className='dash-text'>
+              radius='sm'
+              style={{ backgroundColor: 'white' }}
+            />
+            <div>
               <h2>Logout</h2>
-              <p>Esci dal profilo!</p>
+              <span>Esci dal profilo!</span>
             </div>
-          </div>
-        </div>
+          </CardHeader>
+        </Card>
       </div>
     </div>
   );

@@ -110,7 +110,7 @@ function Calendar() {
           });
           if (response.ok) {
             const tasks = await response.json();
-            const mappedTasks = tasks.map(task => mapTask(task))
+            const mappedTasks = tasks.map(task => mapTask(task, time))
             setCalendarTasks(mappedTasks);
           } else {
             throw new Error()
@@ -147,12 +147,12 @@ function Calendar() {
 
   function handleTaskSave(task) {
     setIsTaskOpen(false)
-    setCalendarTasks(prev => [...prev, mapTask(task)]);
+    setCalendarTasks(prev => [...prev, mapTask(task, time)]);
   }
 
   function handleTaskUpdate(task) {
     setIsTaskOpen(false)
-    const mappedTask = mapTask(task)
+    const mappedTask = mapTask(task, time)
     const updatedTasks = calendarTasks.map(t => t.id === mappedTask.id ? mappedTask : t)
     setCalendarTasks(updatedTasks);
   }

@@ -59,7 +59,7 @@ export default function PreviewCalendar() {
           });
           if (response.ok) {
             const tasks = await response.json();
-            const mappedTasks = tasks.map(task => mapTask(task))
+            const mappedTasks = tasks.map(task => mapTask(task, time))
             setTasks(mappedTasks);
           } else {
             throw new Error()
