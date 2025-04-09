@@ -111,7 +111,6 @@
 - [ ] controllare notifiche push
 
 ## HeroUI
-- Card per la dashboard
 - Toast con timer in caso di non-authenticated
 - Drawer oppure Navbar per menu
 - ScrollShadow in anteprima nota
