@@ -1,4 +1,3 @@
-import { time } from '../contexts/TimeContext'
 /**
  * Mappa un evento con i campi di FullCalendar
  * 
@@ -19,9 +18,10 @@ export function mapEvent(event) {
  * Mappa un task con i campi di FullCalendar
  * 
  * @param {Task} task attività da mappare
+ * @param {Date} time orario in vigore per l'utente
  * @returns attività mappata
  */
-export function mapTask(task) {
+export function mapTask(task, time) {
   const notDoneColor = () => time > new Date(task.deadline) ? '#ff8080' : '#ffff80'
   return {
     id: task._id,
