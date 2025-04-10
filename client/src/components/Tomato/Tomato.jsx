@@ -1,12 +1,19 @@
 import React from 'react';
+import { useAuth } from '../../contexts/AuthenticationContext';
+import Header from '../Header/Header';
 
+// usiamo un iframe perché il contenuto è completamente indipendente dal resto della react app
 function Tomato() {
+  const { isAuthenticated } = useAuth()
   return (
-    <iframe
-      src={`${process.env.PUBLIC_URL}/tomato.html`}
-      style={{ width: '100%', height: '100vh', border: 'none' }}
-      title="Pomodoro Timer"
-    />
+    <div>
+      <Header />
+      {isAuthenticated && <iframe
+        src='/tomato/tomato.html'
+        title='Timer pomodoro'
+        style={{ width:'100%', height:'100vh', border: 'none' }}
+      />}
+    </div>
   );
 }
 

@@ -15,7 +15,7 @@ let finished = false;
 let currentPomodoroId = null; // Traccia l'ultimo pomodoro caricato
 
 function playNotificationSound() {
-  const audio = new Audio('./notification.mp3');
+  const audio = new Audio('../audio/notification.mp3');
   audio.play();
 }
 
