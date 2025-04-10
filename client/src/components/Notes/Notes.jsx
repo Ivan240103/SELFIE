@@ -123,7 +123,7 @@ function Notes() {
 
           if (response.ok) {
             const result = await response.json()
-            setSortedNotes(result, sortCriteria)
+            setSortedNotes(result)
           } else {
             throw new Error()
           }
@@ -137,10 +137,12 @@ function Notes() {
     }
     
     fetchNotes()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   // Per l'ordinamento delle note
-  function setSortedNotes(notes, order) {
+  function setSortedNotes(notes, sortingOrder) {
+    const order = sortingOrder || sortCriteria
     const sorted = notes.sort((a, b) => {
       if (order === 'create') {
         return new Date(b.creation) - new Date(a.creation);
@@ -185,7 +187,7 @@ function Notes() {
       const result = await response.json()
       showSuccess('Nota salvata')
       setIsEditorOpen(false)
-      setSortedNotes([...notes, result], sortCriteria)
+      setSortedNotes([...notes, result])
     } catch (error) {
       showError('Errore nel salvataggio');
     }
@@ -218,7 +220,7 @@ function Notes() {
       showSuccess('Nota aggiornata')
       setIsEditorOpen(false)
       const updatedNotes = notes.map(n => n._id === result._id ? result : n)
-      setSortedNotes(updatedNotes, sortCriteria)
+      setSortedNotes(updatedNotes)
     } catch (error) {
       showError("Errore nell'aggiornamento");
     }
@@ -240,7 +242,7 @@ function Notes() {
       // Aggiorna le note dopo l'eliminazione
       showSuccess('Nota eliminata')
       setIsEditorOpen(false)
-      setSortedNotes(notes.filter(n => n._id !== note._id), sortCriteria)
+      setSortedNotes(notes.filter(n => n._id !== note._id))
     } catch (error) {
       showError("Errore nell'eliminazione");
     }

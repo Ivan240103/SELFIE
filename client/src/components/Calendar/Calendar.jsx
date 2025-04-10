@@ -125,6 +125,7 @@ function Calendar() {
     }
 
     fetchTasks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   function handleEventSave(event) {

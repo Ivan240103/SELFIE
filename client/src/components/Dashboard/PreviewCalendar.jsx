@@ -74,6 +74,7 @@ export default function PreviewCalendar() {
     }
 
     fetchTasks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   return (
