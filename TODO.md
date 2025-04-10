@@ -107,11 +107,12 @@
 - [x] geolocalizzazione per gli eventi --> NON SPECIFICATO/APPROFONDITO
   - [x] selezione luogo con auto-completamento di google maps api
   - [x] se auto-completato, nella visualizzazione link per andare su google maps (campo aggiuntivo nel model?)
-- [ ] sistemare autenticazione in modo da poter guardare ma non toccare
+- [x] sistemare autenticazione in modo da poter guardare ma non toccare
 - [ ] controllare notifiche push
+- [ ] nascondere button 'indietro' se la pagina non lo consente (stesso colore del bg ma disabilitato?)
+- [x] toast success di logout
+- [ ] card nella dashboard non cliccabili se non authenticated
 
 ## HeroUI
-- Toast con timer in caso di non-authenticated
-- Drawer oppure Navbar per menu
 - ScrollShadow in anteprima nota
 - Spinner o skeleton nei caricamenti ???

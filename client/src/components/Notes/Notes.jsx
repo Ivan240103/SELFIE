@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
 import { useAuth } from '../../contexts/AuthenticationContext';
 import { getDatetimeString } from '../../utils/dates';
@@ -98,7 +99,8 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy }) {
 }
 
 function Notes() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, checkAuth } = useAuth();
+  const navigate = useNavigate()
   const [notes, setNotes] = useState([]);
   const [sortCriteria, setSortCriteria] = useState('edit');
   const [search, setSearch] = useState('');
@@ -107,6 +109,10 @@ function Notes() {
   const [text, setText] = useState('');
   const [categories, setCategories] = useState('');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+
+  // verifica dell'autenticazione
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => checkAuth(navigate), [])
 
   // Caricare le note dal backend
   useEffect(() => {

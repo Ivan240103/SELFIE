@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
 import { useTime } from '../../contexts/TimeContext';
 import { useAuth } from '../../contexts/AuthenticationContext';
@@ -63,11 +64,16 @@ function TaskCard({ task, onComplete, onDetails }) {
 }
 
 function TaskList() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, checkAuth } = useAuth();
+  const navigate = useNavigate()
   const [user, setUser] = useState({})
   const [tasks, setTasks] = useState([]);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [isTaskOpen, setIsTaskOpen] = useState(false);
+
+  // verifica dell'autenticazione
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => checkAuth(navigate), [])
 
   // recupera il profilo utente
   useEffect(() => {

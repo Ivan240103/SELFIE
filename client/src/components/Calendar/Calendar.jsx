@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -32,8 +33,9 @@ function Sidebar({ weekendsVisible, handleWeekendsToggle }) {
 }
 
 function Calendar() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, checkAuth } = useAuth()
   const { time, isTimeLoading } = useTime()
+  const navigate = useNavigate()
   const [user, setUser] = useState({})
   const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);
@@ -42,6 +44,10 @@ function Calendar() {
   const [calendarTasks, setCalendarTasks] = useState([]);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [isTaskOpen, setIsTaskOpen] = useState(false);
+
+  // verifica dell'autenticazione
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => checkAuth(navigate), [])
 
   // recupera il profilo utente
   useEffect(() => {

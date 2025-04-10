@@ -41,7 +41,7 @@ function GoogleButton({ isSync, onClick }) {
 
 function Profile() {
   const navigate = useNavigate()
-  const { isAuthenticated, logout } = useAuth()
+  const { isAuthenticated, logout, checkAuth } = useAuth()
   const [profile, setProfile] = useState({})
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -54,6 +54,10 @@ function Profile() {
   const [google, setGoogle] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [isAlertVisible, setIsAlertVisible] = useState(false)
+
+  // verifica dell'autenticazione
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => checkAuth(navigate), [])
   
   // recupera i dati del profilo dal backend
   useEffect(() => {
