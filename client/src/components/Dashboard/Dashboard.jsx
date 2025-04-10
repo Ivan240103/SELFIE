@@ -67,22 +67,37 @@ function Dashboard() {
     fetchUser()
   }, [isAuthenticated])
 
+  function handleProfileClick() {
+    if (isAuthenticated) {
+      navigate('/profile')
+    } else {
+      navigate('/login')
+    }
+  }
+
   return(
     <div>
       <Header />
       <div className='dash-container'>
-        <Card isPressable onPress={() => navigate('/profile')}>
+        <Card isPressable onPress={handleProfileClick}>
           <CardHeader>
             <Avatar
               src={`${process.env.REACT_APP_API}/pics/${user.picName || 'default.png'}`}
               alt='icona del profilo'
-              className='w-24 h-24'
+              className='w-24 h-24 bg-color-white'
             />
-            <div>
-              <h2>Profilo personale</h2>
-              <span>Personalizza il tuo profilo!</span>
-              <span>{user.name || ''} {user.surname || ''}, {user.email || 'nessuna email'}</span>
-            </div>
+            {isAuthenticated ? (
+              <div>
+                <h2>Profilo personale</h2>
+                <span>Personalizza il tuo profilo!</span>
+                <span>{user.name || ''} {user.surname || ''}, {user.email || 'nessuna email'}</span>
+              </div>
+            ) : (
+              <div>
+                <h2>Login</h2>
+                <span>Effettua il login o registrati!</span>
+              </div>
+            )}
           </CardHeader>
         </Card>
         <PreviewCard
