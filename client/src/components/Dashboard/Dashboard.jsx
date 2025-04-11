@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthenticationContext';
-import { showError } from '../../utils/toasts';
+import { showError, showWarning } from '../../utils/toasts';
 import Header from '../Header/Header'
 import PreviewCalendar from './PreviewCalendar'
 import PreviewNote from './PreviewNote'
@@ -75,6 +75,14 @@ function Dashboard() {
     }
   }
 
+  function authNav(path) {
+    if (isAuthenticated) {
+      navigate(path)
+    } else {
+      showWarning('Non sei autorizzato')
+    }
+  }
+
   return(
     <div>
       <Header />
@@ -101,7 +109,7 @@ function Dashboard() {
           </CardHeader>
         </Card>
         <PreviewCard
-          onClick={() => navigate('/calendar')}
+          onClick={() => authNav('/calendar')}
           imgSrc="/images/calendar-icon.png"
           imgAlt="icona del calendario"
           title="Calendario"
@@ -110,7 +118,7 @@ function Dashboard() {
           <PreviewCalendar />
         </PreviewCard>
         <PreviewCard
-          onClick={() => navigate('/notes')}
+          onClick={() => authNav('/notes')}
           imgSrc='/images/note-icon.png'
           imgAlt='icona delle note'
           title='Note'
@@ -119,7 +127,7 @@ function Dashboard() {
           <PreviewNote />
         </PreviewCard>
         <PreviewCard
-          onClick={() => navigate('/task')}
+          onClick={() => authNav('/task')}
           imgSrc='/images/task-icon.png'
           imgAlt='icona dei task'
           title='Task'
@@ -128,7 +136,7 @@ function Dashboard() {
           <PreviewTasks />
         </PreviewCard>
         <PreviewCard
-          onClick={() => navigate('/tomato')}
+          onClick={() => authNav('/tomato')}
           imgSrc='/images/tomato-icon.png'
           imgAlt='icona del timer'
           title='Pomodoro'
@@ -136,20 +144,22 @@ function Dashboard() {
         >
           <PreviewTomato />
         </PreviewCard>
-        <Card isPressable onPress={() => logout()}>
-          <CardHeader>
-            <Avatar
-              src='/images/logout-icon.png'
-              alt='icona del logout'
-              radius='sm'
-              style={{ backgroundColor: 'white' }}
-            />
-            <div>
-              <h2>Logout</h2>
-              <span>Esci dal profilo!</span>
-            </div>
-          </CardHeader>
-        </Card>
+        {isAuthenticated && (
+          <Card isPressable onPress={() => logout()}>
+            <CardHeader>
+              <Avatar
+                src='/images/logout-icon.png'
+                alt='icona del logout'
+                radius='sm'
+                style={{ backgroundColor: 'white' }}
+              />
+              <div>
+                <h2>Logout</h2>
+                <span>Esci dal profilo!</span>
+              </div>
+            </CardHeader>
+          </Card>
+        )}
       </div>
     </div>
   );

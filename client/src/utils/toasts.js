@@ -18,6 +18,14 @@ export function showSuccess(title, description) {
   })
 }
 
+export function showWarning(title, description) {
+  addToast({
+    title: title,
+    description: description,
+    color: "warning"
+  })
+}
+
 export function showAuth() {
   addToast({
     title: 'Non sei autenticato',
