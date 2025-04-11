@@ -124,6 +124,7 @@ function Event({
     }
 
     setFields()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event])
 
   /**

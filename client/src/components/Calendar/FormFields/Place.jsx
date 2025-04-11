@@ -15,6 +15,7 @@ function Place({
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedFetchSuggestions = useCallback(
     _.debounce(async (loc) => {
       if (loc.length < 3) {
