@@ -81,7 +81,6 @@
 ## Nice to have
 - [ ] recupero della password tramite mail
 - [x] drag and drop eventi e task
-- [ ] doppio click per creare evento/task
 - [x] button per mostrare la psw in chiaro
 
 ## Estensione 18-27
@@ -108,7 +107,7 @@
   - [x] selezione luogo con auto-completamento di google maps api
   - [x] se auto-completato, nella visualizzazione link per andare su google maps (campo aggiuntivo nel model?)
 - [x] sistemare autenticazione in modo da poter guardare ma non toccare
-- [ ] controllare notifiche push
+- [x] controllare notifiche push
 - [x] nascondere button 'indietro' se la pagina non lo consente (stesso colore del bg ma disabilitato?)
 - [x] toast success di logout
 - [x] card nella dashboard non cliccabili se non authenticated
