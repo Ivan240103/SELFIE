@@ -78,6 +78,9 @@ router.put('/:id', auth, async (req, res) => {
     const { title, description, deadline, reminders } = req.body
     task.title = title || task.title
     task.description = description || task.description
+    if (deadline && new Date(deadline) !== task.deadline) {
+      task.lateTs = -1
+    }
     task.deadline = deadline ? new Date(deadline) : task.deadline
     task.reminders = reminders ?? task.reminders
     await task.save()
@@ -91,12 +94,16 @@ router.put('/:id', auth, async (req, res) => {
 // isDone := true se completato, false altrimenti
 router.put('/toggle/:id', auth, async (req, res) => {
   try {
+    const { isDone } = req.body
     const task = await Task.findById(req.params.id)
     if (!task) {
       return res.status(404).send(`No task found with id ${req.params.id}`)
     }
     // modifica
-    task.isDone = req.body.isDone ?? task.isDone
+    if (isDone === false) {
+      task.lateTs = -1
+    }
+    task.isDone = isDone ?? task.isDone
     await task.save()
     return res.json(task)
   } catch (err) {

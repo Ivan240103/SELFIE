@@ -9,7 +9,7 @@ import rrulePlugin from '@fullcalendar/rrule';
 import { useAuth } from '../../contexts/AuthenticationContext';
 import { useTime } from '../../contexts/TimeContext';
 import { mapEvent, mapTask } from '../../utils/calendar'
-import { showError } from '../../utils/toasts';
+import { showError, showSuccess } from '../../utils/toasts';
 import Header from '../Header/Header'
 import Event from "./Event";
 import Task from "./Task";
@@ -191,39 +191,39 @@ function Calendar() {
     }
   }
 
-  // TODO: check function
+  // Gestisce il trascinamento dei task
   async function handleDrop(info) {
     const { event } = info;
     if (event.extendedProps.eventType === 'task') {
-      // Gestisci il trascinamento dei task
-      const newEndDate = event.start; // Data di fine corretta
+      const newDeadline = event.start ?? time;
       const taskId = event.id
 
       try {
-        // Aggiorna la data dell'evento nel backend
+        // Aggiorna la scadenza del task nel backend
         const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           },
-          body: JSON.stringify({ deadline: newEndDate ? newEndDate.toISOString() : null })
+          body: JSON.stringify({ deadline: newDeadline.toISOString() })
         });
 
         if (response.ok) {
           // Aggiorna lo stato locale
-          setCalendarTasks(prevTasks =>
-            prevTasks.map(task =>
-              task.id === taskId ? { ...task, start: newEndDate } : task
-            )
-          );
+          const result = await response.json()
+          handleTaskUpdate(result)
+          showSuccess('Attività aggiornata')
         } else {
           throw new Error()
         }
       } catch (error) {
         showError('handleTaskDrop error')
-        event.revert()
+        info.revert()
       }
+    } else {
+      showError('Operazione non consentita', 'Gli eventi non ammettono drag-and-drop')
+      info.revert()
     }
   }
 
