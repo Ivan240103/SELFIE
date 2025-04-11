@@ -302,7 +302,6 @@ function Event({
               }}
               isReadOnly={!isEditing}
               isRequired
-              // TODO: add validation with error
             />
             <Checkbox
               color='primary'
