@@ -109,7 +109,7 @@
   - [x] se auto-completato, nella visualizzazione link per andare su google maps (campo aggiuntivo nel model?)
 - [x] sistemare autenticazione in modo da poter guardare ma non toccare
 - [ ] controllare notifiche push
-- [ ] nascondere button 'indietro' se la pagina non lo consente (stesso colore del bg ma disabilitato?)
+- [x] nascondere button 'indietro' se la pagina non lo consente (stesso colore del bg ma disabilitato?)
 - [x] toast success di logout
 - [x] card nella dashboard non cliccabili se non authenticated
 
