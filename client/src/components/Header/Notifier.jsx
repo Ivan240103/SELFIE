@@ -10,8 +10,6 @@ function BellOnIcon() {
     <svg
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      focusable="false"
-      role="presentation"
       viewBox="0 0 24 24"
       height="1.1em"
       width="1.1em"
@@ -26,8 +24,6 @@ function BellOffIcon() {
     <svg
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      focusable="false"
-      role="presentation"
       viewBox="0 0 24 24"
       height="1em"
       width="1em"
