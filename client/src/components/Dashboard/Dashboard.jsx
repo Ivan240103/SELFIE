@@ -9,7 +9,6 @@ import PreviewNote from './PreviewNote'
 import PreviewTasks from './PreviewTasks'
 import PreviewTomato from './PreviewTomato'
 
-import "../../css/Dashboard.css";
 import {
   Card,
   CardHeader,
