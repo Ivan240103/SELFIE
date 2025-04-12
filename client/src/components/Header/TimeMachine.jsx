@@ -38,7 +38,7 @@ function TimeMachine() {
   }
 
   return(
-    <div>
+    <div className="justify-self-center">
       <Button
         color="secondary"
         variant="light"

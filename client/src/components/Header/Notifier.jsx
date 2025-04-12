@@ -144,6 +144,7 @@ function Notifier() {
       content={`Notifiche ${notifyPermission ? 'abilitate' : 'disabilitate'}`}
     >
       <Switch
+        className='justify-self-end'
         color='secondary'
         size='lg'
         isSelected={notifyPermission}
