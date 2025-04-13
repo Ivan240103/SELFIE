@@ -24,7 +24,7 @@ import { parseDate } from "@internationalized/date";
 function TaskCard({ task, onComplete, onDetails }) {
   const { time } = useTime()
 
-  const notDoneColor = () => time > new Date(task.deadline) ? '#ff8080' : '#ffff80'
+  const notDoneColor = () => time > new Date(task.deadline) ? '#f87171' : '#ffff80'
 
   return (
     <Card

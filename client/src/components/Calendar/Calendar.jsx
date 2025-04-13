@@ -14,23 +14,7 @@ import Header from '../Header/Header'
 import Event from "./Event";
 import Task from "./Task";
 
-import {
-  Checkbox
-} from "@heroui/react"
-
-function Sidebar({ weekendsVisible, handleWeekendsToggle }) {
-  return (
-    <div>
-      <Checkbox
-        color="primary"
-        isSelected={weekendsVisible}
-        onValueChange={handleWeekendsToggle}
-      >
-        Mostra weekend
-      </Checkbox>
-    </div>
-  );
-}
+import { Spinner } from '@heroui/react'
 
 function Calendar() {
   const { isAuthenticated, checkAuth } = useAuth()
@@ -230,79 +214,98 @@ function Calendar() {
   return (
     <div>
       <Header />
-      <Sidebar
-        weekendsVisible={weekendsVisible}
-        handleWeekendsToggle={toggleWeekends}
-      />
-      <button
-        type="button"
-        onClick={() => {
-          setSelectedEventId(null)
-          setIsEventOpen(true)
-        }}
-      >
-        Crea evento
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          setSelectedTaskId(null)
-          setIsTaskOpen(true)
-        }}
-      >
-        Crea task
-      </button>
-      {isTimeLoading ? (
-        // TODO: add skeleton?
-        <p>Skeleton</p>
-      ) : (
-        // TODO: visualizzazione di eventi allDay su più giorni non include la end date (forse problema con il salvataggio)
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
-          headerToolbar={{
-            left: 'prevYear,prev,today,next,nextYear',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-          }}
-          initialView='dayGridMonth'
-          locale='it'
-          firstDay={1}
-          initialDate={time}
-          scrollTime='07:00'
-          now={time}
-          nowIndicator={true}
-          editable={true}
-          selectable={true}
-          droppable={true}
-          dayMaxEvents={true}
-          showNonCurrentDates={false}
-          weekends={weekendsVisible}
-          events={[
-            ...calendarEvents,
-            ...calendarTasks
-          ]}
-          eventClick={handleClick}
-          eventDrop={handleDrop}
-        />
-      )}
-      {isEventOpen && <Event
-        eventId={selectedEventId}
-        user={user}
-        onSaveEvent={handleEventSave}
-        onUpdateEvent={handleEventUpdate}
-        onDeleteEvent={handleEventDelete}
-        isModalOpen={isEventOpen}
-        setIsModalOpen={setIsEventOpen}
-      />}
-      {isTaskOpen && <Task
-        taskId={selectedTaskId}
-        user={user}
-        onSaveTask={handleTaskSave}
-        onUpdateTask={handleTaskUpdate}
-        onDeleteTask={handleTaskDelete}
-        isModalOpen={isTaskOpen}
-        setIsModalOpen={setIsTaskOpen}
-      />}
+      <div className='w-[96vw] min-h-[89vh] mt-4 mx-auto pb-8'>
+        {isTimeLoading ? (
+          <div className='flex flex-col justify-center pt-32'>
+            <Spinner color="secondary" variant='wave' label="Caricamento del calendario..." />
+          </div>
+        ) : (
+          // TODO: visualizzazione di eventi allDay su più giorni non include la end date (forse problema con il salvataggio)
+          <FullCalendar
+            aspectRatio={16/9}
+            dayHeaderClassNames='bg-gray-100'
+            eventDisplay='block'
+            eventColor='#bae6fd'
+            eventTextColor='black'
+            eventTimeFormat={{
+              hour: 'numeric',
+              minute: '2-digit',
+              meridiem: false
+            }}
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
+            headerToolbar={{
+              left: 'prev,today,next addEventBtn,addTaskBtn',
+              center: 'title',
+              right: 'toggleWeekendsBtn dayGridMonth,timeGridWeek,timeGridDay'
+            }}
+            buttonText={{
+              today: 'Oggi',
+              month: 'Mese',
+              week: 'Settimana',
+              day: 'Giorno',
+            }}
+            customButtons={{
+              addEventBtn: {
+                text: 'Nuovo evento',
+                click: function() {
+                  setSelectedEventId(null)
+                  setIsEventOpen(true)
+                },
+                hint: 'Crea un nuovo evento'
+              },
+              addTaskBtn: {
+                text: 'Nuova attività',
+                click: function() {
+                  setSelectedTaskId(null)
+                  setIsTaskOpen(true)
+                },
+                hint: 'Crea una nuova attività'
+              },
+              toggleWeekendsBtn: {
+                text: weekendsVisible ? 'Nascondi weekend' : 'Mostra weekend',
+                click: toggleWeekends
+              }
+            }}
+            initialView='dayGridMonth'
+            locale='it'
+            firstDay={1}
+            initialDate={time}
+            scrollTime='07:00'
+            now={time}
+            nowIndicator={true}
+            dayMaxEvents={true}
+            showNonCurrentDates={false}
+            weekends={weekendsVisible}
+            events={[
+              ...calendarEvents,
+              ...calendarTasks
+            ]}
+            editable={true}
+            selectable={false}
+            droppable={true}
+            eventClick={handleClick}
+            eventDrop={handleDrop}
+          />
+        )}
+        {isEventOpen && <Event
+          eventId={selectedEventId}
+          user={user}
+          onSaveEvent={handleEventSave}
+          onUpdateEvent={handleEventUpdate}
+          onDeleteEvent={handleEventDelete}
+          isModalOpen={isEventOpen}
+          setIsModalOpen={setIsEventOpen}
+        />}
+        {isTaskOpen && <Task
+          taskId={selectedTaskId}
+          user={user}
+          onSaveTask={handleTaskSave}
+          onUpdateTask={handleTaskUpdate}
+          onDeleteTask={handleTaskDelete}
+          isModalOpen={isTaskOpen}
+          setIsModalOpen={setIsTaskOpen}
+        />}
+      </div>
     </div>
   );
 }

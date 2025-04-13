@@ -9,7 +9,7 @@ import {
 
 function Reminder({ type, reminder, setReminder, isEditing }) {
   return (
-    <div>
+    <div className='w-full m-2 flex flex-row items-center justify-start gap-3'>
       <Checkbox
         color='primary'
         isSelected={reminder.checked}
@@ -22,6 +22,9 @@ function Reminder({ type, reminder, setReminder, isEditing }) {
         {type}
       </Checkbox>
       <NumberInput
+        className='w-24'
+        size='sm'
+        radius='md'
         minValue={reminder.time === 'm' ? 5 : 1}
         value={reminder.before}
         onValueChange={(v) => setReminder(prev => ({
@@ -32,6 +35,10 @@ function Reminder({ type, reminder, setReminder, isEditing }) {
         isReadOnly={!isEditing}
       />
       <Select
+        className='w-1/3'
+        classNames={{
+          trigger: 'py-6'
+        }}
         selectedKeys={[reminder.time]}
         onChange={(e) => setReminder(prev => ({
           ...prev,
@@ -43,7 +50,7 @@ function Reminder({ type, reminder, setReminder, isEditing }) {
         <SelectItem key='h'>{reminder.before === 1 ? 'Ora' : 'Ore'}</SelectItem>
         <SelectItem key='d'>{reminder.before === 1 ? 'Giorno' : 'Giorni'}</SelectItem>
       </Select>
-      prima
+      <span>prima</span>
     </div>
   )
 }

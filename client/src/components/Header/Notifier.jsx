@@ -44,7 +44,7 @@ function Notifier() {
         try {
           await navigator.serviceWorker.register('/sw.js')
         } catch (error) {
-          showError('Service worker registration error')
+          showError('Service worker registration failed')
         }
       }
     }
@@ -87,7 +87,7 @@ function Notifier() {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
     } catch (error) {
-      showError('subscribeToPush error')
+      showError('Push subscription failed')
       throw new Error()
     }
   }

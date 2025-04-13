@@ -4,7 +4,8 @@ import _ from 'lodash';
 import {
   Autocomplete,
   AutocompleteItem,
-  Button
+  Button,
+  Tooltip
 } from '@heroui/react'
 
 function Place({
@@ -73,8 +74,9 @@ function Place({
     }
   }
 
+  // TODO: problemi nell visualizzazione del luogo all'apertura
   return (
-    <div>
+    <div className="w-full flex flex-row items-baseline gap-3">
       <Autocomplete
         label='Luogo'
         description="Puoi geolocalizzare l'evento"
@@ -97,15 +99,18 @@ function Place({
         )}
       </Autocomplete>
       {mapsLocated && (
-        <Button
-          color="primary"
-          isIconOnly
-          onPress={() => openMaps()}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#FFFFFF"/>
-          </svg>
-        </Button>
+        <Tooltip content='Apri su Google Maps'>
+          <Button
+            color="primary"
+            size="lg"
+            isIconOnly
+            onPress={() => openMaps()}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="white"/>
+            </svg>
+          </Button>
+        </Tooltip>
       )}
     </div>
   )

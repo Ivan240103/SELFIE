@@ -114,4 +114,4 @@
 
 ## HeroUI
 - ScrollShadow in anteprima nota
-- Spinner o skeleton nei caricamenti ???
+- Spinner nei caricamenti pesanti
