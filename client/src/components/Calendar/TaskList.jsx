@@ -24,11 +24,11 @@ import { parseDate } from "@internationalized/date";
 function TaskCard({ task, onComplete, onDetails }) {
   const { time } = useTime()
 
-  const notDoneColor = () => time > new Date(task.deadline) ? '#f87171' : '#ffff80'
+  const notDoneColor = () => time > new Date(task.deadline) ? '#f87171' : '#fde68a'
 
   return (
     <Card
-      style={{ backgroundColor: task.isDone ? '#b3ffb3' : notDoneColor()}}
+      style={{ backgroundColor: task.isDone ? '#86efac' : notDoneColor()}}
     >
       <CardHeader>
         <h3>{task.title}</h3>
@@ -183,37 +183,44 @@ function TaskList() {
   return (
     <div>
       <Header />
-      <h2>Le tue attività</h2>
-      <Tabs color='secondary'>
-        <Tab title={`Da completare (${tasks.filter(t => !t.isDone).length})`}>
-          {tasks.filter(t => !t.isDone).map(t => (
-            <TaskCard
-              task={t}
-              onComplete={handleComplete}
-              onDetails={openDetails}
-            />
-          ))}
-        </Tab>
-        <Tab title='Completate'>
-          {tasks.filter(t => t.isDone).map(t => (
-            <TaskCard
-              key={t._id}
-              task={t}
-              onComplete={handleComplete}
-              onDetails={openDetails}
-            />
-          ))}
-        </Tab>
-      </Tabs>
-      {isTaskOpen && <Task
-        taskId={selectedTaskId}
-        user={user}
-        onSaveTask={handleTaskSave}
-        onUpdateTask={handleTaskUpdate}
-        onDeleteTask={handleTaskDelete}
-        isModalOpen={isTaskOpen}
-        setIsModalOpen={setIsTaskOpen}
-      />}
+      <div className='w-[60vw] mx-auto'>
+        <h2 className='text-2xl'>Le tue attività</h2>
+        <Tabs
+          classNames={{
+            base: 'w-full flex flex-row justify-center mt-8'
+          }}
+          color='secondary'
+        >
+          <Tab title={`Da completare (${tasks.filter(t => !t.isDone).length})`}>
+            {tasks.filter(t => !t.isDone).map(t => (
+              <TaskCard
+                task={t}
+                onComplete={handleComplete}
+                onDetails={openDetails}
+              />
+            ))}
+          </Tab>
+          <Tab title='Completate'>
+            {tasks.filter(t => t.isDone).map(t => (
+              <TaskCard
+                key={t._id}
+                task={t}
+                onComplete={handleComplete}
+                onDetails={openDetails}
+              />
+            ))}
+          </Tab>
+        </Tabs>
+        {isTaskOpen && <Task
+          taskId={selectedTaskId}
+          user={user}
+          onSaveTask={handleTaskSave}
+          onUpdateTask={handleTaskUpdate}
+          onDeleteTask={handleTaskDelete}
+          isModalOpen={isTaskOpen}
+          setIsModalOpen={setIsTaskOpen}
+        />}
+      </div>
     </div>
   );
 };

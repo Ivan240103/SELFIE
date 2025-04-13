@@ -13,6 +13,7 @@ body {
 
 @layer components {
   h2 {
+    /* TODO: decidere un colore per i titoli */
     @apply font-bold;
   }
 }
