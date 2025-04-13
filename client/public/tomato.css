@@ -368,86 +368,83 @@ input:focus {
     margin-top: 10px;
 }
 
-.pause-containerr {
-    width: 100%;
-    height: 30px;
-    background-color: #f3f3f3;
-    border-radius: 5px;
-    margin-top: 10px;
-}
-
 .barstudy {
-    width: 100%;
-    height: 30px;
-    background-color: red;
-    border-radius: 5px;
-    transition: width 1s linear;
+    width: 300px; /* Larghezza del div .blob */
+    height: 300px; /* Altezza del div .blob */
+    margin: 10% auto; /* Margini: 10% sopra e sotto, centrato orizzontalmente */
+    position: relative; /* Posizionamento relativo: utilizzato per posizionare gli pseudo-elementi ::before e ::after rispetto a questo elemento */
+    color: #fff; /* Colore del testo all'interno del div */
+    display: flex; /* Display flex per centrare il contenuto (testo o altro) all'interno del div */
+    justify-content: center; /* Allinea orizzontalmente il contenuto al centro */
+    align-items: center; /* Allinea verticalmente il contenuto al centro */
+    z-index: 0; /* Livello z-index, determina l'ordine di sovrapposizione degli elementi */
 }
   
-.barpause {
-    height: 30px;
-    width: 100%;
-    background-color: rgb(29, 232, 29);
-    border-radius: 5px;
-    transition: width 1s linear;
-}
-
 #countdown {
     font-size: 36px; /* Dimensione del testo */
     transition: color 0.3s ease; /* Transizione del colore */
-    color: whitesmoke;
+    color: black;
     margin-top: 30px;
 }
 
-/* Animazione per il testo */
-@keyframes countdownAnimation {
-    0% { transform: scale(1); } /* Inizio animazione: dimensione normale */
-    50% { transform: scale(1.2); } /* Metà animazione: ingrandimento */
-    100% { transform: scale(1); } /* Fine animazione: ritorno alla dimensione normale */
+
+
+.barstudy::before{
+    content: ''; /* Necessario per rendere visibile lo pseudo-elemento, anche se non contiene testo */
+    border: 2px solid #fff; /* Bordo dello pseudo-elemento */
+    border-radius: 58% 42% 48% 53% / 47% 60% 36% 53%; /* Raggio del bordo per creare forme organiche/irregolari */
+    width: 100%; /* Larghezza: occupa tutto lo spazio disponibile nel contenitore .blob */
+    height: 50%; /* Altezza: occupa tutto lo spazio disponibile nel contenitore .blob */
+    position: absolute; /* Posizionamento assoluto: posizionato rispetto al primo antenato posizionato (in questo caso .blob) */
+    left: 0; /* Allineato a sinistra del contenitore .blob */
+    top: 0; /* Allineato in alto del contenitore .blob */
+    animation-fill-mode: forwards; /* Mantiene lo stile dell'ultimo frame dell'animazione dopo che è finita */
 }
 
-/* Applicazione dell'animazione */
-#countdown.animate {
-    animation: countdownAnimation 1s ease-in-out infinite; /* Animazione continua */
+  
+.barstudy::after{
+    content: ''; /* Analogamente a ::before, rende visibile lo pseudo-elemento */
+    border: 2px solid #fff; /* Bordo dello pseudo-elemento */
+    border-radius: 48% 42% 48% 53% / 47% 60% 36% 53%; /* Raggio del bordo per creare forme diverse rispetto a ::before */
+    width: 100%; /* Larghezza come ::before */
+    height: 50%; /* Altezza come ::before */
+    background: rgba(161, 145, 145, 0.178); /* Sfondo leggermente trasparente per differenziarlo da ::before */
+    position: absolute; /* Posizionamento assoluto come ::before */
+    left: 0; /* Allineato a sinistra come ::before */
+    top: 0; /* Allineato in alto come ::before */
+    animation-fill-mode: forwards; /* Mantiene lo stile dell'ultimo frame dell'animazione come ::before */
+}
+  
+@keyframes rotate {
+    0% {
+      transform: scale(1) rotate(0deg);
+      border-color: #EC0D0D;
+    }
+    50% {
+      transform: scale(3) rotate(360deg); /* Adjust the scale value at 50% as needed */
+      border-color: #f4c01c;
+    }
+    100% {
+      transform: scale(6) rotate(360deg); /* Keep rotation the same as at 50% */
+      border-color: #EC0D0D;
+    }
 }
 
-/* Animazione per il countdown */
-#countpause {
-    margin-top: 80px;
-    font-size: 36px; /* Dimensione del testo */
-    transition: color 0.3s ease; /* Transizione del colore */
-    color: whitesmoke;
+@keyframes back {
+    0% {
+        transform: scale(3) rotate(0deg);
+        border-color: #c3ec0d;
+    }
+    50% {
+        transform: scale(2) rotate(360deg); /* Adjust the scale value at 50% as needed */
+        border-color: #45b32a;
+    }
+    100% {
+        transform: scale(1) rotate(360deg); /* Keep rotation the same as at 50% */
+        border-color: rgb(60, 240, 24);
+    }
 }
 
-/* Animazione per il testo */
-@keyframes countdownAnimation {
-    0% { transform: scale(1); } /* Inizio animazione: dimensione normale */
-    50% { transform: scale(1.2); } /* Metà animazione: ingrandimento */
-    100% { transform: scale(1); } /* Fine animazione: ritorno alla dimensione normale */
-}
-
-/* Applicazione dell'animazione */
-#countpause.animate {
-    animation: countdownAnimation 1s ease-in-out infinite; /* Animazione continua */
-}
-
-.sus{
-    position: relative;
-    display: flex;
-    width: 100%;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
-    margin-top: -300px;
-}
-
-#bury{
-    display: flex;
-    width: 40vh;
-    height: 50vh;
-    background-color: rgb(40, 40, 40);
-    border-radius: 48px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.pause-animation::before, .pause-animation::after {
+  animation-play-state: paused !important;
 }
