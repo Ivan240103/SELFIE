@@ -265,6 +265,7 @@ function Event({
   return (
     <Modal
       className='min-w-[32vw] px-5 py-3'
+      classNames={{ header: 'text-xl' }}
       isOpen={isModalOpen}
       onClose={() => setIsModalOpen(false)}
       draggable
