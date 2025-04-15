@@ -46,47 +46,51 @@ function Registration() {
   return (
     <div>
       <Header />
-      <h2>Registrazione</h2>
-      <Form
-        className="flex flex-col items-center"
-        validationBehavior="native"
-        onSubmit={handleRegister}
-      >
-        <Input
-          type="text"
-          label='Username'
-          value={usr}
-          onChange={(e) => setUsr(e.target.value)}
-          isRequired
-        />
-        <Password
-          value={psw}
-          setValue={setPsw}
-          isRequired={true}
-        />
-        <Input
-          type="text"
-          label='Nome'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <Input
-          type="text"
-          label='Cognome'
-          value={surname}
-          onChange={(e) => setSurname(e.target.value)}
-        />
-        <Input
-          type="email"
-          label='Email'
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          isRequired
-        />
-        <Button type="submit" color="primary" variant="solid">
-          Registrati
-        </Button>
-      </Form>
+      <div className="w-1/5 mx-auto mt-12">
+        <h2 className="text-3xl text-center">
+          Registrazione
+        </h2>
+        <Form
+          className="mt-10 flex flex-col items-center gap-4"
+          validationBehavior="native"
+          onSubmit={handleRegister}
+        >
+          <Input
+            type="text"
+            label='Username'
+            value={usr}
+            onChange={(e) => setUsr(e.target.value)}
+            isRequired
+          />
+          <Password
+            value={psw}
+            setValue={setPsw}
+            isRequired={true}
+          />
+          <Input
+            type="text"
+            label='Nome'
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <Input
+            type="text"
+            label='Cognome'
+            value={surname}
+            onChange={(e) => setSurname(e.target.value)}
+          />
+          <Input
+            type="email"
+            label='Email'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            isRequired
+          />
+          <Button className="w-32 mt-4" type="submit" color="primary" variant="solid">
+            Registrati
+          </Button>
+        </Form>
+      </div>
     </div>
   )
 }

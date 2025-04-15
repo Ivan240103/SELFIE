@@ -214,7 +214,7 @@ function Calendar() {
   return (
     <div>
       <Header />
-      <div className='w-[96vw] min-h-[89vh] mt-4 mx-auto pb-8'>
+      <div className='w-[96vw] mt-4 mx-auto pb-8'>
         {isTimeLoading ? (
           <div className='flex flex-col justify-center pt-32'>
             <Spinner color="secondary" variant='wave' label="Caricamento del calendario..." />

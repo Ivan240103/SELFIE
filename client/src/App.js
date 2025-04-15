@@ -15,7 +15,7 @@ function App() {
   return (
     <AuthenticationProvider>
       <TimeProvider>
-        <div className="App">
+        <div className="App min-h-screen">
           <Router>
             <Routes>
               <Route path="/" element={<Dashboard />} />

@@ -181,12 +181,12 @@ function TaskList() {
   return (
     <div>
       <Header />
-      <div className='w-[60vw] min-h-[88vh] mx-auto mt-6 pb-8'>
+      <div className='w-[60vw] mx-auto mt-6 pb-8'>
         <h2 className='text-3xl'>Le tue attività</h2>
         <Tabs
           classNames={{
             base: 'w-full flex flex-row justify-center mt-8',
-            panel: 'w-3/5 m-auto pt-4 flex flex-col items-center gap-4'
+            panel: 'w-3/5 m-auto pt-6 flex flex-col items-center gap-4'
           }}
           color='secondary'
           variant='underlined'

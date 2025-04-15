@@ -344,6 +344,7 @@ function Notes() {
           <div>
             {/* TODO: icona della lente */}
             <Input
+              // TODO: esiste un type 'search'
               type='text'
               label='Cerca'
               value={search}

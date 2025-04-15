@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import CryptoJS from 'crypto-js'
+import clsx from 'clsx';
 import { useAuth } from '../../contexts/AuthenticationContext'
 import { getDateString } from '../../utils/dates'
 import { showError, showSuccess } from '../../utils/toasts'
@@ -22,7 +23,10 @@ import { parseDate } from '@internationalized/date'
 function GoogleButton({ isSync, onClick }) {
   return (
     <Button
-      className={`flex items-center justify-center gap-3 bg-white ${isSync ? 'disabled:opacity-100' : 'border border-gray-300 hover:bg-gray-100'}`}
+      className={clsx(
+        'flex items-center justify-center gap-3 bg-[#fdfdfd]',
+        isSync ? 'disabled:opacity-100' : 'border border-gray-300 hover:bg-gray-100'
+      )}
       onPress={onClick}
       isDisabled={isSync}
     >
@@ -178,7 +182,7 @@ function Profile() {
     <div>
       <Header />
       {isAlertVisible && <Alert
-        className='my-3 fade-in'
+        className='w-3/5 mx-auto my-3 fade-in'
         title={<b>Stai eliminando il tuo profilo</b>}
         description="Se procedi non sarai più in grado di recuperarlo"
         color="danger"
@@ -194,22 +198,31 @@ function Profile() {
           </>
         }
       />}
-      <div>
-        <h2>Ciao, {username}</h2>
+      <div className='w-1/5 min-w-64 mx-auto mt-6 pb-8 flex flex-col items-center'>
+        <h2 className='text-3xl'>
+          Ciao, {username}
+        </h2>
         {!isEditing && <Avatar
+          className='w-32 h-32 my-8 bg-white'
           src={`${process.env.REACT_APP_API}/pics/${profile.picName || 'default.png'}`}
-          className='w-32 h-32'
           alt='Profile'
           isBordered
         />}
         <Form
-          className="flex flex-col items-center"
+          className="w-full flex flex-col items-center gap-4"
           validationBehavior="native"
           onSubmit={handleUpdate}
         >
           {isEditing && <Input
+            // TODO: levare background on hover
+            classNames={{
+              mainWrapper: 'mt-12 mb-4',
+              inputWrapper: 'bg-[#fdfdfd] shadow-none',
+              input: "file:mr-4 file:rounded-full file:border-0 file:bg-blue-100 file:px-4 file:py-2 file:font-semibold file:text-blue-700 hover:file:opacity-80"
+            }}
             type='file'
             label='Carica una foto profilo'
+            labelPlacement='outside'
             description='Quadrata è meglio!'
             accept='.png,.jpg,.jpeg'
             onChange={(e) => setPic(e.target.files[0])}
@@ -243,38 +256,40 @@ function Profile() {
             onChange={(d) => setBirthday(d.toDate())}
             isReadOnly={!isEditing}
           />
-          {isEditing && <Password
-            label='Vecchia password'
-            description='Lascia vuoto per non modificarla'
-            value={password}
-            setValue={setPassword}
-          />}
-          <Password
-            label={isEditing ? 'Nuova password' : 'Password'}
-            description={isEditing ? 'Lascia vuoto per non modificarla' : ''}
-            value={modifiedPsw}
-            setValue={setModifiedPsw}
-            isReadOnly={!isEditing}
-            isRequired={!!password}
-          />
+          <div className='w-full'>
+            {isEditing && <Password
+              label='Vecchia password'
+              description='Lascia vuoto per non modificarla'
+              value={password}
+              setValue={setPassword}
+            />}
+            <Password
+              label={isEditing ? 'Nuova password' : 'Password'}
+              description={isEditing ? 'Lascia vuoto per non modificarla' : ''}
+              value={modifiedPsw}
+              setValue={setModifiedPsw}
+              isReadOnly={!isEditing}
+              isRequired={!!password}
+            />
+          </div>
           {isEditing && (
-            <ButtonGroup>
-              <Button type='button' color='primary' variant='flat' onPress={handleReset}>
+            <ButtonGroup className='mt-4'>
+              <Button className='w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
                 Annulla modifiche
               </Button>
-              <Button type='submit' color='primary' variant='solid'>
+              <Button className='w-40' type='submit' color='primary' variant='solid'>
                 Aggiorna profilo
               </Button>
             </ButtonGroup>
           )}
         </Form>
-        {!isEditing && <div>
+        {!isEditing && <div className='w-full mt-6 flex flex-col items-center gap-4'>
           <GoogleButton isSync={google} onClick={syncGoogle} />
           <ButtonGroup>
-            <Button color='danger' variant='flat' onPress={() => setIsAlertVisible(true)}>
+            <Button className='w-40' color='danger' variant='flat' onPress={() => setIsAlertVisible(true)}>
               Elimina profilo
             </Button>
-            <Button color='primary' variant='solid' onPress={enterEdit}>
+            <Button className='w-40' color='primary' variant='solid' onPress={enterEdit}>
               Modifica profilo
             </Button>
           </ButtonGroup>
