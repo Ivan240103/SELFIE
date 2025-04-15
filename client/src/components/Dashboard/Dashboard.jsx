@@ -85,8 +85,8 @@ function Dashboard() {
   return(
     <div>
       <Header />
-      <div className='dash-container'>
-        <Card isPressable onPress={handleProfileClick}>
+      <div className='w-3/5 mx-auto mt-12 pb-12 grid grid-cols-2 gap-8'>
+        <Card className='col-span-2' isPressable onPress={handleProfileClick}>
           <CardHeader>
             <Avatar
               src={`${process.env.REACT_APP_API}/pics/${user.picName || 'default.png'}`}
@@ -144,7 +144,7 @@ function Dashboard() {
           <PreviewTomato />
         </PreviewCard>
         {isAuthenticated && (
-          <Card isPressable onPress={() => logout()}>
+          <Card className='col-span-2' isPressable onPress={() => logout()}>
             <CardHeader>
               <Avatar
                 src='/images/logout-icon.png'
