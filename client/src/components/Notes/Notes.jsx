@@ -10,6 +10,7 @@ import {
   Card,
   CardHeader,
   CardBody,
+  CardFooter,
   Form,
   Input,
   Textarea,
@@ -72,7 +73,7 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy }) {
   return (
     <Card>
       <CardHeader>
-        <h3>{note.title}</h3>
+        <h3 className='font-bold text-lg'>{note.title}</h3>
         <Dropdown>
           <DropdownTrigger>
             {/* TODO: icona trigger dei tre puntini */}
@@ -90,10 +91,16 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy }) {
         </Dropdown>
       </CardHeader>
       <CardBody>
-        <span>{note.categories ? displayCategories(note.categories) : 'Nessun tag'}</span>
+        <span className='pb-4 text-gray-700'>
+          {note.categories ? displayCategories(note.categories) : 'Nessun tag'}
+        </span>
         <div dangerouslySetInnerHTML={{ __html: marked(note.text) }} />
-        <span>{creationStr}, {modificationStr}</span>
       </CardBody>
+      <CardFooter>
+        <span className='text-gray-600 text-sm'>
+          {creationStr}, {modificationStr}
+        </span>
+      </CardFooter>
     </Card>
   )
 }
@@ -292,65 +299,70 @@ function Notes() {
     <div>
       <Header />
       {isEditorOpen ? (
-        <div>
-          <h2>{noteId ? 'Modifica' : 'Crea'} nota</h2>
+        <div className='w-3/5 mx-auto mt-6 pb-8'>
+          <h2 className='text-3xl'>
+            {noteId ? 'Modifica' : 'Crea'} nota
+          </h2>
           <Form
-            className="flex flex-col items-center"
+            className="w-full flex flex-col items-center mt-8"
             validationBehavior="native"
             onSubmit={handleSubmit}
           >
-            <div>
-              <Input
-                type='text'
-                label='Titolo'
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <Input
-                type='text'
-                label='Categorie'
-                description='Inserisci tutti i #tag che vuoi'
-                value={categories}
-                onChange={(e) => setCategories(e.target.value)}
-              />
-              <Textarea
-                label='Contenuto'
-                placeholder='Scrivi o incolla il contenuto della nota qui...'
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                minRows={8}
-                isRequired
-              />
-            </div>
-            <div>
-              <div dangerouslySetInnerHTML={{ __html: marked(`# ${title}`) }} />
-              <div>
-                <span>{categories ? clearCategories(categories).map(c => `#${c}`).join(' ') : 'Nessun tag'}</span>
+            <div className='w-full flex flex-row items-start justify-between gap-8'>
+              <div className='w-1/2 flex flex-col items-center gap-3'>
+                <Input
+                  type='text'
+                  label='Titolo'
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+                <Input
+                  type='text'
+                  label='Categorie'
+                  description='Inserisci tutti i #tag che vuoi'
+                  value={categories}
+                  onChange={(e) => setCategories(e.target.value)}
+                />
+                <Textarea
+                  label='Contenuto'
+                  placeholder='Scrivi o incolla il contenuto della nota qui...'
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  minRows={8}
+                  isRequired
+                />
               </div>
-              <div dangerouslySetInnerHTML={{ __html: marked(text) }} />
+              <div className='w-1/2 flex flex-col items-center gap-3'>
+                <div dangerouslySetInnerHTML={{ __html: marked(`# ${title}`) }} />
+                <div>
+                  <span>{categories ? clearCategories(categories).map(c => `#${c}`).join(' ') : 'Nessun tag'}</span>
+                </div>
+                <div className='w-full bg-gray-100' dangerouslySetInnerHTML={{ __html: marked(text) }} />
+              </div>
             </div>
-            <ButtonGroup>
-              <Button type='button' color='primary' variant='flat' onPress={() => setIsEditorOpen(false)}>
+            <ButtonGroup className='mt-6'>
+              <Button className='w-40' type='button' color='primary' variant='flat' onPress={() => setIsEditorOpen(false)}>
                 Annulla
               </Button>
-              <Button type='submit' color='primary' variant='solid'>
+              <Button className='w-40' type='submit' color='primary' variant='solid'>
                 Salva nota
               </Button>
             </ButtonGroup>
           </Form>
         </div>
       ) : (
-        <div>
-          <div>
+        <div className='w-3/5 mx-auto mt-6 pb-8'>
+          <div className='w-full flex flex-row items-center gap-4'>
             {/* TODO: icona della lente */}
             <Input
-              // TODO: esiste un type 'search'
-              type='text'
+              className='w-full'
+              type='search'
               label='Cerca'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
             <Select
+              className='w-72'
               label='Ordina per'
               selectedKeys={[sortCriteria]}
               onChange={(e) => {
@@ -363,12 +375,12 @@ function Notes() {
               <SelectItem key="create">Data di creazione</SelectItem>
               <SelectItem key="length">Dimensione</SelectItem>
             </Select>
-            <Button color='primary' variant='flat' onPress={() => openEditor()}>
+            <Button className='w-32 py-7' color='primary' variant='flat' onPress={() => openEditor()}>
               Crea nota
             </Button>
           </div>
-          <div>
-            {notes ? (
+          <div className='mt-8 grid grid-cols-3 gap-10'>
+            {notes.length > 0 ? (
               notes.filter(n => checkSearch(n, search)).map(n => (
                 <NoteCard
                   key={n._id}
@@ -380,7 +392,9 @@ function Notes() {
                 />
               ))
             ) : (
-              <p>Nessuna nota presente</p>
+              <span className='text-gray-700 mt-[20vh] text-center col-start-2'>
+                Nessuna nota presente
+              </span>
             )}
           </div>
         </div>
