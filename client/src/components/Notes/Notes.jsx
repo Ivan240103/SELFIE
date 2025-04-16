@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
 import { useAuth } from '../../contexts/AuthenticationContext';
-import { getDatetimeString } from '../../utils/dates';
 import { showError, showSuccess } from '../../utils/toasts';
 import Header from '../Header/Header';
 
@@ -21,9 +20,11 @@ import {
   DropdownMenu,
   DropdownItem,
   Select,
-  SelectItem
+  SelectItem,
+  ScrollShadow
 } from '@heroui/react'
 
+// TODO: non funzionano i titoli con i cancelletti e gli elenchi
 marked.setOptions({
   gfm: true,       // usa le specifiche markdown di Github
   breaks: true,    // aggiunge una singola linea di break
@@ -32,7 +33,7 @@ marked.setOptions({
 const displayCategories = (cat) => cat.split(',').map(c => `#${c}`).join(' ')
 
 function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy }) {
-  const displayTime = (d) => getDatetimeString(d).replace('T', ' alle ');
+  const displayTime = (d) => d.toLocaleString('it-IT').slice(0, 17).replace(',', ' alle');
   const creationStr = `Creata il ${displayTime(new Date(note.creation))}`
   const modificationStr = `ultima modifica il ${displayTime(new Date(note.modification))}`
 
@@ -71,22 +72,30 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy }) {
   }
 
   return (
-    <Card>
+    <Card
+      classNames={{
+        base: 'p-3',
+        header: 'pt-1 flex flex-row items-center justify-between'
+      }}
+    >
       <CardHeader>
         <h3 className='font-bold text-lg'>{note.title}</h3>
         <Dropdown>
           <DropdownTrigger>
-            {/* TODO: icona trigger dei tre puntini */}
-            <Button color='default' variant='light'>
-              ...
+            <Button color='default' variant='light' radius='full' isIconOnly>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className='fill-gray-600'>
+                <circle cx="8" cy="12" r="1"/>
+                <circle cx="12" cy="12" r="1"/>
+                <circle cx="16" cy="12" r="1"/>
+              </svg>
             </Button>
           </DropdownTrigger>
-          <DropdownMenu onAction={handleAction}>
+          <DropdownMenu onAction={handleAction} variant='flat'>
             <DropdownItem key='edit'>Modifica</DropdownItem>
             <DropdownItem key='copy'>Copia testo</DropdownItem>
             <DropdownItem key='duplicate'>Duplica</DropdownItem>
             <DropdownItem key='down'>Scarica</DropdownItem>
-            <DropdownItem key='del'>Elimina</DropdownItem>
+            <DropdownItem key='del' className='text-danger' color='danger'>Elimina</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </CardHeader>
@@ -94,7 +103,9 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy }) {
         <span className='pb-4 text-gray-700'>
           {note.categories ? displayCategories(note.categories) : 'Nessun tag'}
         </span>
-        <div dangerouslySetInnerHTML={{ __html: marked(note.text) }} />
+        <ScrollShadow className='h-48'>
+          <div dangerouslySetInnerHTML={{ __html: marked(note.text) }} />
+        </ScrollShadow>
       </CardBody>
       <CardFooter>
         <span className='text-gray-600 text-sm'>
@@ -273,6 +284,7 @@ function Notes() {
   // duplicare una nota
   function handleDuplicate(note) {
     // Prepara i dati per la nuova nota (copia il titolo, categorie e testo)
+    setNoteId('')
     setTitle(`Copia di ${note.title}`);
     setText(note.text);
     setCategories(displayCategories(note.categories));
@@ -296,10 +308,10 @@ function Notes() {
   }
 
   return (
-    <div>
+    <div className='pb-8'>
       <Header />
       {isEditorOpen ? (
-        <div className='w-3/5 mx-auto mt-6 pb-8'>
+        <div className='w-3/5 mx-auto mt-8 pb-8'>
           <h2 className='text-3xl'>
             {noteId ? 'Modifica' : 'Crea'} nota
           </h2>
@@ -308,8 +320,8 @@ function Notes() {
             validationBehavior="native"
             onSubmit={handleSubmit}
           >
-            <div className='w-full flex flex-row items-start justify-between gap-8'>
-              <div className='w-1/2 flex flex-col items-center gap-3'>
+            <div className='w-full flex flex-row items-start justify-between gap-10'>
+              <div className='w-1/2 flex flex-col gap-3'>
                 <Input
                   type='text'
                   label='Titolo'
@@ -332,12 +344,12 @@ function Notes() {
                   isRequired
                 />
               </div>
-              <div className='w-1/2 flex flex-col items-center gap-3'>
-                <div dangerouslySetInnerHTML={{ __html: marked(`# ${title}`) }} />
-                <div>
-                  <span>{categories ? clearCategories(categories).map(c => `#${c}`).join(' ') : 'Nessun tag'}</span>
-                </div>
-                <div className='w-full bg-gray-100' dangerouslySetInnerHTML={{ __html: marked(text) }} />
+              <div className='w-1/2 flex flex-col gap-3 pl-4'>
+                <h3 className='font-bold text-xl pt-4'>{title || 'Senza titolo'}</h3>
+                <span className='text-gray-700 pt-2'>
+                  {categories ? clearCategories(categories).map(c => `#${c}`).join(' ') : 'Nessun tag'}
+                </span>
+                <div className='w-full mt-3' dangerouslySetInnerHTML={{ __html: marked(text) }} />
               </div>
             </div>
             <ButtonGroup className='mt-6'>
@@ -351,15 +363,20 @@ function Notes() {
           </Form>
         </div>
       ) : (
-        <div className='w-3/5 mx-auto mt-6 pb-8'>
-          <div className='w-full flex flex-row items-center gap-4'>
-            {/* TODO: icona della lente */}
+        <div className='w-3/5 mx-auto mt-8 pb-8'>
+          <h2 className='text-3xl'>Le tue note</h2>
+          <div className='w-full mt-8 flex flex-row items-center gap-4'>
             <Input
               className='w-full'
               type='search'
               label='Cerca'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              endContent={
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 40" width={28} height={28} className='fill-gray-600'>
+                  <path d="M27.414,24.586l-5.077-5.077C23.386,17.928,24,16.035,24,14c0-5.514-4.486-10-10-10S4,8.486,4,14  s4.486,10,10,10c2.035,0,3.928-0.614,5.509-1.663l5.077,5.077c0.78,0.781,2.048,0.781,2.828,0  C28.195,26.633,28.195,25.367,27.414,24.586z M7,14c0-3.86,3.14-7,7-7s7,3.14,7,7s-3.14,7-7,7S7,17.86,7,14z" />
+                </svg>
+              }
             />
             <Select
               className='w-72'
@@ -379,7 +396,7 @@ function Notes() {
               Crea nota
             </Button>
           </div>
-          <div className='mt-8 grid grid-cols-3 gap-10'>
+          <div className='mt-12 grid grid-cols-3 gap-10'>
             {notes.length > 0 ? (
               notes.filter(n => checkSearch(n, search)).map(n => (
                 <NoteCard
