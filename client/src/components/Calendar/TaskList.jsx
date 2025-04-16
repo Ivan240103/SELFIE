@@ -181,7 +181,7 @@ function TaskList() {
   return (
     <div>
       <Header />
-      <div className='w-[60vw] mx-auto mt-6 pb-8'>
+      <div className='w-[60vw] mx-auto mt-8 pb-8'>
         <h2 className='text-3xl'>Le tue attività</h2>
         <Tabs
           classNames={{
