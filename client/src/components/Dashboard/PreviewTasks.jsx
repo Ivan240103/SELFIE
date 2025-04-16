@@ -65,7 +65,7 @@ export default function PreviewTasks() {
   return (
     <div className='my-3 size-full flex items-center justify-center'>
       {tasks.length === 0 ? (
-        <span className='text-gray-700'>Nessun task previsto</span>
+        <span className='text-gray-700'>Nessuna attività prevista</span>
       ) : (
         <div className="size-full grid grid-rows-3 gap-4">
           {tasks.map(t => <TaskCard key={t._id} task={t}/>)}

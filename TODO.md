@@ -94,6 +94,7 @@
 - [x] disabilitare le notifiche
 - [x] note in markdown
 - [ ] cicli di pomodoro programmati come eventi
+  - [ ] nella preview prendere l'ultimo pomodoro che non ha associato un task???
   - [ ] !!! quando si crea il pomodoro, in settings mettere un bottone per pianificarlo che apre un Modal come quello dei task, per scegliere data ecc... queste scelte vengono mostrate nei settings. quando si crea il pomodoro, creare anche il task associato.
   - [ ] cicli non completati si spostano alle giornate successive
   - [ ] aggiungere campo tomato a task
