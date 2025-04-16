@@ -243,7 +243,6 @@ function Task({
               isEditing={isEditing}
             />
             <DatePicker
-              // TODO: format date in dd/MM/yyyy
               label='Scadenza'
               description='Entro quando deve essere completata'
               showMonthAndYearPickers

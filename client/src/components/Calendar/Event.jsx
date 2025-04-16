@@ -302,7 +302,6 @@ function Event({
               description='Seleziona uno o più giorni'
               firstDayOfWeek='mon'
               hourCycle={24}
-              // TODO: format date in dd/MM/yyyy
               value={getDatePickerValue()}
               onChange={(e) => {
                 setStart(e.start.toDate())
@@ -362,7 +361,6 @@ function Event({
                 <div className='flex flex-row gap-3'>
                   <Radio className='ml-1' value='u'>il</Radio>
                   <DatePicker
-                    // TODO: format date in dd/MM/yyyy
                     classNames={{
                       inputWrapper: 'py-6'
                     }}

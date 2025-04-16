@@ -10,6 +10,8 @@ Per avviare server e client è realizzato uno script unico:
 ./selfie.sh
 ```
 
+Menzionare che le date nei date picker sono in formato MM/dd/yyyy
+
 ## Documentazione
 FullCalendar: https://fullcalendar.io/docs  
 RRule: https://github.com/jkbrzt/rrule
