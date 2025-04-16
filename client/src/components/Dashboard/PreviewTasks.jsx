@@ -3,27 +3,35 @@ import axios from 'axios';
 import { useTime } from '../../contexts/TimeContext'
 import { useAuth } from '../../contexts/AuthenticationContext';
 import { showError } from '../../utils/toasts'
-import { getDateString } from '../../utils/dates';
 
 import {
   Card,
   CardHeader,
-  CardBody,
+  CardBody
 } from '@heroui/react'
 
 function TaskCard({ task }) {
   const { time } = useTime()
 
-  const notDoneColor = () => time > new Date(task.deadline) ? '#ff8080' : '#ffff80'
+  const notDoneColor = () => time > new Date(task.deadline) ? '#f87171' : '#fde68a'
 
   return (
-    <Card style={{ backgroundColor: notDoneColor()}}>
+    <Card
+      style={{ backgroundColor: task.isDone ? '#86efac' : notDoneColor()}}
+      classNames={{
+        base: 'w-full p-3',
+        header: 'pb-0 flex flex-row items-center gap-3'
+      }}
+    >
       <CardHeader>
-        <h3>{task.title}</h3>
+        <h3 className="font-bold">{task.title}</h3>
+        <span>|</span>
+        <time className="text-sm text-gray-800">
+          {(new Date(task.deadline)).toLocaleString('it-IT').slice(0, 10)}
+        </time>
       </CardHeader>
       <CardBody>
-        <time>{getDateString(new Date(task.deadline))}</time>
-        <span>{task.description.slice(0, 45)}{task.description.length > 45 && '...'}</span>
+        <span className="truncate">{task.description}</span>
       </CardBody>
     </Card>
   )
@@ -55,11 +63,13 @@ export default function PreviewTasks() {
   }, [isAuthenticated])
 
   return (
-    <div className='dash-card-preview'>
+    <div className='my-3 size-full flex items-center justify-center'>
       {tasks.length === 0 ? (
-        <span className='dash-empty-prev'>Nessun task previsto</span>
+        <span className='text-gray-700'>Nessun task previsto</span>
       ) : (
-        tasks.map(t => <TaskCard key={t._id} task={t}/>)
+        <div className="size-full grid grid-rows-3 gap-4">
+          {tasks.map(t => <TaskCard key={t._id} task={t}/>)}
+        </div>
       )}
     </div>
   )

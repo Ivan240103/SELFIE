@@ -43,14 +43,14 @@ export default function PreviewNote() {
   }, [isAuthenticated])
 
   const displayCategories = (cat) => cat.split(',').map(c => `#${c}`).join(' ')
-  const displayTime = (d) => d.toLocaleString('it-IT').slice(0, 17).replace(',', ' alle');
+  const displayTime = (d) => d.toLocaleString('it-IT').slice(0, -3).replace(',', ' alle');
   
   return (
     <div className="size-full flex flex-col items-center justify-center">
       {note ? (
         <Card
           classNames={{
-            base: 'w-[85%] p-5 shadow-none border-1 border-gray-300 bg-[#fafafa]',
+            base: 'w-[88%] p-5 shadow-none border-1 border-gray-300 bg-[#fafafa]',
             header: 'pt-2'
           }}
         >

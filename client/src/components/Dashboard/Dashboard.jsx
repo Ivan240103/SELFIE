@@ -148,7 +148,7 @@ function Dashboard() {
           onClick={() => authNav('/task')}
           imgSrc='/images/task-icon.png'
           imgAlt='icona dei task'
-          title='Task'
+          title='Attività'
           description='Traccia le cose da fare!'
         >
           <PreviewTasks />
