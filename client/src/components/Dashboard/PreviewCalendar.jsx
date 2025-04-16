@@ -87,7 +87,6 @@ export default function PreviewCalendar() {
         </div>
       ) : (
         <FullCalendar
-          dayHeaderClassNames='bg-gray-100'
           eventDisplay='block'
           eventColor='#bae6fd'
           eventTextColor='black'

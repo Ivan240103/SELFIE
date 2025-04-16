@@ -111,7 +111,3 @@
 - [x] nascondere button 'indietro' se la pagina non lo consente (stesso colore del bg ma disabilitato?)
 - [x] toast success di logout
 - [x] card nella dashboard non cliccabili se non authenticated
-
-## HeroUI
-- ScrollShadow in anteprima nota
-- Spinner nei caricamenti pesanti
