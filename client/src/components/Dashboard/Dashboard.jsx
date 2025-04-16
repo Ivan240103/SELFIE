@@ -20,16 +20,24 @@ function PreviewCard({
   onClick, imgSrc, imgAlt, title, description, children
 }) {
   return (
-    <Card isPressable onPress={onClick}>
+    <Card
+      classNames={{
+        base: 'aspect-square p-5',
+        header: 'ml-2 flex flex-row items-center gap-6',
+        body: 'px-5 pb-5'
+      }}
+      isPressable
+      onPress={onClick}
+    >
       <CardHeader>
         <Avatar
+          className='w-14 h-14 bg-white'
           src={imgSrc}
           alt={imgAlt}
-          radius='sm'
-          style={{ backgroundColor: 'white' }}
+          radius='none'
         />
-        <div>
-          <h2>{title}</h2>
+        <div className='flex flex-col items-start'>
+          <h2 className='text-lg pt-1'>{title}</h2>
           <span>{description}</span>
         </div>
       </CardHeader>
@@ -83,25 +91,36 @@ function Dashboard() {
   }
 
   return(
-    <div>
+    <div className='pb-20'>
       <Header />
-      <div className='w-3/5 mx-auto mt-12 pb-12 grid grid-cols-2 gap-8'>
-        <Card className='col-span-2' isPressable onPress={handleProfileClick}>
+      <div className='w-3/5 mx-auto mt-12 grid grid-cols-2 gap-12'>
+        <Card
+          className='col-span-2'
+          classNames={{
+            base: 'px-3 py-5',
+            header: 'ml-4 py-4 flex flex-row items-center gap-8'
+          }}
+          isPressable
+          onPress={handleProfileClick}
+        >
           <CardHeader>
             <Avatar
+              className='w-24 h-24 bg-color-white'
               src={`${process.env.REACT_APP_API}/pics/${user.picName || 'default.png'}`}
               alt='icona del profilo'
-              className='w-24 h-24 bg-color-white'
+              isBordered
             />
             {isAuthenticated ? (
-              <div>
-                <h2>Profilo personale</h2>
+              <div className='flex flex-col items-start'>
+                <h2 className='text-lg py-1'>Profilo personale</h2>
                 <span>Personalizza il tuo profilo!</span>
-                <span>{user.name || ''} {user.surname || ''}, {user.email || 'nessuna email'}</span>
+                <span className='text-gray-600'>
+                  {user.name || ''} {user.surname || ''}, {user.email || 'nessuna email'}
+                </span>
               </div>
             ) : (
-              <div>
-                <h2>Login</h2>
+              <div className='flex flex-col items-start'>
+                <h2 className='text-lg py-1'>Login</h2>
                 <span>Effettua il login o registrati!</span>
               </div>
             )}
@@ -144,16 +163,24 @@ function Dashboard() {
           <PreviewTomato />
         </PreviewCard>
         {isAuthenticated && (
-          <Card className='col-span-2' isPressable onPress={() => logout()}>
+          <Card
+            className='col-span-2'
+            classNames={{
+              base: 'px-5 py-7',
+              header: 'ml-2 flex flex-row items-center gap-6'
+            }}
+            isPressable
+            onPress={() => logout()}
+          >
             <CardHeader>
               <Avatar
+                className='w-14 h-14 bg-white'
                 src='/images/logout-icon.png'
                 alt='icona del logout'
-                radius='sm'
-                style={{ backgroundColor: 'white' }}
+                radius='none'
               />
-              <div>
-                <h2>Logout</h2>
+              <div className='flex flex-col items-start'>
+                <h2 className='text-lg pt-1'>Logout</h2>
                 <span>Esci dal profilo!</span>
               </div>
             </CardHeader>
