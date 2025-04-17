@@ -40,7 +40,7 @@ function Access() {
   return (
     <div>
       <Header />
-      <div className="w-1/5 mx-auto mt-12">
+      <div className="w-3/5 lg:w-1/5 mx-auto mt-12">
         <h2 className="text-3xl text-center">Login</h2>
         <Form
           className="mt-10 flex flex-col items-center gap-4"
@@ -63,10 +63,10 @@ function Access() {
             Non hai un profilo? <Link href="/register" color="primary" underline="focus">Registrati</Link>
           </span>
           <div className="mt-2 flex flex-row gap-3">
-            <Button className="w-32" type="button" color="primary" variant="flat" onPress={() => navigate('/')}>
+            <Button className="w-28 lg:w-32" type="button" color="primary" variant="flat" onPress={() => navigate('/')}>
               Annulla
             </Button>
-            <Button className="w-32" type="submit" color="primary" variant="solid">
+            <Button className="w-28 lg:w-32" type="submit" color="primary" variant="solid">
               Accedi
             </Button>
           </div>

@@ -12,7 +12,7 @@ function Header() {
   return (
     <header className='w-full grid grid-cols-3 items-center p-5'>
       <Button
-        className='w-20 justify-self-start disabled:bg-transparent'
+        className='w-16 lg:w-20 justify-self-start disabled:bg-transparent'
         color='secondary'
         isIconOnly
         onPress={() => navigate(-1)}

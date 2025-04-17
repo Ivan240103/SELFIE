@@ -50,23 +50,24 @@ export default function PreviewNote() {
       {note ? (
         <Card
           classNames={{
-            base: 'w-[88%] p-5 shadow-none border-1 border-gray-300 bg-[#fafafa]',
-            header: 'pt-2'
+            base: 'w-[88%] p-3 lg:p-5 shadow-none border-1 border-gray-300 bg-[#fafafa]',
+            header: 'pt-2',
+            body: 'py-0 lg:py-3'
           }}
         >
           <CardHeader>
-            <h3 className='font-bold text-lg'>{note.title}</h3>
+            <h3 className='font-bold lg:text-lg'>{note.title}</h3>
           </CardHeader>
           <CardBody>
-            <span className='pb-4 text-gray-700'>
+            <span className='pb-1 lg:pb-4 text-gray-700 text-sm lg:text-base'>
               {note.categories ? displayCategories(note.categories) : 'Nessun tag'}
             </span>
-            <ScrollShadow className='h-48'>
+            <ScrollShadow className='lg:h-48'>
               <div dangerouslySetInnerHTML={{ __html: marked(note.text) }} />
             </ScrollShadow>
           </CardBody>
           <CardFooter>
-            <span className='text-gray-600 text-sm'>
+            <span className='text-gray-600 text-xs lg:text-sm'>
               {`Ultima modifica il ${displayTime(new Date(note.modification))}`}  
             </span>
           </CardFooter>

@@ -9,7 +9,7 @@ import {
 
 function Reminder({ type, reminder, setReminder, isEditing }) {
   return (
-    <div className='w-full m-2 flex flex-row items-center justify-start gap-3'>
+    <div className='w-full m-2 flex flex-row items-center justify-start gap-2 lg:gap-3'>
       <Checkbox
         color='primary'
         isSelected={reminder.checked}
@@ -19,10 +19,10 @@ function Reminder({ type, reminder, setReminder, isEditing }) {
         }))}
         isReadOnly={!isEditing}
       >
-        {type}
+        <span className="block text-sm lg:text-base">{type}</span>
       </Checkbox>
       <NumberInput
-        className='w-24'
+        className='w-20 lg:w-24'
         size='sm'
         radius='md'
         minValue={reminder.time === 'm' ? 5 : 1}
@@ -50,7 +50,7 @@ function Reminder({ type, reminder, setReminder, isEditing }) {
         <SelectItem key='h'>{reminder.before === 1 ? 'Ora' : 'Ore'}</SelectItem>
         <SelectItem key='d'>{reminder.before === 1 ? 'Giorno' : 'Giorni'}</SelectItem>
       </Select>
-      <span>prima</span>
+      <span className="block text-sm lg:text-base">prima</span>
     </div>
   )
 }

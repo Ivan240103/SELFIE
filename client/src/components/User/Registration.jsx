@@ -46,7 +46,7 @@ function Registration() {
   return (
     <div>
       <Header />
-      <div className="w-1/5 mx-auto mt-12">
+      <div className="w-3/5 lg:w-1/5 mx-auto mt-12">
         <h2 className="text-3xl text-center">
           Registrazione
         </h2>
@@ -86,7 +86,7 @@ function Registration() {
             onChange={(e) => setEmail(e.target.value)}
             isRequired
           />
-          <Button className="w-32 mt-4" type="submit" color="primary" variant="solid">
+          <Button className="w-28 lg:w-32 mt-4" type="submit" color="primary" variant="solid">
             Registrati
           </Button>
         </Form>

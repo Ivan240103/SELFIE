@@ -19,7 +19,7 @@ function TaskCard({ task }) {
     <Card
       style={{ backgroundColor: task.isDone ? '#86efac' : notDoneColor()}}
       classNames={{
-        base: 'w-full p-3',
+        base: 'w-full p-1 lg:p-3',
         header: 'pb-0 flex flex-row items-center gap-3'
       }}
     >
@@ -63,11 +63,11 @@ export default function PreviewTasks() {
   }, [isAuthenticated])
 
   return (
-    <div className='my-3 size-full flex items-center justify-center'>
+    <div className='lg:my-3 size-full flex items-center justify-center'>
       {tasks.length === 0 ? (
         <span className='text-gray-700'>Nessuna attività prevista</span>
       ) : (
-        <div className="size-full grid grid-rows-3 gap-4">
+        <div className="size-full grid grid-rows-3 gap-2 lg:gap-4">
           {tasks.map(t => <TaskCard key={t._id} task={t}/>)}
         </div>
       )}

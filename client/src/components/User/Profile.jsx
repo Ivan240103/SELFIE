@@ -182,23 +182,23 @@ function Profile() {
     <div>
       <Header />
       {isAlertVisible && <Alert
-        className='w-3/5 mx-auto my-3 fade-in'
+        className='w-4/5 lg:w-3/5 mx-auto my-3 fade-in'
         title={<b>Stai eliminando il tuo profilo</b>}
         description="Se procedi non sarai più in grado di recuperarlo"
         color="danger"
         variant="faded"
         endContent={
-          <>
+          <div className='flex flex-col lg:flex-row gap-2'>
             <Button color="danger" variant="light" onPress={() => setIsAlertVisible(false)}>
               Annulla
             </Button>
             <Button color="danger" variant="flat" onPress={handleDelete}>
               Elimina
             </Button>
-          </>
+          </div>
         }
       />}
-      <div className='w-1/5 min-w-64 mx-auto mt-6 pb-8 flex flex-col items-center'>
+      <div className='w-3/5 lg:w-1/5 min-w-64 mx-auto mt-6 pb-8 flex flex-col items-center'>
         <h2 className='text-3xl'>
           Ciao, {username}
         </h2>
@@ -274,10 +274,10 @@ function Profile() {
           </div>
           {isEditing && (
             <ButtonGroup className='mt-4'>
-              <Button className='w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
+              <Button className='w-36 lg:w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
                 Annulla modifiche
               </Button>
-              <Button className='w-40' type='submit' color='primary' variant='solid'>
+              <Button className='w-36 lg:w-40' type='submit' color='primary' variant='solid'>
                 Aggiorna profilo
               </Button>
             </ButtonGroup>
@@ -286,10 +286,10 @@ function Profile() {
         {!isEditing && <div className='w-full mt-6 flex flex-col items-center gap-4'>
           <GoogleButton isSync={google} onClick={syncGoogle} />
           <ButtonGroup>
-            <Button className='w-40' color='danger' variant='flat' onPress={() => setIsAlertVisible(true)}>
+            <Button className='w-36 lg:w-40' color='danger' variant='flat' onPress={() => setIsAlertVisible(true)}>
               Elimina profilo
             </Button>
-            <Button className='w-40' color='primary' variant='solid' onPress={enterEdit}>
+            <Button className='w-36 lg:w-40' color='primary' variant='solid' onPress={enterEdit}>
               Modifica profilo
             </Button>
           </ButtonGroup>

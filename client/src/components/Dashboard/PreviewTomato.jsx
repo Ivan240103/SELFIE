@@ -31,17 +31,17 @@ export default function PreviewTomato() {
   return (
     <div className='size-full flex items-center justify-center'>
       {tomato ? (
-        <div className='flex flex-col items-center justify-center gap-3 p-16 rounded-full border-3 border-red-500 bg-red-200'>
-          <span>
+        <div className='flex flex-col items-center justify-center gap-1 lg:gap-3 p-8 lg:p-16 rounded-full border-3 border-red-500 bg-red-200'>
+          <span className='text-sm lg:text-base'>
             {tomato.loops} <b>{tomato.loops === 1 ? 'ciclo' : 'cicli'}</b> da
           </span>
-          <span>
+          <span className='text-sm lg:text-base'>
             {tomato.studyMinutes} {tomato.studyMinutes === 1 ? 'minuto' : 'minuti'} di <b>studio</b>  
           </span>
-          <span>
+          <span className='text-sm lg:text-base'>
             {tomato.pauseMinutes} {tomato.pauseMinutes === 1 ? 'minuto' : 'minuti'} di <b>pausa</b>  
           </span>
-          <span>
+          <span className='text-sm lg:text-base'>
             <b>{tomato.interrupted === 'n' ? 'Creato' : tomato.interrupted === 'f' ? 'Concluso' : 'Cominciato'}</b>
           </span>
         </div>

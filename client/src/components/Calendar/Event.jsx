@@ -264,7 +264,7 @@ function Event({
 
   return (
     <Modal
-      className='min-w-[32vw] px-5 py-3'
+      className='min-w-[32vw] lg:px-5 py-3'
       classNames={{ header: 'text-xl' }}
       isOpen={isModalOpen}
       onClose={() => setIsModalOpen(false)}
@@ -273,7 +273,7 @@ function Event({
     >
       <ModalContent>
         <ModalHeader>Evento</ModalHeader>
-        <ModalBody className='w-[88%] m-auto'>
+        <ModalBody className='w-full lg:w-[88%] m-auto'>
           <Form
             className="flex flex-col items-center"
             validationBehavior="native"
@@ -293,9 +293,7 @@ function Event({
               onValueChange={setIsAllDay}
               isReadOnly={!isEditing}
             >
-              <p className='text-gray-800'>
-                Evento per tutto il giorno
-              </p>
+              <span>Evento per tutto il giorno</span>
             </Checkbox>
             <DateRangePicker
               label='Durata'
@@ -317,15 +315,13 @@ function Event({
               onValueChange={setIsRecurrent}
               isReadOnly={!isEditing}
             >
-              <span className='text-gray-800'>
-                Evento ricorrente
-              </span>
+              <span>Evento ricorrente</span>
             </Checkbox>
             {isRecurrent && <div className='w-full flex flex-col items-start ml-3 pt-1 pb-3'>
-              <div className='w-full flex flex-row items-center justify-between gap-3'>
+              <div className='w-full flex flex-row items-center justify-between gap-2 lg:gap-3'>
                 <span className='block'>Ripeti&nbsp;ogni</span>
                 <NumberInput
-                  className='w-32'
+                  className='w-24 lg:w-32'
                   size='sm'
                   radius='md'
                   minValue={1}
@@ -417,10 +413,10 @@ function Event({
                 </ButtonGroup>
               ) : isEditing && (
                 <ButtonGroup className='mt-1'>
-                  <Button className='w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
+                  <Button className='w-36 lg:w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
                     Annulla modifiche
                   </Button>
-                  <Button className='w-40' type='submit' color='primary' variant='solid'>
+                  <Button className='w-36 lg:w-40' type='submit' color='primary' variant='solid'>
                     Aggiorna evento
                   </Button>
                 </ButtonGroup>
@@ -429,10 +425,10 @@ function Event({
           </Form>
           {!googleId && eventId && !isEditing && (
             <ButtonGroup>
-              <Button className='w-40' color='danger' variant='flat' onPress={handleDelete}>
+              <Button className='w-36 lg:w-40' color='danger' variant='flat' onPress={handleDelete}>
                 Elimina evento
               </Button>
-              <Button className='w-40' color='primary' variant='solid' onPress={() => setIsEditing(true)}>
+              <Button className='w-36 lg:w-40' color='primary' variant='solid' onPress={() => setIsEditing(true)}>
                 Modifica evento
               </Button>
             </ButtonGroup>

@@ -212,7 +212,7 @@ function Task({
 
   return (
     <Modal
-      className='min-w-[32vw] px-5 py-3'
+      className='min-w-[32vw] lg:px-5 py-3'
       classNames={{ header: 'text-xl' }}
       isOpen={isModalOpen}
       onClose={() => setIsModalOpen(false)}
@@ -221,7 +221,7 @@ function Task({
     >
       <ModalContent>
         <ModalHeader>Attività</ModalHeader>
-        <ModalBody className='w-[88%] m-auto'>
+        <ModalBody className='w-full lg:w-[88%] m-auto'>
           {!isEditing && <Checkbox
             className='ml-2 mb-2'
             color='success'
@@ -275,10 +275,10 @@ function Task({
               </ButtonGroup>
             ) : isEditing && (
               <ButtonGroup className='mt-1'>
-                <Button className='w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
+                <Button className='w-36 lg:w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
                   Annulla modifiche
                 </Button>
-                <Button className='w-40' type='submit' color='primary' variant='solid'>
+                <Button className='w-36 lg:w-40' type='submit' color='primary' variant='solid'>
                   Aggiorna attività
                 </Button>
               </ButtonGroup>
@@ -286,10 +286,10 @@ function Task({
           </Form>
           {taskId && !isEditing && (
             <ButtonGroup>
-              <Button className='w-40' color='danger' variant='flat' onPress={handleDelete}>
+              <Button className='w-36 lg:w-40' color='danger' variant='flat' onPress={handleDelete}>
                 Elimina attività
               </Button>
-              <Button className='w-40' color='primary' variant='solid' onPress={() => setIsEditing(true)}>
+              <Button className='w-36 lg:w-40' color='primary' variant='solid' onPress={() => setIsEditing(true)}>
                 Modifica attività
               </Button>
             </ButtonGroup>

@@ -220,13 +220,14 @@ function Calendar() {
             <Spinner color="secondary" variant='wave' label="Caricamento del calendario..." />
           </div>
         ) : (
+          // TODO: rendere responsive la toolbar del calendario
           // TODO: visualizzazione di eventi allDay su più giorni non include la end date (forse problema con il salvataggio)
           <FullCalendar
-            aspectRatio={16/9}
             dayHeaderClassNames='bg-gray-100'
             eventDisplay='block'
             eventColor='#bae6fd'
             eventTextColor='black'
+            height='94vh'
             eventTimeFormat={{
               hour: 'numeric',
               minute: '2-digit',

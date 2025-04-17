@@ -31,7 +31,7 @@ function TaskCard({ task, onDetails }) {
     <Card
       style={{ backgroundColor: task.isDone ? '#86efac' : notDoneColor()}}
       classNames={{
-        base: 'w-full p-4 pb-2',
+        base: 'w-full p-2 lg:p-4 pb-2',
         header: 'font-bold text-lg p-1 ml-4',
         body: 'flex flex-col gap-1 px-4 py-2',
         footer: 'flex flex-row justify-end p-0'
@@ -181,12 +181,12 @@ function TaskList() {
   return (
     <div>
       <Header />
-      <div className='w-[60vw] mx-auto mt-8 pb-8'>
+      <div className='w-4/5 lg:w-3/5 mx-auto mt-8 pb-8 lg:pb-16'>
         <h2 className='text-3xl'>Le tue attività</h2>
         <Tabs
           classNames={{
             base: 'w-full flex flex-row justify-center mt-8',
-            panel: 'w-3/5 m-auto pt-6 flex flex-col items-center gap-4'
+            panel: 'w-full lg:w-3/5 m-auto pt-6 flex flex-col items-center gap-4'
           }}
           color='secondary'
           variant='underlined'

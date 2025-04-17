@@ -80,13 +80,14 @@ export default function PreviewCalendar() {
   }, [isAuthenticated]);
 
   return (
-    <div className="size-full">
+    <div className="size-full lg:p-3">
       {isTimeLoading ? (
         <div className='h-full flex flex-col items-center justify-center'>
           <Spinner color="secondary" variant='wave' label="Caricamento del calendario..." />
         </div>
       ) : (
         <FullCalendar
+          height='100%'
           eventDisplay='block'
           eventColor='#bae6fd'
           eventTextColor='black'
@@ -96,7 +97,7 @@ export default function PreviewCalendar() {
             meridiem: false
           }}
           plugins={[timeGridPlugin, rrulePlugin]}
-          headerToolbar={{left: '', center: '', right: ''}}
+          headerToolbar={false}
           initialView='timeGridDay'
           locale='it'
           initialDate={time}

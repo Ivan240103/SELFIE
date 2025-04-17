@@ -103,7 +103,7 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy }) {
         <span className='pb-4 text-gray-700'>
           {note.categories ? displayCategories(note.categories) : 'Nessun tag'}
         </span>
-        <ScrollShadow className='h-48'>
+        <ScrollShadow className='h-36 lg:h-48'>
           <div dangerouslySetInnerHTML={{ __html: marked(note.text) }} />
         </ScrollShadow>
       </CardBody>
@@ -308,10 +308,10 @@ function Notes() {
   }
 
   return (
-    <div className='pb-8'>
+    <div className='pb-8 lg:pb-16'>
       <Header />
       {isEditorOpen ? (
-        <div className='w-3/5 mx-auto mt-8 pb-8'>
+        <div className='w-4/5 lg:w-3/5 mx-auto mt-8'>
           <h2 className='text-3xl'>
             {noteId ? 'Modifica' : 'Crea'} nota
           </h2>
@@ -320,8 +320,8 @@ function Notes() {
             validationBehavior="native"
             onSubmit={handleSubmit}
           >
-            <div className='w-full flex flex-row items-start justify-between gap-10'>
-              <div className='w-1/2 flex flex-col gap-3'>
+            <div className='w-full flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 lg:gap-10'>
+              <div className='w-full lg:w-1/2 flex flex-col gap-3'>
                 <Input
                   type='text'
                   label='Titolo'
@@ -344,28 +344,28 @@ function Notes() {
                   isRequired
                 />
               </div>
-              <div className='w-1/2 flex flex-col gap-3 pl-4'>
+              <div className='w-full lg:w-1/2 flex flex-col gap-3 pl-4'>
                 <h3 className='font-bold text-xl pt-4'>{title || 'Senza titolo'}</h3>
                 <span className='text-gray-700 pt-2'>
                   {categories ? clearCategories(categories).map(c => `#${c}`).join(' ') : 'Nessun tag'}
                 </span>
-                <div className='w-full mt-3' dangerouslySetInnerHTML={{ __html: marked(text) }} />
+                <div className='w-full lg:mt-3' dangerouslySetInnerHTML={{ __html: marked(text) }} />
               </div>
             </div>
             <ButtonGroup className='mt-6'>
-              <Button className='w-40' type='button' color='primary' variant='flat' onPress={() => setIsEditorOpen(false)}>
+              <Button className='w-32 lg:w-40' type='button' color='primary' variant='flat' onPress={() => setIsEditorOpen(false)}>
                 Annulla
               </Button>
-              <Button className='w-40' type='submit' color='primary' variant='solid'>
+              <Button className='w-32 lg:w-40' type='submit' color='primary' variant='solid'>
                 Salva nota
               </Button>
             </ButtonGroup>
           </Form>
         </div>
       ) : (
-        <div className='w-3/5 mx-auto mt-8 pb-8'>
+        <div className='w-4/5 lg:w-3/5 mx-auto mt-8'>
           <h2 className='text-3xl'>Le tue note</h2>
-          <div className='w-full mt-8 flex flex-row items-center gap-4'>
+          <div className='w-full mt-8 flex flex-row flex-wrap lg:flex-nowrap items-center gap-4'>
             <Input
               className='w-full'
               type='search'
@@ -379,7 +379,7 @@ function Notes() {
               }
             />
             <Select
-              className='w-72'
+              className='w-3/5 lg:w-72'
               label='Ordina per'
               selectedKeys={[sortCriteria]}
               onChange={(e) => {
@@ -392,11 +392,11 @@ function Notes() {
               <SelectItem key="create">Data di creazione</SelectItem>
               <SelectItem key="length">Dimensione</SelectItem>
             </Select>
-            <Button className='w-32 py-7' color='primary' variant='flat' onPress={() => openEditor()}>
+            <Button className='w-3/10 lg:w-32 py-7' color='primary' variant='flat' onPress={() => openEditor()}>
               Crea nota
             </Button>
           </div>
-          <div className='mt-12 grid grid-cols-3 gap-10'>
+          <div className='mt-8 lg:mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10'>
             {notes.length > 0 ? (
               notes.filter(n => checkSearch(n, search)).map(n => (
                 <NoteCard
@@ -409,7 +409,7 @@ function Notes() {
                 />
               ))
             ) : (
-              <span className='text-gray-700 mt-[20vh] text-center col-start-2'>
+              <span className='text-gray-700 mt-[20vh] text-center lg:col-start-2'>
                 Nessuna nota presente
               </span>
             )}

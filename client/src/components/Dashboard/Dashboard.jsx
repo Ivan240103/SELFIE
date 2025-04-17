@@ -22,8 +22,8 @@ function PreviewCard({
   return (
     <Card
       classNames={{
-        base: 'aspect-square p-5',
-        header: 'ml-2 flex flex-row items-center gap-6',
+        base: 'aspect-square p-3 lg:p-5',
+        header: 'ml-2 flex flex-row items-center gap-4 lg:gap-6',
         body: 'px-5 pb-5'
       }}
       isPressable
@@ -31,14 +31,14 @@ function PreviewCard({
     >
       <CardHeader>
         <Avatar
-          className='w-14 h-14 bg-white'
+          className='w-12 lg:w-14 h-12 lg:h-14 bg-white'
           src={imgSrc}
           alt={imgAlt}
           radius='none'
         />
         <div className='flex flex-col items-start'>
           <h2 className='text-lg pt-1'>{title}</h2>
-          <span>{description}</span>
+          <span className='text-sm lg:text-base'>{description}</span>
         </div>
       </CardHeader>
       <CardBody>
@@ -91,21 +91,21 @@ function Dashboard() {
   }
 
   return(
-    <div className='pb-20'>
+    <div className='pb-12 lg:pb-20'>
       <Header />
-      <div className='w-3/5 mx-auto mt-12 grid grid-cols-2 gap-12'>
+      <div className='w-4/5 lg:w-3/5 mx-auto mt-4 lg:mt-12 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12'>
         <Card
-          className='col-span-2'
+          className='lg:col-span-2'
           classNames={{
             base: 'px-3 py-5',
-            header: 'ml-4 py-4 flex flex-row items-center gap-8'
+            header: 'ml-2 lg:ml-4 lg:py-4 flex flex-row items-center gap-8'
           }}
           isPressable
           onPress={handleProfileClick}
         >
           <CardHeader>
             <Avatar
-              className='w-24 h-24 bg-color-white'
+              className='w-20 lg:w-24 h-20 lg:h-24 bg-color-white'
               src={`${process.env.REACT_APP_API}/pics/${user.picName || 'default.png'}`}
               alt='icona del profilo'
               isBordered
@@ -113,15 +113,15 @@ function Dashboard() {
             {isAuthenticated ? (
               <div className='flex flex-col items-start'>
                 <h2 className='text-lg py-1'>Profilo personale</h2>
-                <span>Personalizza il tuo profilo!</span>
-                <span className='text-gray-600'>
+                <span className='text-sm lg:text-base'>Personalizza il tuo profilo!</span>
+                <span className='text-sm lg:text-base text-gray-600'>
                   {user.name || ''} {user.surname || ''}, {user.email || 'nessuna email'}
                 </span>
               </div>
             ) : (
               <div className='flex flex-col items-start'>
                 <h2 className='text-lg py-1'>Login</h2>
-                <span>Effettua il login o registrati!</span>
+                <span className='text-sm lg:text-base'>Effettua il login o registrati!</span>
               </div>
             )}
           </CardHeader>
@@ -164,24 +164,24 @@ function Dashboard() {
         </PreviewCard>
         {isAuthenticated && (
           <Card
-            className='col-span-2'
+            className='lg:col-span-2'
             classNames={{
-              base: 'px-5 py-7',
-              header: 'ml-2 flex flex-row items-center gap-6'
+              base: 'px-5 py-4 lg:py-7',
+              header: 'lg:ml-2 flex flex-row items-center gap-4 lg:gap-6'
             }}
             isPressable
             onPress={() => logout()}
           >
             <CardHeader>
               <Avatar
-                className='w-14 h-14 bg-white'
+                className='w-12 lg:w-14 h-12 lg:h-14 bg-white'
                 src='/images/logout-icon.png'
                 alt='icona del logout'
                 radius='none'
               />
               <div className='flex flex-col items-start'>
                 <h2 className='text-lg pt-1'>Logout</h2>
-                <span>Esci dal profilo!</span>
+                <span className='text-sm lg:text-base'>Esci dal profilo!</span>
               </div>
             </CardHeader>
           </Card>
