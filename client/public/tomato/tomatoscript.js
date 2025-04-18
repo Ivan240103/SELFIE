@@ -8,12 +8,73 @@ let selectedpausetime;
 let numberofsessions;
 let currentsession;
 let interval;
+var timeout;
 let ispausetime;
 let currentsecond;
 let isnightmode;
 let finished = false;
 let currentPomodoroId = null; // Traccia l'ultimo pomodoro caricato
+let barstudy = document.getElementById('bar-study');
+let barpause = document.getElementById('bar-pause');
+let startTimestamp = null;
+let elapsedTime = 0; // Serve per tenere traccia del tempo se stoppo il timer
 
+function startStudyTime(resume = false){
+  const totalDuration = selectedstudytime * 60; // durata totale in secondi
+
+  if (!resume) {
+      // Se è il primo avvio, salva il timestamp corrente e resetta elapsedTime
+      startTimestamp = Date.now();
+      elapsedTime = 0;
+  }
+
+  // Calcola il tempo rimanente, eventualmente utile per ulteriori logiche
+  const remainingTime = totalDuration - elapsedTime;
+
+  // Creazione o aggiornamento del blocco di stile dinamico per gestire l’animazione
+  let styleSheet = document.getElementById('dynamic-style');
+  if (!styleSheet) {
+      styleSheet = document.createElement("style");
+      styleSheet.id = "dynamic-style";
+      document.head.appendChild(styleSheet);
+  }
+  styleSheet.innerText = `
+    .barstudy::before, .barstudy::after {
+      animation: rotate ${totalDuration}s linear forwards;
+      animation-delay: -${elapsedTime}s;
+      animation-play-state: running;
+    }
+  `;
+
+  // Rimuovi la classe che mette in pausa l'animazione
+  barstudy.classList.remove('pause-animation');
+}
+
+function startPauseTime(resume = false) {
+  const totalDuration = selectedpausetime * 60; // durata totale in secondi della pausa
+
+  if (!resume) {
+      startTimestamp = Date.now();
+      elapsedTime = 0;
+  }
+  // Creazione/aggiornamento del blocco per l'animazione "back" per il tempo di pausa
+  let pauseStyleSheet = document.getElementById('dynamic-pause-style');
+  if (!pauseStyleSheet) {
+      pauseStyleSheet = document.createElement("style");
+      pauseStyleSheet.id = "dynamic-pause-style";
+      document.head.appendChild(pauseStyleSheet);
+  }
+  pauseStyleSheet.innerText = `
+    .barstudy::before, .barstudy::after {
+      animation: back ${totalDuration}s linear forwards;
+      animation-delay: -${elapsedTime}s;
+      animation-play-state: running;
+    }
+  `;
+
+  // Rimuove eventuali classi di pausa per far ripartire l'animazione della pausa
+  barstudy.classList.remove('pause-animation');
+}
 function playNotificationSound() {
   const audio = new Audio('../audio/notification.mp3');
   audio.play();
@@ -184,27 +245,36 @@ function resetTimer() {
   currentsecond = 0;
   currentsession = 1;
   ispausetime = false;
+  elapsedTime = 0; // Reset di elapsedTime
+  
   const timeElement = document.getElementById('time');
   timeElement.innerHTML = (selectedstudytime < 10 ? '0' : '') + selectedstudytime + ':00';
+  
   const tomato = document.getElementById('tmt');
   tomato.style.transform = 'rotate(0deg)';
+  
   const sessionElement = document.getElementById('sessions');
   sessionElement.innerHTML =
     '1 of <div><input type="text" value="' + numberofsessions + '" id="ses-selector"></div><div> sessions</div>';
+  
   changesessionslistener();
+  
   const playButton = document.getElementById('play');
   playButton.innerHTML =
     '<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
       '<path d="M30.6693 14.0114L11.6966 2.15371C8.4254 0.342116 4.5 2.48309 4.5 6.27097V29.8217C4.5 33.4449 8.4254 35.7505 11.6966 33.7742L30.6693 21.9165C33.7769 20.1049 33.7769 15.823 30.6693 14.0114Z" fill="white"/>' +
     '</svg>';
+  
   savePomodoro();
 }
 
 function skipToNextSession() {
   clearInterval(interval);
   currentsecond = 0;
+  elapsedTime = 0; // Reset di elapsedTime per far ripartire l'animazione da zero
   const tomato = document.getElementById('tmt');
   tomato.style.transform = 'rotate(0deg)';
+  
   const timeElement = document.getElementById('time');
   const sessionsElement = document.getElementById('sessions');
 
@@ -239,69 +309,89 @@ function timer(timeElement) {
   const timeParts = timeElement.innerHTML.split(':');
   let minutes = parseInt(timeParts[0]);
   let seconds = parseInt(timeParts[1]);
-  const sessions = document.getElementById('sessions');
-  const tomato = document.getElementById('tmt');
-  interval = setInterval(function() {
-    currentsecond = (currentsecond + 6) % 360;
 
-    if (seconds === 0) {
-      if (minutes === 0) {
-        clearInterval(interval);
-        if (currentsession === numberofsessions) {
-          finished = true;
-          resetTimer();
-          return;
-        } else {
-          if (ispausetime === false) {
-            playNotificationSound();
-            timeElement.innerHTML = (selectedpausetime < 10 ? '0' : '') + selectedpausetime + ':00';
-            timer(timeElement);
-            ispausetime = true;
-          } else {
-            playNotificationSound();
-            currentsession++;
-            sessions.innerHTML =
-              currentsession +
-              ' of <div><input type="text" value="' + numberofsessions + '" id="ses-selector"></div><div> sessions</div>';
-            changesessionslistener();
-            timeElement.innerHTML = (selectedstudytime < 10 ? '0' : '') + selectedstudytime + ':00';
-            timer(timeElement);
-            ispausetime = false;
-          }
-          savePomodoro();
-          return;
-        }
+  interval = setInterval(function() {
+      // Aggiorna elapsedTime in base alla modalità attuale (studio o pausa)
+      if (!ispausetime) {
+        elapsedTime = selectedstudytime * 60 - (minutes * 60 + seconds);
       } else {
-        minutes--;
-        seconds = 59;
+        elapsedTime = selectedpausetime * 60 - (minutes * 60 + seconds);
       }
-    } else {
-      seconds--;
-    }
-    tomato.style.transform = 'rotate(' + currentsecond + 'deg)';
-    timeElement.innerHTML =
-      (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+
+      if (seconds === 0) {
+          if (minutes === 0) {
+              clearInterval(interval);
+              if (currentsession === numberofsessions) {
+                  finished = true;
+                  resetTimer();
+                  return;
+              } else {
+                  if (ispausetime === false) {
+                      playNotificationSound();
+                      timeElement.innerHTML = (selectedpausetime < 10 ? '0' : '') + selectedpausetime + ':00';
+                      elapsedTime = 0;
+                      // Avvia la pausa con animazione "back"
+                      startPauseTime();
+                      timer(timeElement);
+                      ispausetime = true;
+                  } else {
+                      playNotificationSound();
+                      currentsession++;
+                      document.getElementById('sessions').innerHTML =
+                        currentsession +
+                        ' of <div><input type="text" value="' + numberofsessions + '" id="ses-selector"></div><div> sessions</div>';
+                      changesessionslistener();
+                      timeElement.innerHTML = (selectedstudytime < 10 ? '0' : '') + selectedstudytime + ':00';
+                      elapsedTime = 0;
+                      // Avvia il tempo di studio con animazione "rotate"
+                      startStudyTime();
+                      timer(timeElement);
+                      ispausetime = false;
+                  }
+                  savePomodoro();
+                  return;
+              }
+          } else {
+              minutes--;
+              seconds = 59;
+          }
+      } else {
+          seconds--;
+      }
+      
+      timeElement.innerHTML =
+        (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
   }, 1000);
 }
 
 function checkbuttonstatus(playbutton, currentInterval, currenttime) {
   if (buttonactivated) {
-    playbutton.innerHTML =
-      '<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M30.6693 14.0114L11.6966 2.15371C8.4254 0.342116 4.5 2.48309 4.5 6.27097V29.8217C4.5 33.4449 8.4254 35.7505 11.6966 33.7742L30.6693 21.9165C33.7769 20.1049 33.7769 15.823 30.6693 14.0114Z" fill="white"/>' +
-      '</svg>';
-    buttonactivated = false;
-    clearInterval(currentInterval);
-    savePomodoro();
+      console.log("Pausa: elapsedTime =", elapsedTime);
+      playbutton.innerHTML =
+        '<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<path d="M30.6693 14.0114L11.6966 2.15371C8.4254 0.342116 4.5 2.48309 4.5 6.27097V29.8217C4.5 33.4449 8.4254 35.7505 11.6966 33.7742L30.6693 21.9165C33.7769 20.1049 33.7769 15.823 30.6693 14.0114Z" fill="white"/>' +
+        '</svg>';
+      buttonactivated = false;
+      clearInterval(currentInterval);
+      savePomodoro();
+      // Aggiunge la classe di pausa per sospendere l'animazione
+      barstudy.classList.add('pause-animation');
   } else {
-    playbutton.innerHTML =
-      '<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M11.0572 33H8.43432C6.24859 33 4.5 31.2 4.5 28.95V7.05C4.5 4.8 6.24859 3 8.43432 3H11.0572C13.2429 3 14.9915 4.8 14.9915 7.05V28.8C15.1372 31.2 13.3886 33 11.0572 33Z" fill="white"/>' +
-        '<path d="M27.5625 33H24.9375C22.75 33 21 31.2 21 28.95V7.05C21 4.8 22.75 3 24.9375 3H27.5625C29.75 3 31.5 4.8 31.5 7.05V28.8C31.5 31.2 29.75 33 27.5625 33Z" fill="white"/>' +
-      '</svg>';
-    timer(currenttime);
-    buttonactivated = true;
-    savePomodoro();
+      console.log("Ripresa: elapsedTime =", elapsedTime);
+      playbutton.innerHTML =
+        '<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<path d="M11.0572 33H8.43432C6.24859 33 4.5 31.2 4.5 28.95V7.05C4.5 4.8 6.24859 3 8.43432 3H11.0572C13.2429 3 14.9915 4.8 14.9915 7.05V28.8C15.1372 31.2 13.3886 33 11.0572 33Z" fill="white"/>' +
+          '<path d="M27.5625 33H24.9375C22.75 33 21 31.2 21 28.95V7.05C21 4.8 22.75 3 24.9375 3H27.5625C29.75 3 31.5 4.8 31.5 7.05V28.8C31.5 31.2 29.75 33 27.5625 33Z" fill="white"/>' +
+        '</svg>';
+      // A seconda di ispausetime, riprende l'animazione corretta
+      if (!ispausetime) {
+          startStudyTime(true);
+      } else {
+          startPauseTime(true);
+      }
+      timer(currenttime);
+      buttonactivated = true;
+      savePomodoro();
   }
 }
 
