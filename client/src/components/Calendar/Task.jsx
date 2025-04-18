@@ -52,7 +52,7 @@ function Task({
             throw new Error()
           }
         } catch (error) {
-          showError('fetchTask error')
+          showError("Couldn't retrieve task")
           setTask({})
         }
       } else {
@@ -87,6 +87,7 @@ function Task({
     }
 
     setFields()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task])
 
   const handleSave = async () => {
@@ -193,6 +194,7 @@ function Task({
     }
   }
 
+  // artificio per resettare i campi del form
   const handleReset = () => {
     setIsEditing(false)
     setTask(JSON.parse(JSON.stringify(task)))
@@ -210,6 +212,8 @@ function Task({
 
   return (
     <Modal
+      className='min-w-[32vw] lg:px-5 py-3'
+      classNames={{ header: 'text-xl' }}
       isOpen={isModalOpen}
       onClose={() => setIsModalOpen(false)}
       draggable
@@ -217,8 +221,9 @@ function Task({
     >
       <ModalContent>
         <ModalHeader>Attività</ModalHeader>
-        <ModalBody>
+        <ModalBody className='w-full lg:w-[88%] m-auto'>
           {!isEditing && <Checkbox
+            className='ml-2 mb-2'
             color='success'
             isSelected={isDone}
             onValueChange={handleComplete}
@@ -247,8 +252,8 @@ function Task({
               isRequired
               isReadOnly={!isEditing}
             />
-            {user.notification && <div>
-              Promemoria
+            {user.notification && <div className='self-start w-full ml-1'>
+              <span className='block text-gray-800 self-start'>Promemoria</span>
               <Reminder
                 type='Email'
                 reminder={emailReminder}
@@ -264,16 +269,16 @@ function Task({
             </div>}
             {!taskId ? (
               <ButtonGroup>
-                <Button type='submit' color='primary' variant='solid'>
+                <Button className='w-32' type='submit' color='primary' variant='solid'>
                   Crea attività
                 </Button>
               </ButtonGroup>
             ) : isEditing && (
-              <ButtonGroup>
-                <Button type='button' color='primary' variant='flat' onPress={handleReset}>
+              <ButtonGroup className='mt-1'>
+                <Button className='w-36 lg:w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
                   Annulla modifiche
                 </Button>
-                <Button type='submit' color='primary' variant='solid'>
+                <Button className='w-36 lg:w-40' type='submit' color='primary' variant='solid'>
                   Aggiorna attività
                 </Button>
               </ButtonGroup>
@@ -281,10 +286,10 @@ function Task({
           </Form>
           {taskId && !isEditing && (
             <ButtonGroup>
-              <Button color='danger' variant='flat' onPress={handleDelete}>
+              <Button className='w-36 lg:w-40' color='danger' variant='flat' onPress={handleDelete}>
                 Elimina attività
               </Button>
-              <Button color='primary' variant='solid' onPress={() => setIsEditing(true)}>
+              <Button className='w-36 lg:w-40' color='primary' variant='solid' onPress={() => setIsEditing(true)}>
                 Modifica attività
               </Button>
             </ButtonGroup>

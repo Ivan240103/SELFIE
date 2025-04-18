@@ -7,6 +7,8 @@ import { useTime } from '../../contexts/TimeContext'
 import { mapEvent, mapTask } from '../../utils/calendar'
 import { showError } from "../../utils/toasts";
 
+import { Spinner } from "@heroui/react";
+
 export default function PreviewCalendar() {
   const { isAuthenticated } = useAuth()
   const { time, isTimeLoading } = useTime()
@@ -74,17 +76,28 @@ export default function PreviewCalendar() {
     }
 
     fetchTasks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   return (
-    <div className='dash-card-preview'>
+    <div className="size-full lg:p-3">
       {isTimeLoading ? (
-        // TODO: add skeleton?
-        <p>Skeleton</p>
+        <div className='h-full flex flex-col items-center justify-center'>
+          <Spinner color="secondary" variant='wave' label="Caricamento del calendario..." />
+        </div>
       ) : (
         <FullCalendar
+          height='100%'
+          eventDisplay='block'
+          eventColor='#bae6fd'
+          eventTextColor='black'
+          eventTimeFormat={{
+            hour: 'numeric',
+            minute: '2-digit',
+            meridiem: false
+          }}
           plugins={[timeGridPlugin, rrulePlugin]}
-          headerToolbar={{left: '', center: '', right: ''}}
+          headerToolbar={false}
           initialView='timeGridDay'
           locale='it'
           initialDate={time}

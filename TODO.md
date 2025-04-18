@@ -81,7 +81,6 @@
 ## Nice to have
 - [ ] recupero della password tramite mail
 - [x] drag and drop eventi e task
-- [ ] doppio click per creare evento/task
 - [x] button per mostrare la psw in chiaro
 
 ## Estensione 18-27
@@ -95,6 +94,7 @@
 - [x] disabilitare le notifiche
 - [x] note in markdown
 - [ ] cicli di pomodoro programmati come eventi
+  - [ ] nella preview prendere l'ultimo pomodoro che non ha associato un task???
   - [ ] !!! quando si crea il pomodoro, in settings mettere un bottone per pianificarlo che apre un Modal come quello dei task, per scegliere data ecc... queste scelte vengono mostrate nei settings. quando si crea il pomodoro, creare anche il task associato.
   - [ ] cicli non completati si spostano alle giornate successive
   - [ ] aggiungere campo tomato a task
@@ -107,11 +107,8 @@
 - [x] geolocalizzazione per gli eventi --> NON SPECIFICATO/APPROFONDITO
   - [x] selezione luogo con auto-completamento di google maps api
   - [x] se auto-completato, nella visualizzazione link per andare su google maps (campo aggiuntivo nel model?)
-- [ ] sistemare autenticazione in modo da poter guardare ma non toccare
-- [ ] controllare notifiche push
-
-## HeroUI
-- Toast con timer in caso di non-authenticated
-- Drawer oppure Navbar per menu
-- ScrollShadow in anteprima nota
-- Spinner o skeleton nei caricamenti ???
+- [x] sistemare autenticazione in modo da poter guardare ma non toccare
+- [x] controllare notifiche push
+- [x] nascondere button 'indietro' se la pagina non lo consente (stesso colore del bg ma disabilitato?)
+- [x] toast success di logout
+- [x] card nella dashboard non cliccabili se non authenticated

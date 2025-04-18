@@ -38,8 +38,9 @@ function TimeMachine() {
   }
 
   return(
-    <div>
+    <div className="justify-self-center">
       <Button
+        className="text-black disabled:text-black"
         color="secondary"
         variant="light"
         onPress={() => {
@@ -47,7 +48,6 @@ function TimeMachine() {
           setIsModalOpen(true)
         }}
         isDisabled={!isAuthenticated}
-        style={{ color: 'black' }}
       >
         {time.toLocaleString('it-IT').slice(0, -3).replace(', ', ' - ')}
       </Button>
@@ -73,12 +73,12 @@ function TimeMachine() {
                 value={parseDateTime(getDatetimeString(selectedTime))}
                 onChange={(d) => setSelectedTime(d.toDate())}
               />
-              <div>
+              <div className="flex flex-row gap-2 mt-5 mb-3">
                 <Button
                   color="primary"
                   variant="flat"
                   onPress={() => reset()}
-                  >
+                >
                   Resetta
                 </Button>
                 <Button

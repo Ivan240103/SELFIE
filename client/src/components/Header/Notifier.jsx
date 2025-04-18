@@ -10,8 +10,6 @@ function BellOnIcon() {
     <svg
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      focusable="false"
-      role="presentation"
       viewBox="0 0 24 24"
       height="1.1em"
       width="1.1em"
@@ -26,8 +24,6 @@ function BellOffIcon() {
     <svg
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      focusable="false"
-      role="presentation"
       viewBox="0 0 24 24"
       height="1em"
       width="1em"
@@ -48,7 +44,7 @@ function Notifier() {
         try {
           await navigator.serviceWorker.register('/sw.js')
         } catch (error) {
-          showError('Service worker registration error')
+          showError('Service worker registration failed')
         }
       }
     }
@@ -91,7 +87,7 @@ function Notifier() {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
     } catch (error) {
-      showError('subscribeToPush error')
+      showError('Push subscription failed')
       throw new Error()
     }
   }
@@ -144,6 +140,7 @@ function Notifier() {
       content={`Notifiche ${notifyPermission ? 'abilitate' : 'disabilitate'}`}
     >
       <Switch
+        className='justify-self-end'
         color='secondary'
         size='lg'
         isSelected={notifyPermission}

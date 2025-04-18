@@ -17,3 +17,22 @@ export function showSuccess(title, description) {
     color: "success"
   })
 }
+
+export function showWarning(title, description) {
+  addToast({
+    title: title,
+    description: description,
+    color: "warning"
+  })
+}
+
+export function showAuth() {
+  addToast({
+    title: 'Non sei autenticato',
+    description: 'Verrai indirizzato alla pagina di login',
+    color: 'warning',
+    timeout: 5000,
+    shouldShowTimeoutProgress: true,
+    hideCloseButton: true
+  })
+}

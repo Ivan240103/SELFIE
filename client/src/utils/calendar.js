@@ -5,7 +5,6 @@
  * @returns evento mappato
  */
 export function mapEvent(event) {
-  // TODO: customize color?
   return {
     ...event,
     id: event.googleId || event._id,
@@ -22,13 +21,13 @@ export function mapEvent(event) {
  * @returns attività mappata
  */
 export function mapTask(task, time) {
-  const notDoneColor = () => time > new Date(task.deadline) ? '#ff8080' : '#ffff80'
+  const notDoneColor = () => time > new Date(task.deadline) ? '#f87171' : '#fde68a'
   return {
     id: task._id,
     title: task.title,
     start: task.deadline,
     allDay: true,
-    color: task.isDone ? '#b3ffb3' : notDoneColor(),
+    color: task.isDone ? '#86efac' : notDoneColor(),
     textColor: 'black',
     eventType: 'task',
     isDone: task.isDone

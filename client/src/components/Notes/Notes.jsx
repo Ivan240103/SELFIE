@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
 import { useAuth } from '../../contexts/AuthenticationContext';
-import { getDatetimeString } from '../../utils/dates';
 import { showError, showSuccess } from '../../utils/toasts';
 import Header from '../Header/Header';
 
@@ -9,6 +9,7 @@ import {
   Card,
   CardHeader,
   CardBody,
+  CardFooter,
   Form,
   Input,
   Textarea,
@@ -19,9 +20,11 @@ import {
   DropdownMenu,
   DropdownItem,
   Select,
-  SelectItem
+  SelectItem,
+  ScrollShadow
 } from '@heroui/react'
 
+// TODO: non funzionano i titoli con i cancelletti e gli elenchi
 marked.setOptions({
   gfm: true,       // usa le specifiche markdown di Github
   breaks: true,    // aggiunge una singola linea di break
@@ -30,7 +33,7 @@ marked.setOptions({
 const displayCategories = (cat) => cat.split(',').map(c => `#${c}`).join(' ')
 
 function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy }) {
-  const displayTime = (d) => getDatetimeString(d).replace('T', ' alle ');
+  const displayTime = (d) => d.toLocaleString('it-IT').slice(0, 17).replace(',', ' alle');
   const creationStr = `Creata il ${displayTime(new Date(note.creation))}`
   const modificationStr = `ultima modifica il ${displayTime(new Date(note.modification))}`
 
@@ -69,36 +72,53 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy }) {
   }
 
   return (
-    <Card>
+    <Card
+      classNames={{
+        base: 'p-3',
+        header: 'pt-1 flex flex-row items-center justify-between'
+      }}
+    >
       <CardHeader>
-        <h3>{note.title}</h3>
+        <h3 className='font-bold text-lg'>{note.title}</h3>
         <Dropdown>
           <DropdownTrigger>
-            {/* TODO: icona trigger dei tre puntini */}
-            <Button color='default' variant='light'>
-              ...
+            <Button color='default' variant='light' radius='full' isIconOnly>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className='fill-gray-600'>
+                <circle cx="8" cy="12" r="1"/>
+                <circle cx="12" cy="12" r="1"/>
+                <circle cx="16" cy="12" r="1"/>
+              </svg>
             </Button>
           </DropdownTrigger>
-          <DropdownMenu onAction={handleAction}>
+          <DropdownMenu onAction={handleAction} variant='flat'>
             <DropdownItem key='edit'>Modifica</DropdownItem>
             <DropdownItem key='copy'>Copia testo</DropdownItem>
             <DropdownItem key='duplicate'>Duplica</DropdownItem>
             <DropdownItem key='down'>Scarica</DropdownItem>
-            <DropdownItem key='del'>Elimina</DropdownItem>
+            <DropdownItem key='del' className='text-danger' color='danger'>Elimina</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </CardHeader>
       <CardBody>
-        <span>{note.categories ? displayCategories(note.categories) : 'Nessun tag'}</span>
-        <div dangerouslySetInnerHTML={{ __html: marked(note.text) }} />
-        <span>{creationStr}, {modificationStr}</span>
+        <span className='pb-4 text-gray-700'>
+          {note.categories ? displayCategories(note.categories) : 'Nessun tag'}
+        </span>
+        <ScrollShadow className='h-36 lg:h-48'>
+          <div dangerouslySetInnerHTML={{ __html: marked(note.text) }} />
+        </ScrollShadow>
       </CardBody>
+      <CardFooter>
+        <span className='text-gray-600 text-sm'>
+          {creationStr}, {modificationStr}
+        </span>
+      </CardFooter>
     </Card>
   )
 }
 
 function Notes() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, checkAuth } = useAuth();
+  const navigate = useNavigate()
   const [notes, setNotes] = useState([]);
   const [sortCriteria, setSortCriteria] = useState('edit');
   const [search, setSearch] = useState('');
@@ -107,6 +127,10 @@ function Notes() {
   const [text, setText] = useState('');
   const [categories, setCategories] = useState('');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+
+  // verifica dell'autenticazione
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => checkAuth(navigate), [])
 
   // Caricare le note dal backend
   useEffect(() => {
@@ -123,7 +147,7 @@ function Notes() {
 
           if (response.ok) {
             const result = await response.json()
-            setSortedNotes(result, sortCriteria)
+            setSortedNotes(result)
           } else {
             throw new Error()
           }
@@ -137,10 +161,12 @@ function Notes() {
     }
     
     fetchNotes()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   // Per l'ordinamento delle note
-  function setSortedNotes(notes, order) {
+  function setSortedNotes(notes, sortingOrder) {
+    const order = sortingOrder || sortCriteria
     const sorted = notes.sort((a, b) => {
       if (order === 'create') {
         return new Date(b.creation) - new Date(a.creation);
@@ -185,7 +211,7 @@ function Notes() {
       const result = await response.json()
       showSuccess('Nota salvata')
       setIsEditorOpen(false)
-      setSortedNotes([...notes, result], sortCriteria)
+      setSortedNotes([...notes, result])
     } catch (error) {
       showError('Errore nel salvataggio');
     }
@@ -218,7 +244,7 @@ function Notes() {
       showSuccess('Nota aggiornata')
       setIsEditorOpen(false)
       const updatedNotes = notes.map(n => n._id === result._id ? result : n)
-      setSortedNotes(updatedNotes, sortCriteria)
+      setSortedNotes(updatedNotes)
     } catch (error) {
       showError("Errore nell'aggiornamento");
     }
@@ -240,7 +266,7 @@ function Notes() {
       // Aggiorna le note dopo l'eliminazione
       showSuccess('Nota eliminata')
       setIsEditorOpen(false)
-      setSortedNotes(notes.filter(n => n._id !== note._id), sortCriteria)
+      setSortedNotes(notes.filter(n => n._id !== note._id))
     } catch (error) {
       showError("Errore nell'eliminazione");
     }
@@ -258,6 +284,7 @@ function Notes() {
   // duplicare una nota
   function handleDuplicate(note) {
     // Prepara i dati per la nuova nota (copia il titolo, categorie e testo)
+    setNoteId('')
     setTitle(`Copia di ${note.title}`);
     setText(note.text);
     setCategories(displayCategories(note.categories));
@@ -281,67 +308,78 @@ function Notes() {
   }
 
   return (
-    <div>
+    <div className='pb-8 lg:pb-16'>
       <Header />
       {isEditorOpen ? (
-        <div>
-          <h2>{noteId ? 'Modifica' : 'Crea'} nota</h2>
+        <div className='w-4/5 lg:w-3/5 mx-auto mt-8'>
+          <h2 className='text-3xl'>
+            {noteId ? 'Modifica' : 'Crea'} nota
+          </h2>
           <Form
-            className="flex flex-col items-center"
+            className="w-full flex flex-col items-center mt-8"
             validationBehavior="native"
             onSubmit={handleSubmit}
           >
-            <div>
-              <Input
-                type='text'
-                label='Titolo'
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <Input
-                type='text'
-                label='Categorie'
-                description='Inserisci tutti i #tag che vuoi'
-                value={categories}
-                onChange={(e) => setCategories(e.target.value)}
-              />
-              <Textarea
-                label='Contenuto'
-                placeholder='Scrivi o incolla il contenuto della nota qui...'
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                minRows={8}
-                isRequired
-              />
-            </div>
-            <div>
-              <div dangerouslySetInnerHTML={{ __html: marked(`# ${title}`) }} />
-              <div>
-                <span>{categories ? clearCategories(categories).map(c => `#${c}`).join(' ') : 'Nessun tag'}</span>
+            <div className='w-full flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 lg:gap-10'>
+              <div className='w-full lg:w-1/2 flex flex-col gap-3'>
+                <Input
+                  type='text'
+                  label='Titolo'
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+                <Input
+                  type='text'
+                  label='Categorie'
+                  description='Inserisci tutti i #tag che vuoi'
+                  value={categories}
+                  onChange={(e) => setCategories(e.target.value)}
+                />
+                <Textarea
+                  label='Contenuto'
+                  placeholder='Scrivi o incolla il contenuto della nota qui...'
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  minRows={8}
+                  isRequired
+                />
               </div>
-              <div dangerouslySetInnerHTML={{ __html: marked(text) }} />
+              <div className='w-full lg:w-1/2 flex flex-col gap-3 pl-4'>
+                <h3 className='font-bold text-xl pt-4'>{title || 'Senza titolo'}</h3>
+                <span className='text-gray-700 pt-2'>
+                  {categories ? clearCategories(categories).map(c => `#${c}`).join(' ') : 'Nessun tag'}
+                </span>
+                <div className='w-full lg:mt-3' dangerouslySetInnerHTML={{ __html: marked(text) }} />
+              </div>
             </div>
-            <ButtonGroup>
-              <Button type='button' color='primary' variant='flat' onPress={() => setIsEditorOpen(false)}>
+            <ButtonGroup className='mt-6'>
+              <Button className='w-32 lg:w-40' type='button' color='primary' variant='flat' onPress={() => setIsEditorOpen(false)}>
                 Annulla
               </Button>
-              <Button type='submit' color='primary' variant='solid'>
+              <Button className='w-32 lg:w-40' type='submit' color='primary' variant='solid'>
                 Salva nota
               </Button>
             </ButtonGroup>
           </Form>
         </div>
       ) : (
-        <div>
-          <div>
-            {/* TODO: icona della lente */}
+        <div className='w-4/5 lg:w-3/5 mx-auto mt-8'>
+          <h2 className='text-3xl'>Le tue note</h2>
+          <div className='w-full mt-8 flex flex-row flex-wrap lg:flex-nowrap items-center gap-4'>
             <Input
-              type='text'
+              className='w-full'
+              type='search'
               label='Cerca'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              endContent={
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 40" width={28} height={28} className='fill-gray-600'>
+                  <path d="M27.414,24.586l-5.077-5.077C23.386,17.928,24,16.035,24,14c0-5.514-4.486-10-10-10S4,8.486,4,14  s4.486,10,10,10c2.035,0,3.928-0.614,5.509-1.663l5.077,5.077c0.78,0.781,2.048,0.781,2.828,0  C28.195,26.633,28.195,25.367,27.414,24.586z M7,14c0-3.86,3.14-7,7-7s7,3.14,7,7s-3.14,7-7,7S7,17.86,7,14z" />
+                </svg>
+              }
             />
             <Select
+              className='w-3/5 lg:w-72'
               label='Ordina per'
               selectedKeys={[sortCriteria]}
               onChange={(e) => {
@@ -354,12 +392,12 @@ function Notes() {
               <SelectItem key="create">Data di creazione</SelectItem>
               <SelectItem key="length">Dimensione</SelectItem>
             </Select>
-            <Button color='primary' variant='flat' onPress={() => openEditor()}>
+            <Button className='w-3/10 lg:w-32 py-7' color='primary' variant='flat' onPress={() => openEditor()}>
               Crea nota
             </Button>
           </div>
-          <div>
-            {notes ? (
+          <div className='mt-8 lg:mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10'>
+            {notes.length > 0 ? (
               notes.filter(n => checkSearch(n, search)).map(n => (
                 <NoteCard
                   key={n._id}
@@ -371,7 +409,9 @@ function Notes() {
                 />
               ))
             ) : (
-              <p>Nessuna nota presente</p>
+              <span className='text-gray-700 mt-[20vh] text-center lg:col-start-2'>
+                Nessuna nota presente
+              </span>
             )}
           </div>
         </div>

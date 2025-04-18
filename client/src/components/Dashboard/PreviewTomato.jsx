@@ -29,21 +29,24 @@ export default function PreviewTomato() {
   }, [isAuthenticated]);
 
   return (
-    <div className='dash-card-preview'>
+    <div className='size-full flex items-center justify-center'>
       {tomato ? (
-        // TODO: finire preview pomodoro
-        <>
-          <h3>Ultima sessione</h3>
-          <h4>{tomato.loops} {tomato.loops === 1 ? 'ciclo' : 'cicli'} di</h4>
-          <p><strong>Tempo di studio:</strong> {tomato.studyMinutes}
-          {tomato.studyMinutes === 1 ? 'minuto' : 'minuti'}</p>
-          <p><strong>Tempo di pausa:</strong> {tomato.pauseMinutes}
-          {tomato.pauseMinutes === 1 ? 'minuto' : 'minuti'}</p>
-          <p><strong>Stato:</strong> {tomato.interrupted === 'n' ? 'da iniziare' :
-            tomato.interrupted === 'f' ? 'concluso' : 'da concludere'}</p>
-        </>
+        <div className='flex flex-col items-center justify-center gap-1 lg:gap-3 p-8 lg:p-16 rounded-full border-3 border-red-500 bg-red-200'>
+          <span className='text-sm lg:text-base'>
+            {tomato.loops} <b>{tomato.loops === 1 ? 'ciclo' : 'cicli'}</b> da
+          </span>
+          <span className='text-sm lg:text-base'>
+            {tomato.studyMinutes} {tomato.studyMinutes === 1 ? 'minuto' : 'minuti'} di <b>studio</b>  
+          </span>
+          <span className='text-sm lg:text-base'>
+            {tomato.pauseMinutes} {tomato.pauseMinutes === 1 ? 'minuto' : 'minuti'} di <b>pausa</b>  
+          </span>
+          <span className='text-sm lg:text-base'>
+            <b>{tomato.interrupted === 'n' ? 'Creato' : tomato.interrupted === 'f' ? 'Concluso' : 'Cominciato'}</b>
+          </span>
+        </div>
       ) : (
-        <span className='dash-empty-prev'>Nessun timer presente</span>
+        <span className='text-gray-700'>Nessun timer presente</span>
       )}
     </div>
   )

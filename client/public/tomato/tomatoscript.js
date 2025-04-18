@@ -76,7 +76,7 @@ function startPauseTime(resume = false) {
   barstudy.classList.remove('pause-animation');
 }
 function playNotificationSound() {
-  const audio = new Audio('./notification.mp3');
+  const audio = new Audio('../audio/notification.mp3');
   audio.play();
 }
 

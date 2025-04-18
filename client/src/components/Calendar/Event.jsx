@@ -69,7 +69,7 @@ function Event({
             throw new Error()
           }
         } catch (error) {
-          showError('fetchEvent error')
+          showError("Couldn't retrieve event")
           setEvent({})
         }
       } else {
@@ -124,6 +124,7 @@ function Event({
     }
 
     setFields()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event])
 
   /**
@@ -151,8 +152,8 @@ function Event({
     const eventData = {
       title: title,
       description: description,
-      start: start.toISOString(),
-      end: end.toISOString(),
+      start: isAllDay ? getDateString(start) : start.toISOString(),
+      end: isAllDay ? getDateString(end) : end.toISOString(),
       isAllDay: isAllDay,
       rrule: isRecurrent ? createRRule() : null,
       place: place,
@@ -185,8 +186,8 @@ function Event({
     const eventData = {
       title: title,
       description: description,
-      start: start.toISOString(),
-      end: end.toISOString(),
+      start: isAllDay ? getDateString(start) : start.toISOString(),
+      end: isAllDay ? getDateString(end) : end.toISOString(),
       isAllDay: isAllDay,
       rrule: isRecurrent ? createRRule() : null,
       place: place,
@@ -235,11 +236,13 @@ function Event({
     }
   }
 
+  // artificio per resettare i campi del form
   const handleReset = () => {
     setIsEditing(false)
     setEvent(JSON.parse(JSON.stringify(event)))
   }
 
+  // formatta le date per passarle al componente heroui
   function getDatePickerValue() {
     const s = isAllDay ? getDateString(start) : getDatetimeString(start)
     const e = isAllDay ? getDateString(end) : getDatetimeString(end)
@@ -261,6 +264,8 @@ function Event({
 
   return (
     <Modal
+      className='min-w-[32vw] lg:px-5 py-3'
+      classNames={{ header: 'text-xl' }}
       isOpen={isModalOpen}
       onClose={() => setIsModalOpen(false)}
       draggable
@@ -268,7 +273,7 @@ function Event({
     >
       <ModalContent>
         <ModalHeader>Evento</ModalHeader>
-        <ModalBody>
+        <ModalBody className='w-full lg:w-[88%] m-auto'>
           <Form
             className="flex flex-col items-center"
             validationBehavior="native"
@@ -282,19 +287,19 @@ function Event({
               isEditing={isEditing}
             />
             <Checkbox
+              className='self-start ml-2'
               color='primary'
               isSelected={isAllDay}
               onValueChange={setIsAllDay}
               isReadOnly={!isEditing}
             >
-              Evento per tutto il giorno
+              <span>Evento per tutto il giorno</span>
             </Checkbox>
             <DateRangePicker
               label='Durata'
               description='Seleziona uno o più giorni'
               firstDayOfWeek='mon'
               hourCycle={24}
-              // TODO: format date in dd/MM/yyyy
               value={getDatePickerValue()}
               onChange={(e) => {
                 setStart(e.start.toDate())
@@ -302,59 +307,81 @@ function Event({
               }}
               isReadOnly={!isEditing}
               isRequired
-              // TODO: add validation with error
             />
             <Checkbox
+              className='self-start ml-2'
               color='primary'
               isSelected={isRecurrent}
               onValueChange={setIsRecurrent}
               isReadOnly={!isEditing}
             >
-              Evento ricorrente
+              <span>Evento ricorrente</span>
             </Checkbox>
-            <div hidden={!isRecurrent}>
-              Ripeti ogni
-              <NumberInput
-                minValue={1}
-                value={interval}
-                onValueChange={setInterval}
-                isReadOnly={!isEditing}
-              />
-              <Select
-                selectedKeys={[freq]}
-                onChange={(e) => setFreq(e.target.value)}
-                isDisabled={!isEditing}
-              >
-                <SelectItem key='daily'>{interval === 1 ? 'Giorno' : 'Giorni'}</SelectItem>
-                <SelectItem key='weekly'>{interval === 1 ? 'Settimana' : 'Settimane'}</SelectItem>
-                <SelectItem key='monthly'>{interval === 1 ? 'Mese' : 'Mesi'}</SelectItem>
-                <SelectItem key='yearly'>{interval === 1 ? 'Anno' : 'Anni'}</SelectItem>
-              </Select>
+            {isRecurrent && <div className='w-full flex flex-col items-start ml-3 pt-1 pb-3'>
+              <div className='w-full flex flex-row items-center justify-between gap-2 lg:gap-3'>
+                <span className='block'>Ripeti&nbsp;ogni</span>
+                <NumberInput
+                  className='w-24 lg:w-32'
+                  size='sm'
+                  radius='md'
+                  minValue={1}
+                  value={interval}
+                  onValueChange={setInterval}
+                  isReadOnly={!isEditing}
+                />
+                <Select
+                  className='w-1/2'
+                  classNames={{
+                    trigger: 'py-6'
+                  }}
+                  selectedKeys={[freq]}
+                  onChange={(e) => setFreq(e.target.value)}
+                  isDisabled={!isEditing}
+                >
+                  <SelectItem key='daily'>{interval === 1 ? 'Giorno' : 'Giorni'}</SelectItem>
+                  <SelectItem key='weekly'>{interval === 1 ? 'Settimana' : 'Settimane'}</SelectItem>
+                  <SelectItem key='monthly'>{interval === 1 ? 'Mese' : 'Mesi'}</SelectItem>
+                  <SelectItem key='yearly'>{interval === 1 ? 'Anno' : 'Anni'}</SelectItem>
+                </Select>
+              </div>
               <RadioGroup
+                classNames={{
+                  label: 'text-gray-800'
+                }}
                 label='Scade'
                 value={term}
                 onValueChange={setTerm}
                 isReadOnly={!isEditing}
               >
-                <Radio value='n'>mai</Radio>
-                <Radio value='u'>il</Radio>
-                <DatePicker
-                  showMonthAndYearPickers
-                  firstDayOfWeek='mon'
-                  value={parseDate(getDateString(until))}
-                  onChange={(e) => setUntil(e.toDate())}
-                  isReadOnly={!isEditing}
-                />
-                <Radio value='c'>dopo</Radio>
-                <NumberInput
-                  minValue={1}
-                  value={count}
-                  onValueChange={setCount}
-                  isReadOnly={!isEditing}
-                />
-                {count === 1 ? 'ripetizione' : 'ripetizioni'}
+                <Radio className='ml-1' value='n'>mai</Radio>
+                <div className='flex flex-row gap-3'>
+                  <Radio className='ml-1' value='u'>il</Radio>
+                  <DatePicker
+                    classNames={{
+                      inputWrapper: 'py-6'
+                    }}
+                    showMonthAndYearPickers
+                    firstDayOfWeek='mon'
+                    value={parseDate(getDateString(until))}
+                    onChange={(e) => setUntil(e.toDate())}
+                    isReadOnly={!isEditing}
+                  />
+                </div>
+                <div className='flex flex-row items-center gap-3'>
+                  <Radio className='ml-1' value='c'>dopo</Radio>
+                  <NumberInput
+                    className='w-28'
+                    size='sm'
+                    radius='md'
+                    minValue={1}
+                    value={count}
+                    onValueChange={setCount}
+                    isReadOnly={!isEditing}
+                  />
+                  <span className='block'>{count === 1 ? 'ripetizione' : 'ripetizioni'}</span>
+                </div>
               </RadioGroup>
-            </div>
+            </div>}
             <Place
               place={place}
               setPlace={setPlace}
@@ -362,8 +389,8 @@ function Event({
               setMapsLocated={setMapsLocated}
               isEditing={isEditing}
             />
-            {user.notification && <div>
-              Promemoria
+            {user.notification && <div className='self-start w-full ml-1'>
+              <span className='block text-gray-800 self-start'>Promemoria</span>
               <Reminder
                 type='Email'
                 reminder={emailReminder}
@@ -380,16 +407,16 @@ function Event({
             {!googleId && <>
               {!eventId ? (
                 <ButtonGroup>
-                  <Button type='submit' color='primary' variant='solid'>
+                  <Button className='w-32' type='submit' color='primary' variant='solid'>
                     Crea evento
                   </Button>
                 </ButtonGroup>
               ) : isEditing && (
-                <ButtonGroup>
-                  <Button type='button' color='primary' variant='flat' onPress={handleReset}>
+                <ButtonGroup className='mt-1'>
+                  <Button className='w-36 lg:w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
                     Annulla modifiche
                   </Button>
-                  <Button type='submit' color='primary' variant='solid'>
+                  <Button className='w-36 lg:w-40' type='submit' color='primary' variant='solid'>
                     Aggiorna evento
                   </Button>
                 </ButtonGroup>
@@ -398,10 +425,10 @@ function Event({
           </Form>
           {!googleId && eventId && !isEditing && (
             <ButtonGroup>
-              <Button color='danger' variant='flat' onPress={handleDelete}>
+              <Button className='w-36 lg:w-40' color='danger' variant='flat' onPress={handleDelete}>
                 Elimina evento
               </Button>
-              <Button color='primary' variant='solid' onPress={() => setIsEditing(true)}>
+              <Button className='w-36 lg:w-40' color='primary' variant='solid' onPress={() => setIsEditing(true)}>
                 Modifica evento
               </Button>
             </ButtonGroup>

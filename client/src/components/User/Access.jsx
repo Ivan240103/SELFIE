@@ -40,31 +40,38 @@ function Access() {
   return (
     <div>
       <Header />
-      <h2>Login</h2>
-      <Form
-        className="flex flex-col items-center"
-        validationBehavior="native"
-        onSubmit={handleLogin}
-      >
-        <Input
-          type="text"
-          label='Username'
-          value={usr}
-          onChange={(e) => setUsr(e.target.value)}
-          isRequired
-        />
-        <Password
-          value={psw}
-          setValue={setPsw}
-          isRequired={true}
-        />
-        <p>
-          Non hai un profilo? <Link href="/register" color="primary" underline="focus">Registrati</Link>
-        </p>
-        <Button type="submit" color="primary" variant="solid">
-          Accedi
-        </Button>
-      </Form>
+      <div className="w-3/5 lg:w-1/5 mx-auto mt-12">
+        <h2 className="text-3xl text-center">Login</h2>
+        <Form
+          className="mt-10 flex flex-col items-center gap-4"
+          validationBehavior="native"
+          onSubmit={handleLogin}
+        >
+          <Input
+            type="text"
+            label='Username'
+            value={usr}
+            onChange={(e) => setUsr(e.target.value)}
+            isRequired
+          />
+          <Password
+            value={psw}
+            setValue={setPsw}
+            isRequired={true}
+          />
+          <span className="mt-3">
+            Non hai un profilo? <Link href="/register" color="primary" underline="focus">Registrati</Link>
+          </span>
+          <div className="mt-2 flex flex-row gap-3">
+            <Button className="w-28 lg:w-32" type="button" color="primary" variant="flat" onPress={() => navigate('/')}>
+              Annulla
+            </Button>
+            <Button className="w-28 lg:w-32" type="submit" color="primary" variant="solid">
+              Accedi
+            </Button>
+          </div>
+        </Form>
+      </div>
     </div>
   )
 }
