@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTime } from '../../contexts/TimeContext';
 import TitleDescription from './FormFields/TitleDescription';
 import Reminder from './FormFields/Reminder';
@@ -24,6 +25,7 @@ function Task({
 }) {
   // tempo in vigore per l'utente (fuso orario UTC)
   const { time } = useTime();
+  const navigate = useNavigate()
   const [task, setTask] = useState({});
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -300,7 +302,10 @@ function Task({
               type='button'
               color='danger'
               variant='solid'
-              // TODO: collegamento al componente Tomato passando il taskID
+              onPress={() => {
+                localStorage.setItem('taskId', taskId)
+                navigate('/tomato')
+              }}
             >
               Vai alla sessione
             </Button>}
