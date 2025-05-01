@@ -32,6 +32,7 @@ function Task({
   const [emailReminder, setEmailReminder] = useState({})
   const [pushReminder, setPushReminder] = useState({})
   const [isEditing, setIsEditing] = useState(!!!taskId)
+  const tomato = localStorage.getItem('tomato') ?? null
 
   // recupera il task specifico dal backend
   useEffect(() => {
@@ -66,8 +67,8 @@ function Task({
   // popola i campi
   useEffect(() => {
     const setFields = () => {
-      setTitle(task.title || "")
-      setDescription(task.description || "")
+      setTitle(tomato ? "Pomodoro" : task.title || "")
+      setDescription(tomato ? getTomatoDescription(tomato) : task.description || "")
       setDeadline(task.deadline ? new Date(task.deadline) : time)
       setIsDone(task.isDone ?? false)
       if (task.reminders) {
@@ -90,12 +91,47 @@ function Task({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task])
 
+  function getTomatoDescription(t) {
+    return `${t.loops} ${t.loops === 1 ? 'ciclo' : 'cicli'} da ${t.studyMinutes} ${tomato.studyMinutes === 1 ? 'minuto ' : 'minuti '}
+      di studio + ${t.pauseMinutes} ${tomato.pauseMinutes === 1 ? 'minuto' : 'minuti'} di pausa`
+  }
+
+  const saveTomato = async (t) => {
+    const tomatoData = {
+      studyMinutes: t.studyMinutes,
+      pauseMinutes: t.pauseMinutes,
+      loops: t.loops
+    }
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API}/api/tomatoes/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(tomatoData)
+      });
+
+      if (!response.ok) {
+        throw new Error();
+      }
+      const result = await response.json()
+      return result._id
+    } catch (error) {
+      showError('Errore nel salvataggio del pomodoro')
+    }
+  }
+
   const handleSave = async () => {
+    const tomatoId = tomato ? await saveTomato(tomato) : null
+
     const taskData = {
       title: title,
       description: description,
       deadline: deadline.toISOString(),
-      reminders: remindersToString(emailReminder, pushReminder)
+      reminders: remindersToString(emailReminder, pushReminder),
+      tomatoId: tomatoId
     };
 
     try {
@@ -112,10 +148,13 @@ function Task({
         throw new Error();
       }
       const result = await response.json()
-      showSuccess('Attività salvata')
+      showSuccess(tomato ? 'Pomodoro salvato' : 'Attività salvata')
+      if (tomato) {
+        localStorage.removeItem('tomato')
+      }
       onSaveTask(result)
     } catch (error) {
-      showError('Errore nel salvataggio')
+      showError("Errore nel salvataggio dell'attività")
     }
   }
 
@@ -220,7 +259,9 @@ function Task({
       tabIndex={2}
     >
       <ModalContent>
-        <ModalHeader>Attività</ModalHeader>
+        <ModalHeader>
+          {tomato ? 'Pomodoro' : 'Attività'}
+        </ModalHeader>
         <ModalBody className='w-full lg:w-[88%] m-auto'>
           {!isEditing && <Checkbox
             className='ml-2 mb-2'

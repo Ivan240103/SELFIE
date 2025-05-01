@@ -27,7 +27,7 @@ function Calendar() {
   const [isEventOpen, setIsEventOpen] = useState(false);
   const [calendarTasks, setCalendarTasks] = useState([]);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
-  const [isTaskOpen, setIsTaskOpen] = useState(false);
+  const [isTaskOpen, setIsTaskOpen] = useState(!!localStorage.getItem('tomato') ?? false);
 
   // verifica dell'autenticazione
   // eslint-disable-next-line react-hooks/exhaustive-deps
