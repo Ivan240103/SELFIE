@@ -4,6 +4,8 @@ const playIcon = `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xm
   <path d="M30.6693 14.0114L11.6966 2.15371C8.4254 0.342116 4.5 2.48309 4.5 6.27097V29.8217C4.5 33.4449 8.4254 35.7505 11.6966 33.7742L30.6693 21.9165C33.7769 20.1049 33.7769 15.823 30.6693 14.0114Z" fill="white"/>
 </svg>`
 
+let interval;
+let taskId;
 let buttonActivated;
 let optionsStudyOpened;
 let optionsPauseOpened;
@@ -16,8 +18,13 @@ let finished = false;
 let currentPomodoroId = null; // Traccia l'ultimo pomodoro caricato
 let barstudy = document.getElementById('bar-study');
 let barpause = document.getElementById('bar-pause');
-let interval;
 let elapsedTime = 0; // Serve per tenere traccia del tempo se stoppo il timer
+
+// TODO: add fields to object
+function plan() {
+  localStorage.setItem('tomato', {})
+  window.open('/calendar', '_self')
+}
 
 function startStudyTime(resume = false) {
   const totalDuration = selectedStudyTime * 60; // durata totale in secondi
@@ -79,17 +86,42 @@ function playNotificationSound() {
   audio.play();
 }
 
-function init() {
+async function init() {
+  const timeElement = document.getElementById('time');
+  taskId = localStorage.getItem('taskId') ?? null
+  const tomatoData = taskId ? await loadPlannedTomato() : loadLastPomodoro()
+
+  if (Object.keys(tomatoData).length > 0 && tomatoData.interrupted !== "f") {
+    selectedStudyTime = tomatoData.studyMinutes;
+    selectedPauseTime = tomatoData.pauseMinutes;
+    sessionsNumber = tomatoData.loops;
+    isPauseTime = tomatoData.interrupted === "p"
+    currentPomodoroId = tomatoData._id
+    timeElement.innerHTML = `${selectedStudyTime}`.padStart(2, '0') + ':00';
+    currentSession = 0
+    if (tomatoData.interrupted !== "n") {
+      // era stato interrotto
+      const mins = Math.floor(tomatoData.remainingSeconds / 60);
+      const secs = tomatoData.remainingSeconds % 60;
+      timeElement.innerHTML = `${mins}`.padStart(2, '0') + ":" + `${secs}`.padStart(2, '0')
+      currentSession = tomatoData.loops - tomatoData.remainingLoops;
+    }
+  } else {
+    selectedStudyTime = 25;
+    selectedPauseTime = 5;
+    sessionsNumber = 3;
+    currentSession = 0;
+    isPauseTime = false;
+    finished = false;
+    currentPomodoroId = null;
+    timeElement.innerHTML = `${selectedStudyTime}`.padStart(2, '0') + ':00';
+  }
+  document.getElementById('sessions').innerHTML = (currentSession + 1) +
+    ' di <div><input type="text" value="' + sessionsNumber +
+    '" id="ses-selector"></div><div> cicli</div>';
   buttonActivated = false;
   optionsStudyOpened = false;
   optionsPauseOpened = false;
-  selectedStudyTime = 25;
-  selectedPauseTime = 5;
-  sessionsNumber = 3;
-  currentSession = 0;
-  isPauseTime = false;
-  finished = false;
-  currentPomodoroId = null;
 
   addButtonListener();
   setSettingsPosition();
@@ -101,14 +133,71 @@ function init() {
   stdOptionsListener();
   psOptionsListener();
   changeSessionsListener();
-
   document.querySelector('.pom-info').addEventListener('click', resetTimer);
   document.querySelector('.pom-reset').addEventListener('click', restartTimer);
   document.querySelector('.pom-volume').addEventListener('click', skipToNextSession);
   document.getElementById('calculate-cycles').addEventListener('click', calculateCycles);
-
-  loadLastPomodoro();
 }
+
+async function fetchPlannedTomatoId() {
+  try {
+    // TODO: cambiare path
+    const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    if (response.ok) {
+      const task = await response.json();
+      return task.tomatoId
+    } else {
+      throw new Error()
+    }
+  } catch (error) { }
+}
+
+async function loadPlannedTomato() {
+  const tomatoId = await fetchPlannedTomatoId()
+  try {
+    // TODO: cambiare path
+    const response = await fetch(`${process.env.REACT_APP_API}/api/tomatoes/${tomatoId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    if (response.ok) {
+      const tomato = await response.json();
+      return tomato
+    } else {
+      throw new Error()
+    }
+  } catch (error) { }
+}
+
+function loadLastPomodoro() {
+  const tomato = fetch('http://localhost:8000/api/tomatoes/last', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error();
+      }
+      return response.json();
+    })
+    .catch(e => { });
+
+  return tomato
+}
+
+// TODO: controllare il salvataggio dei timer
 
 window.addEventListener('beforeunload', function (e) {
   clearInterval(interval);
@@ -568,74 +657,8 @@ async function savePomodoro() {
       throw new Error()
     }
     const result = await response.json()
-    if (!currentPomodoroId) { 
+    if (!currentPomodoroId) {
       currentPomodoroId = result._id
     }
-  } catch (error) {}
-}
-
-function loadLastPomodoro() {
-  fetch('http://localhost:8000/api/tomatoes/last', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
-    }
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error();
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data && Object.keys(data).length > 0) {
-        // Memorizzo l'id del pomodoro se presente
-        currentPomodoroId = data._id;
-        if (data.interrupted === "f") {
-          selectedStudyTime = 25;
-          selectedPauseTime = 5;
-          sessionsNumber = 3;
-          currentSession = 0;
-          document.getElementById('time').innerHTML =
-            (selectedStudyTime < 10 ? '0' : '') + selectedStudyTime + ':00';
-          document.getElementById('sessions').innerHTML =
-            '1 di <div><input type="text" value="' + sessionsNumber +
-            '" id="ses-selector"></div><div> cicli</div>';
-          changeSessionsListener();
-          return;
-        }
-
-        selectedStudyTime = data.studyMinutes;
-        selectedPauseTime = data.pauseMinutes;
-        sessionsNumber = data.loops;
-        isPauseTime = data.interrupted === "p"
-
-        const timeElement = document.getElementById('time');
-        if (data.remainingSeconds !== -1) {
-          const totalSec = data.remainingSeconds * 60;
-          const mins = Math.floor(totalSec / 60);
-          const secs = totalSec % 60;
-          timeElement.innerHTML =
-            (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
-        } else {
-          timeElement.innerHTML =
-            (selectedStudyTime < 10 ? '0' : '') + selectedStudyTime + ':00';
-        }
-
-        if (data.remainingLoops !== -1) {
-          currentSession = data.loops - data.remainingLoops;
-        } else {
-          currentSession = 0;
-        }
-
-        document.getElementById('sessions').innerHTML = (currentSession + 1) +
-          ' di <div><input type="text" value="' + sessionsNumber +
-          '" id="ses-selector"></div><div> cicli</div>';
-        changeSessionsListener();
-      }
-    })
-    .catch(error => {
-      console.error('Errore nel caricamento dell\'ultimo pomodoro:');
-    });
+  } catch (error) { }
 }
