@@ -119,7 +119,7 @@ function TaskList() {
     const fetchTasks = async () => {
       if (isAuthenticated) {
         try {
-          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/`, {
+          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/list`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
