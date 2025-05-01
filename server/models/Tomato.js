@@ -27,7 +27,7 @@ const tomatoSchema = mongoose.Schema({
     min: 1,
     required: true
   },
-  // numero di cicli totali (studio + pausa)
+  // numero di cicli totali (uno è studio + pausa)
   loops: {
     type: Number,
     min: 1,

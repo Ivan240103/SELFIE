@@ -5,6 +5,7 @@
 const express = require('express')
 const { auth } = require('../middleware/auth')
 const Task = require('../models/Task')
+const Tomato = require('../models/Tomato')
 
 const router = express.Router()
 
@@ -12,12 +13,13 @@ const router = express.Router()
 // deadline := datetime in ISO string (UTC)
 // reminders := lista di method:minutes concatenata da ,
 router.post('/', auth, async (req, res) => {
-  const { title, description, deadline, reminders } = req.body
+  const { title, description, deadline, reminders, tomatoId } = req.body
   const task = new Task({
     title: title,
     description: description,
     deadline: new Date(deadline),
     reminders: reminders,
+    tomatoId: tomatoId,
     owner: req.user.username
   })
 
@@ -39,11 +41,22 @@ router.get('/', auth, async (req, res) => {
   }
 })
 
+// ottenere tutti i task senza pomodoro associato
+router.get('/list', auth, async (req, res) => {
+  try {
+    const tasks = await Task.find({ owner: req.user.username, tomatoId: null })
+    return res.json(tasks)
+  } catch (err) {
+    return res.status(500).send('Error while getting tasks without tomato')
+  }
+})
+
 // ottenere 3 task non completati, ordinati per scadenza
 router.get('/notdone', auth, async (req, res) => {
   try {
     const tasks = await Task.find({
       isDone: false,
+      tomatoId: null,
       owner: req.user.username
     }).sort({ deadline: 'asc' }).limit(3)
     return res.json(tasks)
@@ -104,6 +117,14 @@ router.put('/toggle/:id', auth, async (req, res) => {
       task.lateTs = -1
     }
     task.isDone = isDone ?? task.isDone
+    if (task.tomatoId) {
+      const timer = await Tomato.findById(task.tomatoId)
+      if (!timer) {
+        return res.status(404).send('Associated timer not found')
+      }
+      timer.interrupted = isDone ? 'f' : 'n'
+      await timer.save()
+    }
     await task.save()
     return res.json(task)
   } catch (err) {
@@ -111,13 +132,17 @@ router.put('/toggle/:id', auth, async (req, res) => {
   }
 })
 
-// eliminare un task specifico
+// eliminare un task specifico (ed eventuale pomodoro)
 router.delete('/:id', auth, async (req, res) => {
   try {
-    const deletion = await Task.findByIdAndDelete(req.params.id)
-    if (!deletion) {
+    const task = await Task.findById(req.params.id)
+    if (!task) {
       return res.status(404).send(`No task found with id ${req.params.id}`)
     }
+    if (task.tomatoId) { 
+      await Tomato.findByIdAndDelete(task.tomatoId)
+    }
+    await task.deleteOne()
     return res.send('ok')
   } catch (err) {
     return res.status(500).send('Error while deleting task')

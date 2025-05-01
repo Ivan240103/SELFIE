@@ -38,6 +38,11 @@ const taskSchema = mongoose.Schema({
     type: Number,
     default: -1
   },
+  // id del timer pomodoro pianificato
+  tomatoId: {
+    type: String,
+    default: null
+  },
   // username dell'utente che ha creato l'attività
   owner: {
     type: String,
