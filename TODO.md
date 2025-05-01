@@ -100,9 +100,9 @@
   - [x] cicli non completati si spostano alle giornate successive
   - [x] aggiungere campo tomato a task
   - [x] se il campo tomato != null, nella lista task non mostrare
-  - [ ] se il campo tomato != null, visualizzazione diversa nel calendar (con link che manda alla tomato page)
+  - [x] se il campo tomato != null, visualizzazione diversa nel calendar (con link che manda alla tomato page)
   - [ ] per segnare il task come done devi completare il ciclo di pomodoro (quindi setti da lì)
-  - [ ] permettere l'eliminazione, ma non la modifica (una volta che lo pianifichi resta così, altrimenti ne pianifichi un altro)
+  - [x] permettere l'eliminazione, ma non la modifica (una volta che lo pianifichi resta così, altrimenti ne pianifichi un altro)
 - [x] integrazione con calendari terzi (standard iCalendar?)
 - [x] geolocalizzazione per gli eventi --> NON SPECIFICATO/APPROFONDITO
   - [x] selezione luogo con auto-completamento di google maps api

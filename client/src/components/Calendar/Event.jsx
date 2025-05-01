@@ -12,6 +12,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalBody,
+  ScrollShadow,
   Form,
   NumberInput,
   DatePicker,
@@ -264,7 +265,7 @@ function Event({
 
   return (
     <Modal
-      className='min-w-[32vw] lg:px-5 py-3'
+      className='min-w-[32vw] max-h-[80vh] lg:px-5 py-3'
       classNames={{ header: 'text-xl' }}
       isOpen={isModalOpen}
       onClose={() => setIsModalOpen(false)}
@@ -273,167 +274,169 @@ function Event({
     >
       <ModalContent>
         <ModalHeader>Evento</ModalHeader>
-        <ModalBody className='w-full lg:w-[88%] m-auto'>
-          <Form
-            className="flex flex-col items-center"
-            validationBehavior="native"
-            onSubmit={handleSubmit}
-          >
-            <TitleDescription
-              title={title}
-              setTitle={setTitle}
-              description={description}
-              setDescription={setDescription}
-              isEditing={isEditing}
-            />
-            <Checkbox
-              className='self-start ml-2'
-              color='primary'
-              isSelected={isAllDay}
-              onValueChange={setIsAllDay}
-              isReadOnly={!isEditing}
+        <ScrollShadow hideScrollBar>
+          <ModalBody className='w-full lg:w-[88%] m-auto'>
+            <Form
+              className="flex flex-col items-center"
+              validationBehavior="native"
+              onSubmit={handleSubmit}
             >
-              <span>Evento per tutto il giorno</span>
-            </Checkbox>
-            <DateRangePicker
-              label='Durata'
-              description='Seleziona uno o più giorni'
-              firstDayOfWeek='mon'
-              hourCycle={24}
-              value={getDatePickerValue()}
-              onChange={(e) => {
-                setStart(e.start.toDate())
-                setEnd(e.end.toDate())
-              }}
-              isReadOnly={!isEditing}
-              isRequired
-            />
-            <Checkbox
-              className='self-start ml-2'
-              color='primary'
-              isSelected={isRecurrent}
-              onValueChange={setIsRecurrent}
-              isReadOnly={!isEditing}
-            >
-              <span>Evento ricorrente</span>
-            </Checkbox>
-            {isRecurrent && <div className='w-full flex flex-col items-start ml-3 pt-1 pb-3'>
-              <div className='w-full flex flex-row items-center justify-between gap-2 lg:gap-3'>
-                <span className='block'>Ripeti&nbsp;ogni</span>
-                <NumberInput
-                  className='w-24 lg:w-32'
-                  size='sm'
-                  radius='md'
-                  minValue={1}
-                  value={interval}
-                  onValueChange={setInterval}
-                  isReadOnly={!isEditing}
-                />
-                <Select
-                  className='w-1/2'
-                  classNames={{
-                    trigger: 'py-6'
-                  }}
-                  selectedKeys={[freq]}
-                  onChange={(e) => setFreq(e.target.value)}
-                  isDisabled={!isEditing}
-                >
-                  <SelectItem key='daily'>{interval === 1 ? 'Giorno' : 'Giorni'}</SelectItem>
-                  <SelectItem key='weekly'>{interval === 1 ? 'Settimana' : 'Settimane'}</SelectItem>
-                  <SelectItem key='monthly'>{interval === 1 ? 'Mese' : 'Mesi'}</SelectItem>
-                  <SelectItem key='yearly'>{interval === 1 ? 'Anno' : 'Anni'}</SelectItem>
-                </Select>
-              </div>
-              <RadioGroup
-                classNames={{
-                  label: 'text-gray-800'
-                }}
-                label='Scade'
-                value={term}
-                onValueChange={setTerm}
+              <TitleDescription
+                title={title}
+                setTitle={setTitle}
+                description={description}
+                setDescription={setDescription}
+                isEditing={isEditing}
+              />
+              <Checkbox
+                className='self-start ml-2'
+                color='primary'
+                isSelected={isAllDay}
+                onValueChange={setIsAllDay}
                 isReadOnly={!isEditing}
               >
-                <Radio className='ml-1' value='n'>mai</Radio>
-                <div className='flex flex-row gap-3'>
-                  <Radio className='ml-1' value='u'>il</Radio>
-                  <DatePicker
-                    classNames={{
-                      inputWrapper: 'py-6'
-                    }}
-                    showMonthAndYearPickers
-                    firstDayOfWeek='mon'
-                    value={parseDate(getDateString(until))}
-                    onChange={(e) => setUntil(e.toDate())}
-                    isReadOnly={!isEditing}
-                  />
-                </div>
-                <div className='flex flex-row items-center gap-3'>
-                  <Radio className='ml-1' value='c'>dopo</Radio>
+                <span>Evento per tutto il giorno</span>
+              </Checkbox>
+              <DateRangePicker
+                label='Durata'
+                description='Seleziona uno o più giorni'
+                firstDayOfWeek='mon'
+                hourCycle={24}
+                value={getDatePickerValue()}
+                onChange={(e) => {
+                  setStart(e.start.toDate())
+                  setEnd(e.end.toDate())
+                }}
+                isReadOnly={!isEditing}
+                isRequired
+              />
+              <Checkbox
+                className='self-start ml-2'
+                color='primary'
+                isSelected={isRecurrent}
+                onValueChange={setIsRecurrent}
+                isReadOnly={!isEditing}
+              >
+                <span>Evento ricorrente</span>
+              </Checkbox>
+              {isRecurrent && <div className='w-full flex flex-col items-start ml-3 pt-1 pb-3'>
+                <div className='w-full flex flex-row items-center justify-between gap-2 lg:gap-3'>
+                  <span className='block'>Ripeti&nbsp;ogni</span>
                   <NumberInput
-                    className='w-28'
+                    className='w-24 lg:w-32'
                     size='sm'
                     radius='md'
                     minValue={1}
-                    value={count}
-                    onValueChange={setCount}
+                    value={interval}
+                    onValueChange={setInterval}
                     isReadOnly={!isEditing}
                   />
-                  <span className='block'>{count === 1 ? 'ripetizione' : 'ripetizioni'}</span>
+                  <Select
+                    className='w-1/2'
+                    classNames={{
+                      trigger: 'py-6'
+                    }}
+                    selectedKeys={[freq]}
+                    onChange={(e) => setFreq(e.target.value)}
+                    isDisabled={!isEditing}
+                  >
+                    <SelectItem key='daily'>{interval === 1 ? 'Giorno' : 'Giorni'}</SelectItem>
+                    <SelectItem key='weekly'>{interval === 1 ? 'Settimana' : 'Settimane'}</SelectItem>
+                    <SelectItem key='monthly'>{interval === 1 ? 'Mese' : 'Mesi'}</SelectItem>
+                    <SelectItem key='yearly'>{interval === 1 ? 'Anno' : 'Anni'}</SelectItem>
+                  </Select>
                 </div>
-              </RadioGroup>
-            </div>}
-            <Place
-              place={place}
-              setPlace={setPlace}
-              mapsLocated={mapsLocated}
-              setMapsLocated={setMapsLocated}
-              isEditing={isEditing}
-            />
-            {user.notification && <div className='self-start w-full ml-1'>
-              <span className='block text-gray-800 self-start'>Promemoria</span>
-              <Reminder
-                type='Email'
-                reminder={emailReminder}
-                setReminder={setEmailReminder}
+                <RadioGroup
+                  classNames={{
+                    label: 'text-gray-800'
+                  }}
+                  label='Scade'
+                  value={term}
+                  onValueChange={setTerm}
+                  isReadOnly={!isEditing}
+                >
+                  <Radio className='ml-1' value='n'>mai</Radio>
+                  <div className='flex flex-row gap-3'>
+                    <Radio className='ml-1' value='u'>il</Radio>
+                    <DatePicker
+                      classNames={{
+                        inputWrapper: 'py-6'
+                      }}
+                      showMonthAndYearPickers
+                      firstDayOfWeek='mon'
+                      value={parseDate(getDateString(until))}
+                      onChange={(e) => setUntil(e.toDate())}
+                      isReadOnly={!isEditing}
+                    />
+                  </div>
+                  <div className='flex flex-row items-center gap-3'>
+                    <Radio className='ml-1' value='c'>dopo</Radio>
+                    <NumberInput
+                      className='w-28'
+                      size='sm'
+                      radius='md'
+                      minValue={1}
+                      value={count}
+                      onValueChange={setCount}
+                      isReadOnly={!isEditing}
+                    />
+                    <span className='block'>{count === 1 ? 'ripetizione' : 'ripetizioni'}</span>
+                  </div>
+                </RadioGroup>
+              </div>}
+              <Place
+                place={place}
+                setPlace={setPlace}
+                mapsLocated={mapsLocated}
+                setMapsLocated={setMapsLocated}
                 isEditing={isEditing}
               />
-              <Reminder
-                type='Push'
-                reminder={pushReminder}
-                setReminder={setPushReminder}
-                isEditing={isEditing}
-              />
-            </div>}
-            {!googleId && <>
-              {!eventId ? (
-                <ButtonGroup>
-                  <Button className='w-32' type='submit' color='primary' variant='solid'>
-                    Crea evento
-                  </Button>
-                </ButtonGroup>
-              ) : isEditing && (
-                <ButtonGroup className='mt-1'>
-                  <Button className='w-36 lg:w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
-                    Annulla modifiche
-                  </Button>
-                  <Button className='w-36 lg:w-40' type='submit' color='primary' variant='solid'>
-                    Aggiorna evento
-                  </Button>
-                </ButtonGroup>
-              )}
-            </>}
-          </Form>
-          {!googleId && eventId && !isEditing && (
-            <ButtonGroup>
-              <Button className='w-36 lg:w-40' color='danger' variant='flat' onPress={handleDelete}>
-                Elimina evento
-              </Button>
-              <Button className='w-36 lg:w-40' color='primary' variant='solid' onPress={() => setIsEditing(true)}>
-                Modifica evento
-              </Button>
-            </ButtonGroup>
-          )}
-        </ModalBody>
+              {user.notification && <div className='self-start w-full ml-1'>
+                <span className='block text-gray-800 self-start'>Promemoria</span>
+                <Reminder
+                  type='Email'
+                  reminder={emailReminder}
+                  setReminder={setEmailReminder}
+                  isEditing={isEditing}
+                />
+                <Reminder
+                  type='Push'
+                  reminder={pushReminder}
+                  setReminder={setPushReminder}
+                  isEditing={isEditing}
+                />
+              </div>}
+              {!googleId && <>
+                {!eventId ? (
+                  <ButtonGroup>
+                    <Button className='w-32' type='submit' color='primary' variant='solid'>
+                      Crea evento
+                    </Button>
+                  </ButtonGroup>
+                ) : isEditing && (
+                  <ButtonGroup className='mt-1'>
+                    <Button className='w-36 lg:w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
+                      Annulla modifiche
+                    </Button>
+                    <Button className='w-36 lg:w-40' type='submit' color='primary' variant='solid'>
+                      Aggiorna evento
+                    </Button>
+                  </ButtonGroup>
+                )}
+              </>}
+            </Form>
+            {!googleId && eventId && !isEditing && (
+              <ButtonGroup>
+                <Button className='w-36 lg:w-40' color='danger' variant='flat' onPress={handleDelete}>
+                  Elimina evento
+                </Button>
+                <Button className='w-36 lg:w-40' color='primary' variant='solid' onPress={() => setIsEditing(true)}>
+                  Modifica evento
+                </Button>
+              </ButtonGroup>
+            )}
+          </ModalBody>
+        </ScrollShadow>
       </ModalContent>
     </Modal>
   );

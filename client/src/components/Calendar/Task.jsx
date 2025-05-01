@@ -31,6 +31,7 @@ function Task({
   const [isDone, setIsDone] = useState(false);
   const [emailReminder, setEmailReminder] = useState({})
   const [pushReminder, setPushReminder] = useState({})
+  const [tomatoId, setTomatoId] = useState(null)
   const [isEditing, setIsEditing] = useState(!!!taskId)
   const tomato = localStorage.getItem('tomato') ?? null
 
@@ -85,6 +86,7 @@ function Task({
         setEmailReminder({ checked: false, method: 'email', before: 15, time: 'm' })
         setPushReminder({ checked: false, method: 'push', before: 15, time: 'm' })
       }
+      setTomatoId(task.tomatoId ?? null)
     }
 
     setFields()
@@ -293,6 +295,15 @@ function Task({
               isRequired
               isReadOnly={!isEditing}
             />
+            {tomatoId && !isEditing && <Button
+              className='w-40'
+              type='button'
+              color='danger'
+              variant='solid'
+              // TODO: collegamento al componente Tomato passando il taskID
+            >
+              Vai alla sessione
+            </Button>}
             {user.notification && <div className='self-start w-full ml-1'>
               <span className='block text-gray-800 self-start'>Promemoria</span>
               <Reminder
