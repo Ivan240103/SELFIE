@@ -11,7 +11,7 @@ const mongoose = require('mongoose')
  *   - 's' = interrupted during study time
  *   - 'p' = interrupted during pause time
  *   - 'f' = finished
- * - remainingMinutes e remainingLoops hanno significato
+ * - remainingSeconds e remainingLoops hanno significato
  *   solo se interrupted != 'n'
  */
 const tomatoSchema = mongoose.Schema({
@@ -38,8 +38,8 @@ const tomatoSchema = mongoose.Schema({
     type: String,
     default: 'n'
   },
-  // tempo rimanente in minuti
-  remainingMinutes: {
+  // tempo rimanente in secondi
+  remainingSeconds: {
     type: Number,
     default: -1
   },

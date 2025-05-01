@@ -63,9 +63,9 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(404).send(`No tomato found with id ${req.params.id}`)
     }
     // modifiche
-    const { interrupted, remainingMinutes, remainingLoops } = req.body
+    const { interrupted, remainingSeconds, remainingLoops } = req.body
     tomato.interrupted = interrupted || tomato.interrupted
-    tomato.remainingMinutes = remainingMinutes ?? tomato.remainingMinutes
+    tomato.remainingSeconds = remainingSeconds ?? tomato.remainingSeconds
     tomato.remainingLoops = remainingLoops ?? tomato.remainingLoops
     tomato.modification = new Date(getTime(req.user))
     await tomato.save()
