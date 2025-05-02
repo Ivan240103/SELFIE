@@ -170,7 +170,7 @@
                 <div class="stdop" id="opt">25 min</div>
                 <div class="stdop" id="opt">30 min</div>
                 <div class="stdop" id="opt">35 min</div>
-                <div class="stdop" id="opt">40 min</div>
+                <div class="stdop" id="opt">1 min</div>
               </div>
             </div>
           </div>
@@ -201,12 +201,9 @@
                 <div class="psop" id="opt">5 min</div>
                 <div class="psop" id="opt">10 min</div>
                 <div class="psop" id="opt">15 min</div>
-                <div class="psop" id="opt">20 min</div>
+                <div class="psop" id="opt">1 min</div>
               </div>
             </div>
-          </div>
-          <div>
-            <button type="button" onclick="plan()">Pianifica data</button>
           </div>
           <div class="available-time-selector">
             <input
@@ -215,6 +212,9 @@
               placeholder="Inserisci i minuti"
             />
             <button id="calculate-cycles">Calcola</button>
+          </div>
+          <div class="plan-container">
+            <button type="button" id="planning" onclick="plan()">Pianifica data</button>
           </div>
         </div>
         <div class="pom-footer"></div>
@@ -234,9 +234,7 @@
       </filter>
     </svg>
 
-    <div class="barstudy" id="bar-study">
-      <div id="countdown"></div>
-    </div>
+    <div class="barstudy" id="bar-study"></div>
 
     <script src="./tomatoscript.js"></script>
   </body>

@@ -443,7 +443,7 @@ function addSettingsListener() {
   const titlePs = document.getElementById('pstitle');
   const psTime = document.getElementById('pssel-selected');
   settingsButton.addEventListener('click', function () {
-    containerSettings.style.width = '40vh';
+    containerSettings.style.width = '42vh';
     closeButton.style.width = '36px';
     settingsTitle.style.display = 'flex';
     optionsText.forEach((div) => {

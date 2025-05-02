@@ -18,7 +18,7 @@ function Tomato() {
       {isAuthenticated && <iframe
         src='/tomato/tomato.html'
         title='Timer pomodoro'
-        style={{ width:'100%', height:'100vh', border: 'none' }}
+        style={{ width:'100%', height:'92vh', border: 'none' }}
       />}
     </div>
   );
