@@ -14,12 +14,11 @@ let selectedPauseTime;
 let sessionsNumber;
 let currentSession;
 let isPauseTime;
-let finished = false;
-let currentPomodoroId = null; // Traccia l'ultimo pomodoro caricato
-let barstudy = document.getElementById('bar-study');
-let barpause = document.getElementById('bar-pause');
-let elapsedTime = 0; // Serve per tenere traccia del tempo se stoppo il timer
+let finished;
+let currentPomodoroId; // Traccia il pomodoro caricato
+let elapsedTime; // Serve per tenere traccia del tempo se stoppo il timer
 
+// eslint-disable-next-line no-unused-vars
 function plan() {
   localStorage.setItem('tomato', JSON.stringify({
     studyMinutes: selectedStudyTime,
@@ -37,9 +36,6 @@ function startStudyTime(resume = false) {
     elapsedTime = 0;
   }
 
-  // Calcola il tempo rimanente, eventualmente utile per ulteriori logiche
-  const remainingTime = totalDuration - elapsedTime;
-
   // Creazione o aggiornamento del blocco di stile dinamico per gestire l’animazione
   let styleSheet = document.getElementById('dynamic-style');
   if (!styleSheet) {
@@ -56,7 +52,7 @@ function startStudyTime(resume = false) {
   `;
 
   // Rimuovi la classe che mette in pausa l'animazione
-  barstudy.classList.remove('pause-animation');
+  document.getElementById('bar-study').classList.remove('pause-animation');
 }
 
 function startPauseTime(resume = false) {
@@ -81,7 +77,7 @@ function startPauseTime(resume = false) {
   `;
 
   // Rimuove eventuali classi di pausa per far ripartire l'animazione della pausa
-  barstudy.classList.remove('pause-animation');
+  document.getElementById('bar-study').classList.remove('pause-animation');
 }
 
 function playNotificationSound() {
@@ -118,16 +114,17 @@ async function init() {
     sessionsNumber = 3;
     currentSession = 0;
     isPauseTime = false;
-    finished = false;
     currentPomodoroId = null;
     timeElement.innerHTML = `${selectedStudyTime}`.padStart(2, '0') + ':00';
   }
+  finished = false;
   document.getElementById('sessions').innerHTML = (currentSession + 1) +
     ' di <div><input type="text" value="' + sessionsNumber +
     '" id="ses-selector"></div><div> cicli</div>';
   buttonActivated = false;
   optionsStudyOpened = false;
   optionsPauseOpened = false;
+  elapsedTime = 0;
 
   addButtonListener();
   setSettingsPosition();
@@ -394,12 +391,13 @@ function timer(timeElement) {
 }
 
 async function checkButtonStatus(playButton, currentInterval, currentTime) {
+  
   if (buttonActivated) {
     playButton.innerHTML = playIcon
     buttonActivated = false;
     clearInterval(currentInterval);
     // Aggiunge la classe di pausa per sospendere l'animazione
-    barstudy.classList.add('pause-animation');
+    document.getElementById('bar-study').classList.add('pause-animation');
   } else {
     playButton.innerHTML =
       '<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
