@@ -35,7 +35,18 @@ function Task({
   const [pushReminder, setPushReminder] = useState({})
   const [tomatoId, setTomatoId] = useState(null)
   const [isEditing, setIsEditing] = useState(!!!taskId)
-  const tomato = localStorage.getItem('tomato') ?? null
+  const [plannedTomato, setPlannedTomato] = useState(null)
+
+  // prende il pomodoro da pianificare se esiste
+  useEffect(() => {
+    const itemStr = localStorage.getItem('tomato') ?? null
+    if (itemStr) {
+      const item = JSON.parse(itemStr)
+      setPlannedTomato(item)
+    } else {
+      setPlannedTomato(null)
+    }
+  }, []);
 
   // recupera il task specifico dal backend
   useEffect(() => {
@@ -70,8 +81,8 @@ function Task({
   // popola i campi
   useEffect(() => {
     const setFields = () => {
-      setTitle(tomato ? "Pomodoro" : task.title || "")
-      setDescription(tomato ? getTomatoDescription(tomato) : task.description || "")
+      setTitle(plannedTomato ? "Pomodoro" : task.title || "")
+      setDescription(plannedTomato ? getTomatoDescription(plannedTomato) : task.description || "")
       setDeadline(task.deadline ? new Date(task.deadline) : time)
       setIsDone(task.isDone ?? false)
       if (task.reminders) {
@@ -96,8 +107,7 @@ function Task({
   }, [task])
 
   function getTomatoDescription(t) {
-    return `${t.loops} ${t.loops === 1 ? 'ciclo' : 'cicli'} da ${t.studyMinutes} ${tomato.studyMinutes === 1 ? 'minuto ' : 'minuti '}
-      di studio + ${t.pauseMinutes} ${tomato.pauseMinutes === 1 ? 'minuto' : 'minuti'} di pausa`
+    return `${t.loops} ${t.loops === 1 ? 'ciclo' : 'cicli'} da ${t.studyMinutes} ${t.studyMinutes === 1 ? 'minuto' : 'minuti'} di studio + ${t.pauseMinutes} ${t.pauseMinutes === 1 ? 'minuto' : 'minuti'} di pausa`
   }
 
   const saveTomato = async (t) => {
@@ -128,7 +138,7 @@ function Task({
   }
 
   const handleSave = async () => {
-    const tomatoId = tomato ? await saveTomato(tomato) : null
+    const tomatoId = plannedTomato ? await saveTomato(plannedTomato) : null
 
     const taskData = {
       title: title,
@@ -152,9 +162,10 @@ function Task({
         throw new Error();
       }
       const result = await response.json()
-      showSuccess(tomato ? 'Pomodoro salvato' : 'Attività salvata')
-      if (tomato) {
+      showSuccess(plannedTomato ? 'Pomodoro salvato' : 'Attività salvata')
+      if (plannedTomato) {
         localStorage.removeItem('tomato')
+        setPlannedTomato(null)
       }
       onSaveTask(result)
     } catch (error) {
@@ -258,13 +269,19 @@ function Task({
       className='min-w-[32vw] lg:px-5 py-3'
       classNames={{ header: 'text-xl' }}
       isOpen={isModalOpen}
-      onClose={() => setIsModalOpen(false)}
+      onClose={() => {
+        if (plannedTomato) {
+          localStorage.removeItem('tomato')
+          setPlannedTomato(null)
+        }
+        setIsModalOpen(false)
+      }}
       draggable
       tabIndex={2}
     >
       <ModalContent>
         <ModalHeader>
-          {tomato ? 'Pomodoro' : 'Attività'}
+          {plannedTomato ? 'Pomodoro' : 'Attività'}
         </ModalHeader>
         <ModalBody className='w-full lg:w-[88%] m-auto'>
           {!isEditing && <Checkbox

@@ -20,10 +20,13 @@ let barstudy = document.getElementById('bar-study');
 let barpause = document.getElementById('bar-pause');
 let elapsedTime = 0; // Serve per tenere traccia del tempo se stoppo il timer
 
-// TODO: add fields to object
 function plan() {
-  localStorage.setItem('tomato', {})
-  window.open('/calendar', '_self')
+  localStorage.setItem('tomato', JSON.stringify({
+    studyMinutes: selectedStudyTime,
+    pauseMinutes: selectedPauseTime,
+    loops: sessionsNumber
+  }))
+  window.parent.location.href = '/calendar';
 }
 
 function startStudyTime(resume = false) {
@@ -89,6 +92,9 @@ function playNotificationSound() {
 async function init() {
   const timeElement = document.getElementById('time');
   taskId = localStorage.getItem('taskId') ?? null
+  if (taskId) {
+    localStorage.removeItem('taskId')
+  }
   const tomatoData = taskId ? await loadPlannedTomato() : loadLastPomodoro()
 
   if (Object.keys(tomatoData).length > 0 && tomatoData.interrupted !== "f") {
@@ -142,7 +148,7 @@ async function init() {
 async function fetchPlannedTomatoId() {
   try {
     // TODO: cambiare path
-    const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
+    const response = await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -162,7 +168,7 @@ async function loadPlannedTomato() {
   const tomatoId = await fetchPlannedTomatoId()
   try {
     // TODO: cambiare path
-    const response = await fetch(`${process.env.REACT_APP_API}/api/tomatoes/${tomatoId}`, {
+    const response = await fetch(`http://localhost:8000/api/tomatoes/${tomatoId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -179,6 +185,7 @@ async function loadPlannedTomato() {
 }
 
 function loadLastPomodoro() {
+  // TODO: cambiare path
   const tomato = fetch('http://localhost:8000/api/tomatoes/last', {
     method: 'GET',
     headers: {
@@ -197,48 +204,14 @@ function loadLastPomodoro() {
   return tomato
 }
 
-// TODO: controllare il salvataggio dei timer
-
-window.addEventListener('beforeunload', function (e) {
+window.addEventListener('beforeunload', async function (e) {
   clearInterval(interval);
   buttonActivated = false;
   document.getElementById('play').innerHTML = playIcon
 
-  const timeElement = document.getElementById('time');
-  const timeStr = timeElement.innerHTML;
-  const parts = timeStr.split(':');
-  const minutes = parseInt(parts[0], 10) || 0;
-  const seconds = parseInt(parts[1], 10) || 0;
-  const totalSeconds = minutes * 60 + seconds;
-
-  const interrupted = finished ? "f" : (isPauseTime ? "p" : "s");
-  const remainingSeconds = (interrupted !== "f") ? totalSeconds : -1;
-  const remainingLoops = (interrupted !== "f") ? sessionsNumber - currentSession : -1;
-
-  const data = {
-    studyMinutes: selectedStudyTime,
-    pauseMinutes: selectedPauseTime,
-    loops: sessionsNumber,
-    interrupted: interrupted,
-    remainingSeconds: remainingSeconds,
-    remainingLoops: remainingLoops
-  };
-
-  const url = currentPomodoroId
-    ? `http://localhost:8000/api/tomatoes/${currentPomodoroId}`
-    : 'http://localhost:8000/api/tomatoes';
-  const method = currentPomodoroId ? 'PUT' : 'POST';
-
-  // Uso fetch con keepalive per inviare l'aggiornamento anche in uscita dalla pagina
-  fetch(url, {
-    method: method,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
-    },
-    body: JSON.stringify(data),
-    keepalive: true
-  });
+  if (currentPomodoroId) {
+    await savePomodoro()
+  }
 });
 
 function calculateCycles() {
@@ -310,7 +283,6 @@ function restartTimer() {
   }
   document.getElementById('play').innerHTML = playIcon
   buttonActivated = false;
-  savePomodoro();
 }
 
 function resetTimer() {
@@ -325,14 +297,13 @@ function resetTimer() {
 
   document.getElementById('tmt').style.transform = 'rotate(0deg)';
 
-  document.getElementById('sessions').innerHTML = '1 di <div><input type="text" value="' + sessionsNumber + '" id="ses-selector" readonly></div><div> cicli</div>';
+  document.getElementById('sessions').innerHTML = '1 di <div><input type="text" value="' + sessionsNumber + '" id="ses-selector"></div><div> cicli</div>';
 
   changeSessionsListener();
   document.getElementById('play').innerHTML = playIcon
-  savePomodoro();
 }
 
-function skipToNextSession() {
+async function skipToNextSession() {
   clearInterval(interval);
   elapsedTime = 0; // Reset di elapsedTime per far ripartire l'animazione da zero
   document.getElementById('tmt').style.transform = 'rotate(0deg)';
@@ -342,7 +313,7 @@ function skipToNextSession() {
 
   if (isPauseTime && currentSession + 1 === sessionsNumber) {
     finished = true;
-    savePomodoro();
+    await savePomodoro();
     resetTimer();
     return;
   }
@@ -354,7 +325,7 @@ function skipToNextSession() {
     currentSession++;
     sessionsElement.innerHTML =
       (currentSession + 1) +
-      ' di <div><input type="text" value="' + sessionsNumber + '" id="ses-selector" readonly></div><div> cicli</div>';
+      ' di <div><input type="text" value="' + sessionsNumber + '" id="ses-selector"></div><div> cicli</div>';
     changeSessionsListener();
     timeElement.innerHTML = (selectedStudyTime < 10 ? '0' : '') + selectedStudyTime + ':00';
     isPauseTime = false;
@@ -363,7 +334,7 @@ function skipToNextSession() {
   const playButton = document.getElementById('play');
   playButton.innerHTML = playIcon
   buttonActivated = false;
-  savePomodoro();
+  await savePomodoro();
 }
 
 function timer(timeElement) {
@@ -371,7 +342,7 @@ function timer(timeElement) {
   let minutes = parseInt(timeParts[0]);
   let seconds = parseInt(timeParts[1]);
 
-  interval = setInterval(function () {
+  interval = setInterval(async function () {
     // Aggiorna elapsedTime in base alla modalità attuale (studio o pausa)
     if (!isPauseTime) {
       elapsedTime = selectedStudyTime * 60 - (minutes * 60 + seconds);
@@ -384,32 +355,30 @@ function timer(timeElement) {
         clearInterval(interval);
         if (currentSession + 1 === sessionsNumber) {
           finished = true;
-          savePomodoro();
+          await savePomodoro();
           resetTimer();
           return;
         } else {
           playNotificationSound();
+          elapsedTime = 0;
           if (isPauseTime === false) {
-            timeElement.innerHTML = (selectedPauseTime < 10 ? '0' : '') + selectedPauseTime + ':00';
-            elapsedTime = 0;
+            timeElement.innerHTML = `${selectedPauseTime}`.padStart(2, '0') + ':00';
+            timer(timeElement);
             // Avvia la pausa con animazione "back"
             startPauseTime();
-            timer(timeElement);
             isPauseTime = true;
           } else {
             currentSession++;
-            document.getElementById('sessions').innerHTML =
-              (currentSession + 1) +
-              ' di <div><input type="text" value="' + sessionsNumber + '" id="ses-selector" readonly></div><div> cicli</div>';
+            document.getElementById('sessions').innerHTML = (currentSession + 1) +
+              ' di <div><input type="text" value="' + sessionsNumber + '" id="ses-selector"></div><div> cicli</div>';
             changeSessionsListener();
-            timeElement.innerHTML = (selectedStudyTime < 10 ? '0' : '') + selectedStudyTime + ':00';
-            elapsedTime = 0;
+            timeElement.innerHTML = `${selectedStudyTime}`.padStart(2, '0') + ':00';
+            timer(timeElement);
             // Avvia il tempo di studio con animazione "rotate"
             startStudyTime();
-            timer(timeElement);
             isPauseTime = false;
           }
-          savePomodoro();
+          await savePomodoro();
           return;
         }
       } else {
@@ -420,17 +389,15 @@ function timer(timeElement) {
       seconds--;
     }
 
-    timeElement.innerHTML =
-      (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+    timeElement.innerHTML = `${minutes}`.padStart(2, '0') + ':' + `${seconds}`.padStart(2, '0')
   }, 1000);
 }
 
-function checkButtonStatus(playButton, currentInterval, currentTime) {
+async function checkButtonStatus(playButton, currentInterval, currentTime) {
   if (buttonActivated) {
     playButton.innerHTML = playIcon
     buttonActivated = false;
     clearInterval(currentInterval);
-    savePomodoro();
     // Aggiunge la classe di pausa per sospendere l'animazione
     barstudy.classList.add('pause-animation');
   } else {
@@ -439,23 +406,23 @@ function checkButtonStatus(playButton, currentInterval, currentTime) {
       '<path d="M11.0572 33H8.43432C6.24859 33 4.5 31.2 4.5 28.95V7.05C4.5 4.8 6.24859 3 8.43432 3H11.0572C13.2429 3 14.9915 4.8 14.9915 7.05V28.8C15.1372 31.2 13.3886 33 11.0572 33Z" fill="white"/>' +
       '<path d="M27.5625 33H24.9375C22.75 33 21 31.2 21 28.95V7.05C21 4.8 22.75 3 24.9375 3H27.5625C29.75 3 31.5 4.8 31.5 7.05V28.8C31.5 31.2 29.75 33 27.5625 33Z" fill="white"/>' +
       '</svg>';
-    // A seconda di ispausetime, riprende l'animazione corretta
+    buttonActivated = true;
+    timer(currentTime);
+    // A seconda di isPauseTime, riprende l'animazione corretta
     if (isPauseTime) {
       startPauseTime(true);
     } else {
       startStudyTime(true);
     }
-    timer(currentTime);
-    buttonActivated = true;
-    savePomodoro();
   }
+  await savePomodoro();
 }
 
 function addButtonListener() {
   const playButton = document.getElementById('play');
   const timeElement = document.getElementById('time');
-  playButton.addEventListener('click', function () {
-    checkButtonStatus(playButton, interval, timeElement);
+  playButton.addEventListener('click', async function () {
+    await checkButtonStatus(playButton, interval, timeElement);
   });
 }
 
@@ -618,14 +585,13 @@ function psOptionsListener() {
 }
 
 async function savePomodoro() {
-  const timeElement = document.getElementById('time');
-  const timeStr = timeElement.innerHTML;
+  const timeStr = document.getElementById('time').innerHTML;
   const parts = timeStr.split(':');
   const minutes = parseInt(parts[0], 10) || 0;
   const seconds = parseInt(parts[1], 10) || 0;
   const totalSeconds = minutes * 60 + seconds;
-
-  const interrupted = finished ? "f" : (buttonActivated ? "n" : (isPauseTime ? "p" : "s"));
+  // il salvataggio avviene solo a timer cominciato
+  const interrupted = finished ? "f" : (isPauseTime ? "p" : "s");
   const remainingSeconds = (interrupted !== "f") ? totalSeconds : -1;
   const remainingLoops = (interrupted !== "f") ? sessionsNumber - currentSession : -1;
 
@@ -638,9 +604,10 @@ async function savePomodoro() {
     remainingLoops: remainingLoops
   };
 
+  // TODO: modificare path
   const url = currentPomodoroId
     ? `http://localhost:8000/api/tomatoes/${currentPomodoroId}`
-    : 'http://localhost:8000/api/tomatoes';
+    : 'http://localhost:8000/api/tomatoes/';
   const method = currentPomodoroId ? 'PUT' : 'POST';
   try {
     const response = await fetch(url, {

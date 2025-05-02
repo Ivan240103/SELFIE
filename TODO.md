@@ -93,15 +93,15 @@
   - [x] ogni 5 minuti controllare quali task sono in ritardo e nel caso notificarli
 - [x] disabilitare le notifiche
 - [x] note in markdown
-- [ ] cicli di pomodoro programmati come eventi
+- [x] cicli di pomodoro programmati come eventi
   - [x] nella preview prendere l'ultimo pomodoro modificato
-  - [ ] quando si crea il pomodoro, in settings mettere un bottone per aprire il Modal dei task nel /calendar
+  - [x] quando si crea il pomodoro, in settings mettere un bottone per aprire il Modal dei task nel /calendar
   - [x] quando si crea il task, creare anche il pomodoro associato.
   - [x] cicli non completati si spostano alle giornate successive
   - [x] aggiungere campo tomato a task
   - [x] se il campo tomato != null, nella lista task non mostrare
   - [x] se il campo tomato != null, visualizzazione diversa nel calendar (con link che manda alla tomato page)
-  - [ ] per segnare il task come done devi completare il ciclo di pomodoro (quindi setti da lì)
+  - [x] per segnare il task come done devi completare il ciclo di pomodoro (quindi setti da lì)
   - [x] permettere l'eliminazione, ma non la modifica (una volta che lo pianifichi resta così, altrimenti ne pianifichi un altro)
 - [x] integrazione con calendari terzi (standard iCalendar?)
 - [x] geolocalizzazione per gli eventi --> NON SPECIFICATO/APPROFONDITO
