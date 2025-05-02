@@ -240,7 +240,11 @@ function Task({
       const result = await response.json()
       setIsDone(v)
       setTimeout(() => {
-        showSuccess(`Attività segnata come ${v ? '' : 'non'} completata`)
+        if (tomatoId) {
+          showSuccess(`Pomodoro segnato come ${v ? '' : 'non'} completato`)
+        } else {
+          showSuccess(`Attività segnata come ${v ? '' : 'non'} completata`)
+        }
         onUpdateTask(result)
       }, 500);
     } catch (error) {
@@ -281,7 +285,7 @@ function Task({
     >
       <ModalContent>
         <ModalHeader>
-          {plannedTomato ? 'Pomodoro' : 'Attività'}
+          {(plannedTomato || tomatoId) ? 'Pomodoro' : 'Attività'}
         </ModalHeader>
         <ModalBody className='w-full lg:w-[88%] m-auto'>
           {!isEditing && <Checkbox
@@ -314,7 +318,7 @@ function Task({
               isRequired
               isReadOnly={!isEditing}
             />
-            {tomatoId && !isEditing && <Button
+            {tomatoId && !isDone && !isEditing && <Button
               className='w-40'
               type='button'
               color='danger'
