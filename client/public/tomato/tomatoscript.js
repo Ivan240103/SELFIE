@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', init);
 const playIcon = `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M30.6693 14.0114L11.6966 2.15371C8.4254 0.342116 4.5 2.48309 4.5 6.27097V29.8217C4.5 33.4449 8.4254 35.7505 11.6966 33.7742L30.6693 21.9165C33.7769 20.1049 33.7769 15.823 30.6693 14.0114Z" fill="white"/>
 </svg>`
+const env = window.parent.ENV;
 
 let interval;
 let taskId;
@@ -91,7 +92,8 @@ async function init() {
   if (taskId) {
     localStorage.removeItem('taskId')
   }
-  const tomatoData = taskId ? await loadPlannedTomato() : loadLastPomodoro()
+  const tomatoData = taskId ? await loadPlannedTomato() : await loadLastPomodoro()
+  console.log('TOMATO:', tomatoData)
 
   if (Object.keys(tomatoData).length > 0 && tomatoData.interrupted !== "f") {
     selectedStudyTime = tomatoData.studyMinutes;
@@ -144,8 +146,7 @@ async function init() {
 
 async function fetchPlannedTomatoId() {
   try {
-    // TODO: cambiare path
-    const response = await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
+    const response = await fetch(`${env.API_URL}/api/tasks/${taskId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -164,8 +165,7 @@ async function fetchPlannedTomatoId() {
 async function loadPlannedTomato() {
   const tomatoId = await fetchPlannedTomatoId()
   try {
-    // TODO: cambiare path
-    const response = await fetch(`http://localhost:8000/api/tomatoes/${tomatoId}`, {
+    const response = await fetch(`${env.API_URL}/api/tomatoes/${tomatoId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -181,24 +181,19 @@ async function loadPlannedTomato() {
   } catch (error) { }
 }
 
-function loadLastPomodoro() {
-  // TODO: cambiare path
-  const tomato = fetch('http://localhost:8000/api/tomatoes/last', {
+async function loadLastPomodoro() {
+  const response = await fetch(`${env.API_URL}/api/tomatoes/last`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     }
   })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error();
-      }
-      return response.json();
-    })
-    .catch(e => { });
 
-  return tomato
+  if (response.ok) {
+    return await response.json();
+  }
+  return undefined
 }
 
 window.addEventListener('beforeunload', async function (e) {
@@ -602,10 +597,9 @@ async function savePomodoro() {
     remainingLoops: remainingLoops
   };
 
-  // TODO: modificare path
   const url = currentPomodoroId
-    ? `http://localhost:8000/api/tomatoes/${currentPomodoroId}`
-    : 'http://localhost:8000/api/tomatoes/';
+    ? `${env.API_URL}/api/tomatoes/${currentPomodoroId}`
+    : `${env.API_URL}/api/tomatoes/`;
   const method = currentPomodoroId ? 'PUT' : 'POST';
   try {
     const response = await fetch(url, {
