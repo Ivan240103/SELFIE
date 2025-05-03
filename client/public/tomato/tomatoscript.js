@@ -17,7 +17,6 @@ let currentSession;
 let isPauseTime;
 let finished;
 let currentPomodoroId; // Traccia il pomodoro caricato
-let elapsedTime; // Serve per tenere traccia del tempo se stoppo il timer
 
 // eslint-disable-next-line no-unused-vars
 function plan() {
@@ -29,56 +28,48 @@ function plan() {
   window.parent.location.href = '/calendar';
 }
 
-function startStudyTime(resume = false) {
-  const totalDuration = selectedStudyTime * 60; // durata totale in secondi
-
-  if (!resume) {
-    // Se è il primo avvio, salva il timestamp corrente e resetta elapsedTime
-    elapsedTime = 0;
-  }
-
-  // Creazione o aggiornamento del blocco di stile dinamico per gestire l’animazione
-  let styleSheet = document.getElementById('dynamic-style');
-  if (!styleSheet) {
-    styleSheet = document.createElement("style");
-    styleSheet.id = "dynamic-style";
-    document.head.appendChild(styleSheet);
-  }
-  styleSheet.innerText = `
+function startStudyAnim() {
+  if (document.getElementById('bar-study').classList.contains('pause-animation')) {
+    // Rimuovi la classe che mette in pausa l'animazione
+    document.getElementById('bar-study').classList.remove('pause-animation');
+  } else {
+    let styleSheet = document.getElementById('dynamic-style');
+    if (!styleSheet) {
+      styleSheet = document.createElement("style");
+      styleSheet.id = "dynamic-style";
+      document.head.appendChild(styleSheet);
+    }
+    const totalDuration = selectedStudyTime * 60; // durata totale in secondi
+    // Creazione o aggiornamento del blocco di stile dinamico per gestire l’animazione
+    styleSheet.innerText = `
     .barstudy::before, .barstudy::after {
       animation: rotate ${totalDuration}s linear forwards;
-      animation-delay: -${elapsedTime}s;
       animation-play-state: running;
     }
   `;
-
-  // Rimuovi la classe che mette in pausa l'animazione
-  document.getElementById('bar-study').classList.remove('pause-animation');
+  }
 }
 
-function startPauseTime(resume = false) {
-  const totalDuration = selectedPauseTime * 60; // durata totale in secondi della pausa
-
-  if (!resume) {
-    elapsedTime = 0;
-  }
-  // Creazione/aggiornamento del blocco per l'animazione "back" per il tempo di pausa
-  let pauseStyleSheet = document.getElementById('dynamic-pause-style');
-  if (!pauseStyleSheet) {
-    pauseStyleSheet = document.createElement("style");
-    pauseStyleSheet.id = "dynamic-pause-style";
-    document.head.appendChild(pauseStyleSheet);
-  }
-  pauseStyleSheet.innerText = `
-    .barstudy::before, .barstudy::after {
-      animation: back ${totalDuration}s linear forwards;
-      animation-delay: -${elapsedTime}s;
-      animation-play-state: running;
+function startPauseAnim() {
+  if (document.getElementById('bar-study').classList.contains('pause-animation')) {
+    // Rimuove eventuali classi di pausa per far ripartire l'animazione della pausa
+    document.getElementById('bar-study').classList.remove('pause-animation');
+  } else {
+    // Creazione/aggiornamento del blocco per l'animazione "back" per il tempo di pausa
+    let styleSheet = document.getElementById('dynamic-style');
+    if (!styleSheet) {
+      styleSheet = document.createElement("style");
+      styleSheet.id = "dynamic-style";
+      document.head.appendChild(styleSheet);
     }
-  `;
-
-  // Rimuove eventuali classi di pausa per far ripartire l'animazione della pausa
-  document.getElementById('bar-study').classList.remove('pause-animation');
+    const totalDuration = selectedPauseTime * 60; // durata totale in secondi della pausa  
+    styleSheet.innerText = `
+      .barstudy::before, .barstudy::after {
+        animation: back ${totalDuration}s linear forwards;
+        animation-play-state: running;
+      }
+    `;
+  }
 }
 
 function playNotificationSound() {
@@ -93,9 +84,8 @@ async function init() {
     localStorage.removeItem('taskId')
   }
   const tomatoData = taskId ? await loadPlannedTomato() : await loadLastPomodoro()
-  console.log('TOMATO:', tomatoData)
 
-  if (Object.keys(tomatoData).length > 0 && tomatoData.interrupted !== "f") {
+  if (tomatoData && tomatoData.interrupted !== "f") {
     selectedStudyTime = tomatoData.studyMinutes;
     selectedPauseTime = tomatoData.pauseMinutes;
     sessionsNumber = tomatoData.loops;
@@ -126,7 +116,6 @@ async function init() {
   buttonActivated = false;
   optionsStudyOpened = false;
   optionsPauseOpened = false;
-  elapsedTime = 0;
 
   addButtonListener();
   setSettingsPosition();
@@ -159,7 +148,9 @@ async function fetchPlannedTomatoId() {
     } else {
       throw new Error()
     }
-  } catch (error) { }
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 async function loadPlannedTomato() {
@@ -178,22 +169,28 @@ async function loadPlannedTomato() {
     } else {
       throw new Error()
     }
-  } catch (error) { }
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 async function loadLastPomodoro() {
-  const response = await fetch(`${env.API_URL}/api/tomatoes/last`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
+  try {
+    const response = await fetch(`${env.API_URL}/api/tomatoes/last`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+  
+    if (!response.ok) {
+      throw new Error()
     }
-  })
-
-  if (response.ok) {
     return await response.json();
+  } catch (error) {
+    console.error(error)
   }
-  return undefined
 }
 
 window.addEventListener('beforeunload', async function (e) {
@@ -267,6 +264,9 @@ function restartTimer() {
   finished = false;
   clearInterval(interval);
   document.getElementById('tmt').style.transform = 'rotate(0deg)';
+  document.getElementById('dynamic-style').innerText = '';
+  // Rimuove eventuali classi di pausa per far ripartire l'animazione della pausa
+  document.getElementById('bar-study').classList.remove('pause-animation');
   const timeElement = document.getElementById('time');
   if (isPauseTime) {
     timeElement.innerHTML = (selectedPauseTime < 10 ? '0' : '') + selectedPauseTime + ':00';
@@ -283,21 +283,21 @@ function resetTimer() {
   buttonActivated = false;
   currentSession = 0;
   isPauseTime = false;
-  elapsedTime = 0; // Reset di elapsedTime
 
   document.getElementById('time').innerHTML = (selectedStudyTime < 10 ? '0' : '') + selectedStudyTime + ':00';
 
   document.getElementById('tmt').style.transform = 'rotate(0deg)';
 
   document.getElementById('sessions').innerHTML = '1 di <div><input type="text" value="' + sessionsNumber + '" id="ses-selector"></div><div> cicli</div>';
-
   changeSessionsListener();
+  document.getElementById('dynamic-style').innerText = '';
+  // Rimuove eventuali classi di pausa per far ripartire l'animazione della pausa
+  document.getElementById('bar-study').classList.remove('pause-animation');
   document.getElementById('play').innerHTML = playIcon
 }
 
 async function skipToNextSession() {
   clearInterval(interval);
-  elapsedTime = 0; // Reset di elapsedTime per far ripartire l'animazione da zero
   document.getElementById('tmt').style.transform = 'rotate(0deg)';
 
   const timeElement = document.getElementById('time');
@@ -306,9 +306,14 @@ async function skipToNextSession() {
   if (isPauseTime && currentSession + 1 === sessionsNumber) {
     finished = true;
     await savePomodoro();
+    currentPomodoroId = null
     resetTimer();
     return;
   }
+
+  document.getElementById('dynamic-style').innerText = '';
+  // Rimuove eventuali classi di pausa per far ripartire l'animazione della pausa
+  document.getElementById('bar-study').classList.remove('pause-animation');
 
   if (!isPauseTime) {
     timeElement.innerHTML = (selectedPauseTime < 10 ? '0' : '') + selectedPauseTime + ':00';
@@ -335,29 +340,22 @@ function timer(timeElement) {
   let seconds = parseInt(timeParts[1]);
 
   interval = setInterval(async function () {
-    // Aggiorna elapsedTime in base alla modalità attuale (studio o pausa)
-    if (!isPauseTime) {
-      elapsedTime = selectedStudyTime * 60 - (minutes * 60 + seconds);
-    } else {
-      elapsedTime = selectedPauseTime * 60 - (minutes * 60 + seconds);
-    }
-
     if (seconds === 0) {
       if (minutes === 0) {
         clearInterval(interval);
         if (currentSession + 1 === sessionsNumber) {
           finished = true;
           await savePomodoro();
+          currentPomodoroId = null
           resetTimer();
           return;
         } else {
           playNotificationSound();
-          elapsedTime = 0;
           if (isPauseTime === false) {
             timeElement.innerHTML = `${selectedPauseTime}`.padStart(2, '0') + ':00';
-            timer(timeElement);
             // Avvia la pausa con animazione "back"
-            startPauseTime();
+            startPauseAnim();
+            timer(timeElement);
             isPauseTime = true;
           } else {
             currentSession++;
@@ -365,9 +363,9 @@ function timer(timeElement) {
               ' di <div><input type="text" value="' + sessionsNumber + '" id="ses-selector"></div><div> cicli</div>';
             changeSessionsListener();
             timeElement.innerHTML = `${selectedStudyTime}`.padStart(2, '0') + ':00';
-            timer(timeElement);
             // Avvia il tempo di studio con animazione "rotate"
-            startStudyTime();
+            startStudyAnim();
+            timer(timeElement);
             isPauseTime = false;
           }
           await savePomodoro();
@@ -386,7 +384,6 @@ function timer(timeElement) {
 }
 
 async function checkButtonStatus(playButton, currentInterval, currentTime) {
-  
   if (buttonActivated) {
     playButton.innerHTML = playIcon
     buttonActivated = false;
@@ -400,13 +397,13 @@ async function checkButtonStatus(playButton, currentInterval, currentTime) {
       '<path d="M27.5625 33H24.9375C22.75 33 21 31.2 21 28.95V7.05C21 4.8 22.75 3 24.9375 3H27.5625C29.75 3 31.5 4.8 31.5 7.05V28.8C31.5 31.2 29.75 33 27.5625 33Z" fill="white"/>' +
       '</svg>';
     buttonActivated = true;
-    timer(currentTime);
     // A seconda di isPauseTime, riprende l'animazione corretta
     if (isPauseTime) {
-      startPauseTime(true);
+      startPauseAnim();
     } else {
-      startStudyTime(true);
+      startStudyAnim();
     }
+    timer(currentTime);
   }
   await savePomodoro();
 }
@@ -619,5 +616,7 @@ async function savePomodoro() {
     if (!currentPomodoroId) {
       currentPomodoroId = result._id
     }
-  } catch (error) { }
+  } catch (error) {
+    console.error(error)
+  }
 }

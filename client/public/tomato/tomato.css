@@ -356,37 +356,34 @@ input:focus {
   border-radius: 5px;
   margin-top: 10px;
 }
+
 .barstudy {
-  width: 100%;
-  height: 100vh;
+  width: calc(100vw + 140px);
+  height: 92vh;
   position: fixed;
   bottom: 0;
   left: 0;
   z-index: -1;
   overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 /* Elemento principale per l'onda dinamica */
 .barstudy::before {
   content: "";
-  position: absolute;
   width: 100%;
   height: 0%;
+  position: absolute;
   bottom: 0;
   left: 0;
   animation-fill-mode: forwards;
-  z-index: 1;
 }
 
 /* Elemento secondario per dare profondità */
 .barstudy::after {
   content: "";
-  position: absolute;
   width: 100%;
   height: 0%;
+  position: absolute;
   bottom: 0;
   left: 0;
   animation-fill-mode: forwards;
@@ -397,91 +394,91 @@ input:focus {
 @keyframes rotate {
   0% {
     height: 0%;
-    border-top-left-radius: 50% 20%;
-    border-top-right-radius: 50% 20%;
+    border-top-left-radius: 60% 30%;
+    border-top-right-radius: 20% 20%;
     transform: translateX(0);
     background: linear-gradient(to top, #ec0d0d, #f4c01c);
   }
   20% {
     height: 25%;
-    border-top-left-radius: 45% 25%;
-    border-top-right-radius: 55% 25%;
-    transform: translateX(-10px);
+    border-top-left-radius: 50% 25%;
+    border-top-right-radius: 40% 25%;
+    transform: translateX(-50px);
     background: linear-gradient(to top, #ec0d0d, #f4c01c);
   }
   40% {
-    height: 55%;
-    border-top-left-radius: 50% 30%;
-    border-top-right-radius: 50% 30%;
-    transform: translateX(10px);
+    height: 50%;
+    border-top-left-radius: 20% 20%;
+    border-top-right-radius: 60% 30%;
+    transform: translateX(-100px);
     background: linear-gradient(to top, #ec0d0d, #f4c01c);
   }
   60% {
-    height: 80%;
-    border-top-left-radius: 55% 30%;
-    border-top-right-radius: 45% 30%;
-    transform: translateX(-10px);
+    height: 75%;
+    border-top-left-radius: 40% 25%;
+    border-top-right-radius: 50% 25%;
+    transform: translateX(-50px);
     background: linear-gradient(to top, #ec0d0d, #f4c01c);
   }
   80% {
-    height: 95%;
-    border-top-left-radius: 60% 30%;
-    border-top-right-radius: 60% 30%;
-    transform: translateX(10px);
+    height: 90%;
+    border-top-left-radius: 30% 20%;
+    border-top-right-radius: 30% 20%;
+    transform: translateX(0);
     background: linear-gradient(to top, #ec0d0d, #f4c01c);
   }
   100% {
     height: 100%;
-    border-top-left-radius: 65% 35%;
-    border-top-right-radius: 65% 35%;
-    transform: translateX(0);
-    background: linear-gradient(to top, #ec0d0d, #ec0d0d);
+    border-top-left-radius: 15% 10%;
+    border-top-right-radius: 15% 10%;
+    transform: translateX(-50px);
+    background: linear-gradient(to top, #ec0d0d, #f4c01c);
   }
 }
 
 /* PAUSA: onda che scende con effetto collinette, gradiente verde */
 @keyframes back {
   0% {
-    height: 0%;
-    border-top-left-radius: 65% 35%;
-    border-top-right-radius: 65% 35%;
-    transform: translateX(0);
-    background: linear-gradient(to top, #3cf018, #2bb32a);
+    height: 100%;
+    border-top-left-radius: 15% 10%;
+    border-top-right-radius: 15% 10%;
+    transform: translateX(-50px);
+    background: linear-gradient(to top, #ec0d0d, #f4c01c);
   }
   20% {
-    height: 25%;
-    border-top-left-radius: 60% 30%;
-    border-top-right-radius: 60% 30%;
-    transform: translateX(10px);
-    background: linear-gradient(to top, #3cf018, #2bb32a);
+    height: 90%;
+    border-top-left-radius: 30% 20%;
+    border-top-right-radius: 30% 20%;
+    transform: translateX(0);
+    background: linear-gradient(to top, #ec0d0d, #f4c01c);
   }
   40% {
-    height: 55%;
-    border-top-left-radius: 55% 30%;
-    border-top-right-radius: 45% 30%;
-    transform: translateX(-10px);
-    background: linear-gradient(to top, #3cf018, #2bb32a);
+    height: 75%;
+    border-top-left-radius: 40% 25%;
+    border-top-right-radius: 50% 25%;
+    transform: translateX(-50px);
+    background: linear-gradient(to top, #ec0d0d, #f4c01c);
   }
   60% {
-    height: 80%;
-    border-top-left-radius: 50% 30%;
-    border-top-right-radius: 50% 30%;
-    transform: translateX(10px);
-    background: linear-gradient(to top, #3cf018, #2bb32a);
+    height: 50%;
+    border-top-left-radius: 20% 20%;
+    border-top-right-radius: 60% 30%;
+    transform: translateX(-100px);
+    background: linear-gradient(to top, #ec0d0d, #f4c01c);
   }
   80% {
-    height: 95%;
-    border-top-left-radius: 45% 25%;
-    border-top-right-radius: 55% 25%;
-    transform: translateX(-10px);
-    background: linear-gradient(to top, #3cf018, #2bb32a);
+    height: 25%;
+    border-top-left-radius: 50% 25%;
+    border-top-right-radius: 40% 25%;
+    transform: translateX(-50px);
+    background: linear-gradient(to top, #ec0d0d, #f4c01c);
   }
   100% {
-    height: 100%;
-    border-top-left-radius: 50% 20%;
-    border-top-right-radius: 50% 20%;
+    height: 0%;
+    border-top-left-radius: 60% 30%;
+    border-top-right-radius: 20% 20%;
     transform: translateX(0);
-    background: linear-gradient(to top, #3cf018, #2bb32a);
+    background: linear-gradient(to top, #ec0d0d, #f4c01c);
   }
 }
 
