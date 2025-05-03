@@ -37,3 +37,11 @@ body {
 .fade-in {
   animation: fadeIn 1s ease forwards;
 }
+
+.notes-container ul {
+  list-style-type: disc;
+}
+
+.notes-container ol {
+  list-style-type: decimal;
+}

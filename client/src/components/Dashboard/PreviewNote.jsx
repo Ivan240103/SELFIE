@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios';
 import { marked } from 'marked';
+import 'github-markdown-css/github-markdown-light.css';
 import { useAuth } from '../../contexts/AuthenticationContext';
 import { showError } from '../../utils/toasts';
 
@@ -63,7 +64,7 @@ export default function PreviewNote() {
               {note.categories ? displayCategories(note.categories) : 'Nessun tag'}
             </span>
             <ScrollShadow className='lg:h-48'>
-              <div dangerouslySetInnerHTML={{ __html: marked(note.text) }} />
+              <div className='markdown-body notes-container' dangerouslySetInnerHTML={{ __html: marked(note.text) }} />
             </ScrollShadow>
           </CardBody>
           <CardFooter>

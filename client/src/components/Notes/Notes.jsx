@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
+import 'github-markdown-css/github-markdown-light.css';
 import { useAuth } from '../../contexts/AuthenticationContext';
 import { showError, showSuccess } from '../../utils/toasts';
 import Header from '../Header/Header';
@@ -24,7 +25,6 @@ import {
   ScrollShadow
 } from '@heroui/react'
 
-// TODO: non funzionano i titoli con i cancelletti e gli elenchi
 marked.setOptions({
   gfm: true,       // usa le specifiche markdown di Github
   breaks: true,    // aggiunge una singola linea di break
@@ -104,7 +104,7 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy }) {
           {note.categories ? displayCategories(note.categories) : 'Nessun tag'}
         </span>
         <ScrollShadow className='h-36 lg:h-48'>
-          <div dangerouslySetInnerHTML={{ __html: marked(note.text) }} />
+          <div className='markdown-body notes-container' dangerouslySetInnerHTML={{ __html: marked(note.text) }} />
         </ScrollShadow>
       </CardBody>
       <CardFooter>
@@ -349,7 +349,7 @@ function Notes() {
                 <span className='text-gray-700 pt-2'>
                   {categories ? clearCategories(categories).map(c => `#${c}`).join(' ') : 'Nessun tag'}
                 </span>
-                <div className='w-full lg:mt-3' dangerouslySetInnerHTML={{ __html: marked(text) }} />
+                <div className='w-full lg:mt-3 markdown-body notes-container' dangerouslySetInnerHTML={{ __html: marked(text) }} />
               </div>
             </div>
             <ButtonGroup className='mt-6'>
