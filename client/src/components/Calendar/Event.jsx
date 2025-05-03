@@ -273,7 +273,7 @@ function Event({
       tabIndex={2}
     >
       <ModalContent>
-        <ModalHeader>Evento</ModalHeader>
+        <ModalHeader>Evento{googleId && " Google"}</ModalHeader>
         <ScrollShadow hideScrollBar>
           <ModalBody className='w-full lg:w-[88%] m-auto'>
             <Form
