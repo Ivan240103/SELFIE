@@ -39,12 +39,7 @@ app.use('/api/notes', noteRoutes)
 app.use('/api/notifications', notificationRoutes)
 
 // connessione al db mongo
-const u = process.env.DB_USER
-const p = process.env.DB_PSW
-// const h = process.env.DB_HOSTNAME
-const mongoURL = `mongodb+srv://${u}:${p}@selfie.qv0gx.mongodb.net/?retryWrites=true&w=majority&appName=SELFIE`
-// potrebbe essere questo per gocker??? mongodb://${u}:${p}@${h}:27017/
-mongoose.connect(mongoURL)
+mongoose.connect(process.env.DB_URI)
 
 // demoni per le notifiche
 setInterval(notificateEvents, 60 * 1000)
