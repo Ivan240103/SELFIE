@@ -93,7 +93,10 @@ function Dashboard() {
   return(
     <div className='pb-12 lg:pb-20'>
       <Header />
-      <div className='w-4/5 lg:w-3/5 mx-auto mt-4 lg:mt-12 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12'>
+      <h1 className='text-center font-[Graffiti] text-blue-900 text-6xl lg:text-7xl mt-3 lg:mt-5'>
+        SELFIE
+      </h1>
+      <div className='w-4/5 lg:w-3/5 mx-auto mt-8 lg:mt-12 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12'>
         <Card
           className='lg:col-span-2'
           classNames={{

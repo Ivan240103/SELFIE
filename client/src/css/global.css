@@ -11,6 +11,12 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
+@font-face {
+  font-family: 'Graffiti';
+  src: url('../fonts/graffitixenoa-regular.otf') format('opentype');
+  font-display: swap;
+}
+
 @layer components {
   h2 {
     @apply font-bold;

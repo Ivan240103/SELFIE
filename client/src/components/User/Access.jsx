@@ -40,6 +40,9 @@ function Access() {
   return (
     <div>
       <Header />
+      <h1 className='text-center font-[Graffiti] text-blue-900 text-6xl lg:text-7xl mt-3 lg:mt-5'>
+        SELFIE
+      </h1>
       <div className="w-3/5 lg:w-1/5 mx-auto mt-12">
         <h2 className="text-3xl text-center">Login</h2>
         <Form
