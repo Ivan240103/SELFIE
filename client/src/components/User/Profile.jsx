@@ -214,7 +214,6 @@ function Profile() {
           onSubmit={handleUpdate}
         >
           {isEditing && <Input
-            // TODO: levare background on hover
             classNames={{
               mainWrapper: 'mt-12 mb-4',
               inputWrapper: 'bg-[#fdfdfd] shadow-none',

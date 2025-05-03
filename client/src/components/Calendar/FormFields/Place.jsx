@@ -11,7 +11,6 @@ import {
 function Place({
   place, setPlace, mapsLocated, setMapsLocated, isEditing
 }) {
-  const [userInput, setUserInput] = useState(place ?? '');
   const [selectedKey, setSelectedKey] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +55,6 @@ function Place({
   }
 
   function handleInputChange(i) {
-    setUserInput(i)
     setSelectedKey('')
     setPlace(i)
     setMapsLocated(false)
@@ -67,14 +65,12 @@ function Place({
     if (k) {
       const p = suggestions.find(s => s.place_id === k)
       setSelectedKey(p.place_id)
-      setUserInput(p.display_name)
       setPlace(p.display_name)
       setMapsLocated(true)
       setSuggestions([p])
     }
   }
 
-  // TODO: problemi nell visualizzazione del luogo all'apertura
   return (
     <div className="w-full flex flex-row items-baseline gap-3">
       <Autocomplete
@@ -82,7 +78,7 @@ function Place({
         description="Puoi geolocalizzare l'evento"
         allowsCustomValue
         items={suggestions}
-        inputValue={userInput}
+        inputValue={place}
         selectedKey={selectedKey}
         onInputChange={handleInputChange}
         onSelectionChange={handleSelectionChange}
