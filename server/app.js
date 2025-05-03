@@ -39,7 +39,8 @@ app.use('/api/notes', noteRoutes)
 app.use('/api/notifications', notificationRoutes)
 
 // connessione al db mongo
-mongoose.connect(process.env.DB_URI)
+const mongoURL = process.env.DB_URI
+mongoose.connect(mongoURL)
 
 // demoni per le notifiche
 setInterval(notificateEvents, 60 * 1000)
