@@ -346,13 +346,13 @@ function Task({
               />
             </div>}
             {!taskId ? (
-              <ButtonGroup>
+              <ButtonGroup className='py-2'>
                 <Button className='w-32' type='submit' color='primary' variant='solid'>
                   Crea attività
                 </Button>
               </ButtonGroup>
             ) : isEditing && (
-              <ButtonGroup className='mt-1'>
+              <ButtonGroup className='mt-1 py-2'>
                 <Button className='w-36 lg:w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
                   Annulla modifiche
                 </Button>
@@ -363,7 +363,7 @@ function Task({
             )}
           </Form>
           {taskId && !isEditing && (
-            <ButtonGroup>
+            <ButtonGroup className='py-2'>
               <Button className='w-36 lg:w-40' color='danger' variant='flat' onPress={handleDelete}>
                 Elimina attività
               </Button>

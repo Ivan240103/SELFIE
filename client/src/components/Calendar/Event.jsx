@@ -408,13 +408,13 @@ function Event({
               </div>}
               {!googleId && <>
                 {!eventId ? (
-                  <ButtonGroup>
+                  <ButtonGroup className='py-2'>
                     <Button className='w-32' type='submit' color='primary' variant='solid'>
                       Crea evento
                     </Button>
                   </ButtonGroup>
                 ) : isEditing && (
-                  <ButtonGroup className='mt-1'>
+                  <ButtonGroup className='mt-1 py-2'>
                     <Button className='w-36 lg:w-40' type='button' color='primary' variant='flat' onPress={handleReset}>
                       Annulla modifiche
                     </Button>
@@ -426,7 +426,7 @@ function Event({
               </>}
             </Form>
             {!googleId && eventId && !isEditing && (
-              <ButtonGroup>
+              <ButtonGroup className='py-2'>
                 <Button className='w-36 lg:w-40' color='danger' variant='flat' onPress={handleDelete}>
                   Elimina evento
                 </Button>
