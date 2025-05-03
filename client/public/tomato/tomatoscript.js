@@ -478,6 +478,7 @@ function changeSessionsListener() {
   if (sesSel) {
     sesSel.addEventListener('input', function () {
       if (!isNaN(sesSel.value)) {
+        currentPomodoroId = null;
         sessionsNumber = parseInt(sesSel.value, 10);
       }
     });
@@ -554,6 +555,7 @@ function stdOptionsListener() {
   const selStd = document.getElementById('stsel-selected');
   divsOptions.forEach((div) => {
     div.addEventListener('click', function () {
+      currentPomodoroId = null;
       time.innerHTML = this.innerHTML.replace(/\D/g, '') + ':00';
       selectedStudyTime = parseInt(this.innerHTML.replace(/\D/g, ''), 10);
       selStd.innerHTML = this.innerHTML;
@@ -567,6 +569,7 @@ function psOptionsListener() {
   const selPs = document.getElementById('pssel-selected');
   divsOptions.forEach((div) => {
     div.addEventListener('click', function () {
+      currentPomodoroId = null;
       selectedPauseTime = parseInt(this.innerHTML.replace(/\D/g, ''), 10);
       selPs.innerHTML = this.innerHTML;
       closePsOpt();
@@ -616,7 +619,27 @@ async function savePomodoro() {
     if (!currentPomodoroId) {
       currentPomodoroId = result._id
     }
+    await togglePlannedTask()
   } catch (error) {
     console.error(error)
+  }
+}
+
+async function togglePlannedTask() {
+  if (taskId) {
+    try {
+      const response = await fetch(`${env.API_URL}/api/tasks/toggle/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ isDone: finished })
+      });
+
+      if (!response.ok) {
+        throw new Error()
+      }
+    } catch (error) {}
   }
 }
