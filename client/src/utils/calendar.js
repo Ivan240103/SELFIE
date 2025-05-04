@@ -9,7 +9,9 @@ export function mapEvent(event) {
     ...event,
     id: event.googleId || event._id,
     eventType: 'event',
-    allDay: event.isAllDay
+    allDay: event.isAllDay,
+    // l'ultimo giorno non è compreso, per visualizzarlo ne aggiungo uno
+    end: new Date(Date.parse(event.end) + 24*60*60*1000)
   }
 }
 
