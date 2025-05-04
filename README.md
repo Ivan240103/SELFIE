@@ -10,6 +10,9 @@ Per avviare server e client è realizzato uno script unico:
 ./selfie.sh
 ```
 
+PAT di accesso al repo su GitHub:  
+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
+
 Menzionare che le date nei date picker sono in formato MM/dd/yyyy
 
 ## Documentazione
