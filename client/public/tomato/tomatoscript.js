@@ -148,9 +148,7 @@ async function fetchPlannedTomatoId() {
     } else {
       throw new Error()
     }
-  } catch (error) {
-    console.error(error)
-  }
+  } catch (error) {}
 }
 
 async function loadPlannedTomato() {
@@ -169,9 +167,7 @@ async function loadPlannedTomato() {
     } else {
       throw new Error()
     }
-  } catch (error) {
-    console.error(error)
-  }
+  } catch (error) {}
 }
 
 async function loadLastPomodoro() {
@@ -188,9 +184,7 @@ async function loadLastPomodoro() {
       throw new Error()
     }
     return await response.json();
-  } catch (error) {
-    console.error(error)
-  }
+  } catch (error) {}
 }
 
 window.addEventListener('beforeunload', async function (e) {
@@ -620,9 +614,7 @@ async function savePomodoro() {
       currentPomodoroId = result._id
     }
     await togglePlannedTask()
-  } catch (error) {
-    console.error(error)
-  }
+  } catch (error) {}
 }
 
 async function togglePlannedTask() {
