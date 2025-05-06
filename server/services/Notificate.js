@@ -10,7 +10,10 @@ const User = require('../models/User')
 const Sub = require('../models/PushSubscription')
 const { getTime } = require('./TimeMachine')
 const { getFirstOccurrence } = require('./RRule')
-require('dotenv').config()
+const dotenv = require('dotenv')
+const path = require('path')
+
+dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
 // testo della notifica per l'evento e
 const eventMsg = (e) => {

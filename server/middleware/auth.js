@@ -6,7 +6,10 @@ const passport = require('passport')
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/User')
-require('dotenv').config()
+const dotenv = require('dotenv')
+const path = require('path')
+
+dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
 // configurazione strategia
 const opts = {
@@ -36,8 +39,7 @@ const auth = passport.authenticate('jwt', { session: false })
  */
 function getToken(user) {
   const payload = { userId: user._id, username: user.username }
-  // DEBUG: token non scade mai
-  return jwt.sign(payload, process.env.JWT_SECRET/*, { expiresIn: '24h' } */)
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '8h' } )
 }
 
 module.exports = { auth, getToken }
