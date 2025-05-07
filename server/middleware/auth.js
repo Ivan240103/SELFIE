@@ -39,7 +39,7 @@ const auth = passport.authenticate('jwt', { session: false })
  */
 function getToken(user) {
   const payload = { userId: user._id, username: user.username }
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '8h' } )
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '24h' } )
 }
 
 module.exports = { auth, getToken }
