@@ -5,6 +5,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
+const path = require('path')
 require('dotenv').config()
 require('./middleware/auth')
 const {
@@ -21,7 +22,9 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 // mette a disposizione del frontend le immagini del profilo
-app.use('/pics', express.static('./images/uploads'))
+app.use('/pics', express.static(path.join(__dirname, './images/uploads')))
+// applicazione frontend dopo il build
+app.use(express.static(path.join(__dirname, "..", "client", "build")))
 
 // ROUTES
 const userRoutes = require('./routes/users')
@@ -37,6 +40,11 @@ app.use('/api/tasks', taskRoutes)
 app.use('/api/tomatoes', tomatoRoutes)
 app.use('/api/notes', noteRoutes)
 app.use('/api/notifications', notificationRoutes)
+
+// serve react app as static
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "client", "build", "index.html"))
+})
 
 // connessione al db mongo
 const mongoURL = process.env.DB_URI
