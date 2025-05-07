@@ -9,7 +9,7 @@ import {
 import './css/global.css';
 
 window.ENV = {
-  API_URL: process.env.REACT_APP_API
+  API_URL: process.env.REACT_APP_API ?? ''
 };
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

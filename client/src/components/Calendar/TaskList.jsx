@@ -98,7 +98,7 @@ function TaskList() {
     const fetchUser = async () => {
       if (isAuthenticated) {
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
+          const response = await axios.get(`${process.env.REACT_APP_API ?? ''}/api/users/`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setUser(response.data)
@@ -119,7 +119,7 @@ function TaskList() {
     const fetchTasks = async () => {
       if (isAuthenticated) {
         try {
-          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/list`, {
+          const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/tasks/list`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

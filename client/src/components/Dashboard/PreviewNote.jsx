@@ -27,7 +27,7 @@ export default function PreviewNote() {
     const fetchNote = async () => {
       if (isAuthenticated) {
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/notes/last`, {
+          const response = await axios.get(`${process.env.REACT_APP_API ?? ''}/api/notes/last`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setNote(response.data)

@@ -38,7 +38,7 @@ function Calendar() {
     const fetchUser = async () => {
       if (isAuthenticated) {
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
+          const response = await axios.get(`${process.env.REACT_APP_API ?? ''}/api/users/`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setUser(response.data)
@@ -59,7 +59,7 @@ function Calendar() {
     async function fetchEvents() {
       if (isAuthenticated) {
         try {
-          const response = await fetch(`${process.env.REACT_APP_API}/api/events/`, {
+          const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/events/`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ function Calendar() {
     async function fetchTasks() {
       if (isAuthenticated) {
         try {
-          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/`, {
+          const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/tasks/`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ function Calendar() {
 
       try {
         // Aggiorna la scadenza del task nel backend
-        const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
+        const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/tasks/${taskId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

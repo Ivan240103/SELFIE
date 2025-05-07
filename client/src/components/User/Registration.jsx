@@ -26,7 +26,7 @@ function Registration() {
       email: email
     }
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/users/register`, {
+      const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody)

@@ -137,7 +137,7 @@ function Notes() {
     const fetchNotes = async () => {
       if (isAuthenticated) {
         try {
-          const response = await fetch(`${process.env.REACT_APP_API}/api/notes/`, {
+          const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/notes/`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ function Notes() {
 
     try {
       // POST per creare una nuova nota
-      const response = await fetch(`${process.env.REACT_APP_API}/api/notes/`, {
+      const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/notes/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -227,7 +227,7 @@ function Notes() {
 
     try {
       // PUT per aggiornare una nota
-      const response = await fetch(`${process.env.REACT_APP_API}/api/notes/${noteId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/notes/${noteId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -253,7 +253,7 @@ function Notes() {
   // eliminare una nota
   async function handleDelete(note) {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/notes/${note._id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/notes/${note._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

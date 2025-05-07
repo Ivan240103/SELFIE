@@ -53,7 +53,7 @@ function Task({
     const fetchTask = async () => {
       if (taskId) {
         try {
-          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
+          const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/tasks/${taskId}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ function Task({
     }
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/tomatoes/`, {
+      const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/tomatoes/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ function Task({
     };
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/`, {
+      const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/tasks/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -182,7 +182,7 @@ function Task({
     };
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/tasks/${taskId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -205,7 +205,7 @@ function Task({
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/${taskId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/tasks/${taskId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -225,7 +225,7 @@ function Task({
 
   const handleComplete = async (v) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/toggle/${taskId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/tasks/toggle/${taskId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

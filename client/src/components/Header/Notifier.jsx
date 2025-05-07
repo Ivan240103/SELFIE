@@ -57,7 +57,7 @@ function Notifier() {
     const fetchUser = async () => {
       if (isAuthenticated) {
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
+          const response = await axios.get(`${process.env.REACT_APP_API ?? ''}/api/users/`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setNotifyPermission(response.data.notification)
@@ -81,7 +81,7 @@ function Notifier() {
     })
 
     try {
-      await axios.post(`${process.env.REACT_APP_API}/api/notifications/push/subscribe`, {
+      await axios.post(`${process.env.REACT_APP_API ?? ''}/api/notifications/push/subscribe`, {
         subscription: subscription
       }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -97,7 +97,7 @@ function Notifier() {
     if (permission === "granted") {
       try {
         await subscribeToPush()
-        await axios.put(`${process.env.REACT_APP_API}/api/users/notification`, {
+        await axios.put(`${process.env.REACT_APP_API ?? ''}/api/users/notification`, {
           state: true
         }, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -115,7 +115,7 @@ function Notifier() {
 
   async function revokeNotifyPermission() {
     try {
-      await axios.put(`${process.env.REACT_APP_API}/api/users/notification`, {
+      await axios.put(`${process.env.REACT_APP_API ?? ''}/api/users/notification`, {
         state: false
       }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }

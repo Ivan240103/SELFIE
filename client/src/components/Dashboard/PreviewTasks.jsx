@@ -46,7 +46,7 @@ export default function PreviewTasks() {
     const fetchTasks = async () => {
       if (isAuthenticated) {
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/tasks/notdone`, {
+          const response = await axios.get(`${process.env.REACT_APP_API ?? ''}/api/tasks/notdone`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setTasks(response.data)

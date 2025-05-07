@@ -68,7 +68,7 @@ function Profile() {
     const fetchProfile = async () => {
       if (isAuthenticated) { 
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
+          const response = await axios.get(`${process.env.REACT_APP_API ?? ''}/api/users/`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setProfile(response.data)
@@ -139,7 +139,7 @@ function Profile() {
     formData.append('pic', pic)
 
     try {
-      const response = await axios.put(`${process.env.REACT_APP_API}/api/users/`, formData, {
+      const response = await axios.put(`${process.env.REACT_APP_API ?? ''}/api/users/`, formData, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
       setProfile(response.data)
@@ -155,7 +155,7 @@ function Profile() {
    */
   const handleDelete = async () => {
     try {
-      await axios.delete(`${process.env.REACT_APP_API}/api/users/`, {
+      await axios.delete(`${process.env.REACT_APP_API ?? ''}/api/users/`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
       logout()
@@ -168,7 +168,7 @@ function Profile() {
 
   const syncGoogle = async () => {
     try {
-      await axios.put(`${process.env.REACT_APP_API}/api/users/google`, {}, {
+      await axios.put(`${process.env.REACT_APP_API ?? ''}/api/users/google`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
       setProfile(prev => ({ ...prev, google: true }))
@@ -204,7 +204,7 @@ function Profile() {
         </h2>
         {!isEditing && <Avatar
           className='w-32 h-32 my-8 bg-white'
-          src={`${process.env.REACT_APP_API}/pics/${profile.picName || 'default.png'}`}
+          src={`${process.env.REACT_APP_API ?? ''}/pics/${profile.picName || 'default.png'}`}
           alt='Profile'
           isBordered
         />}

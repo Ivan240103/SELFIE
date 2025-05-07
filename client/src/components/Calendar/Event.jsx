@@ -56,7 +56,7 @@ function Event({
     const fetchEvent = async () => {
       if (eventId) {
         try {
-          const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventId}`, {
+          const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/events/${eventId}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -163,7 +163,7 @@ function Event({
     };
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/events/`, {
+      const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/events/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ function Event({
     };
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/events/${eventId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +220,7 @@ function Event({
   const handleDelete = async () => {
     setIsEditing(false)
     try {
-      const response = await fetch(`${process.env.REACT_APP_API}/api/events/${eventId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/events/${eventId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

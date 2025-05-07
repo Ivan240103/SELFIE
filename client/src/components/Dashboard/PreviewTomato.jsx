@@ -12,7 +12,7 @@ export default function PreviewTomato() {
     const fetchTomato = async () => {
       if (isAuthenticated) {
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/tomatoes/last`, {
+          const response = await axios.get(`${process.env.REACT_APP_API ?? ''}/api/tomatoes/last`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           });
           setTomato(response.data);

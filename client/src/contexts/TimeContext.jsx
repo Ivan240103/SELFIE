@@ -25,7 +25,7 @@ export const TimeProvider = ({ children }) => {
     const fetchTime = async () => {
       if (isAuthenticated) {
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/users/time`, {
+          const response = await axios.get(`${process.env.REACT_APP_API ?? ''}/api/users/time`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setTime(new Date(response.data))
@@ -62,7 +62,7 @@ export const TimeProvider = ({ children }) => {
     try {
       setIsTimeLoading(true)
       const response = await axios.put(
-        `${process.env.REACT_APP_API}/api/users/time`,
+        `${process.env.REACT_APP_API ?? ''}/api/users/time`,
         { time: newTime.toISOString() },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       )
@@ -81,7 +81,7 @@ export const TimeProvider = ({ children }) => {
   const resetTime = async () => {
     try {
       setIsTimeLoading(true)
-      const response = await axios.put(`${process.env.REACT_APP_API}/api/users/time`, {}, {
+      const response = await axios.put(`${process.env.REACT_APP_API ?? ''}/api/users/time`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
 

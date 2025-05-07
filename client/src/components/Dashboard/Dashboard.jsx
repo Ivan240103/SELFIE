@@ -58,7 +58,7 @@ function Dashboard() {
     const fetchUser = async () => {
       if (isAuthenticated) {
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/api/users/`, {
+          const response = await axios.get(`${process.env.REACT_APP_API ?? ''}/api/users/`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setUser(response.data)
@@ -109,7 +109,7 @@ function Dashboard() {
           <CardHeader>
             <Avatar
               className='w-20 lg:w-24 h-20 lg:h-24 bg-color-white'
-              src={`${process.env.REACT_APP_API}/pics/${user.picName || 'default.png'}`}
+              src={`${process.env.REACT_APP_API ?? ''}/pics/${user.picName || 'default.png'}`}
               alt='icona del profilo'
               isBordered
             />

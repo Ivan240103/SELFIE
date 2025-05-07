@@ -20,7 +20,7 @@ export default function PreviewCalendar() {
     async function fetchEvents() {
       if (isAuthenticated) {
         try {
-          const response = await fetch(`${process.env.REACT_APP_API}/api/events/`, {
+          const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/events/`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export default function PreviewCalendar() {
     async function fetchTasks() {
       if (isAuthenticated) {
         try {
-          const response = await fetch(`${process.env.REACT_APP_API}/api/tasks/`, {
+          const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/tasks/`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
