@@ -34,7 +34,7 @@ Il progetto comprende un client sviluppato con React.js, il quale comunica con u
 ## Funzionalità
 
 #### Eventi
-Il calendario consente la programmazione di eventi, contraddistinti da un titolo ed una descrizione. L'evento, che può impiegare uno o più giorni, può avere orari di inizio e fine determinati oppure occupare l'intera giornata. È possibile impostare una regola di ricorrenza per fare in modo che si ripeta ogni $n$ giorni, mesi o anni ed una scadenza indicata come numero di ripetizioni, data limite o indefinita. L'evento ha la possibilità di essere geolocalizzato, nel qual caso sarà presente un collegamento per vedere la location su Google Maps. È inoltre implementato un servizio di notifica, previa attivazione, attivato con un certo anticipo e recapitato tramite notifiche push o via email.
+Il calendario consente la programmazione di eventi, contraddistinti da un titolo ed una descrizione. L'evento, che può impiegare uno o più giorni, può avere orari di inizio e fine determinati oppure occupare l'intera giornata. È possibile impostare una regola di ricorrenza per fare in modo che si ripeta ogni *n* giorni, mesi o anni ed una scadenza indicata come numero di ripetizioni, data limite o indefinita. L'evento ha la possibilità di essere geolocalizzato, nel qual caso sarà presente un collegamento per vedere la location su Google Maps. È inoltre implementato un servizio di notifica, previa attivazione, attivato con un certo anticipo e recapitato tramite notifiche push o via email.
 Previo accesso con Google, è possibile visualizzare nel calendario gli eventi importati da Google Calendar, non è però consentita la modifica o l'eliminazione di essi.
 
 #### Attività
@@ -60,9 +60,10 @@ Un problema noto della libreria HeroUI è l'obbligo del formato data MM/dd/yyyy 
 
 #### Profilo
 Il database memorizza gli account degli utenti, i quali richiedono nome e cognome, username, password, email ed eventualmente data di nascita. Nel momento in cui si aggiorna la data di nascita viene creato automaticamente un evento di compleanno con ricorrenza annuale e scadenza indefinita. 
-L'autenticazione dell'utente è gestita tramite il middleware [passport](https://www.passportjs.org/) utilizzando la strategia JWT. La memorizzazione della password e la sua trasmissione da client a server è protetta da crittografia tramite hashing. Lato client l'autenticazione viene messa in atto da un context, il quale fornisce verifica, login e logout.
-La foto profilo dell'utente resta memorizzata sul server, dove è presente anche un'immagine default per gli utenti che non l'hanno caricata.
+L'autenticazione dell'utente è gestita tramite il middleware [passport](https://www.passportjs.org/) utilizzando la strategia JWT con scadenza dopo 24 ore. La memorizzazione della password e la sua trasmissione da client a server è protetta da crittografia tramite hashing. Lato client l'autenticazione viene messa in atto da un context, il quale fornisce verifica, login e logout.
+La foto profilo dell'utente viene memorizzata tramite il middleware [multer](https://www.npmjs.com/package/multer) sul server , dove è presente anche un'immagine default per gli utenti che non l'hanno caricata.
 Dalla pagina del profilo personale è possibile effettuare il collegamento con il proprio account Google, il quale consente l'accesso agli eventi di Google Calendar tramite un token OAuth2 (che verrà poi salvato nell'account SELFIE).
+Se un profilo utente viene eliminato, vengono eliminate anche tutte le risorse ad esso associate.
 
 #### Calendario
 La visualizzazione del calendario si basa sulla libreria [FullCalendar](https://fullcalendar.io/), che permette una gestione brillante degli eventi. Tramite il plugin di FullCalendar sul client ed il pacchetto [rrule](https://github.com/jkbrzt/rrule) sul server vengono gestite le regole di ricorrenza secondo lo standard iCalendar.
@@ -70,15 +71,15 @@ Per quel che concerne la geolocalizzazione degli eventi, viene utilizzata l'API 
 Per quanto riguarda le attività, sarebbero di default visualizzate di colore ambrato. In caso di completamento il colore diventerà verde. Contrariamente, in caso di ritardo il colore diventerà rosso. Discorso valido anche per la lista di attività visualizzabile a parte. Le attività si possono segnare come completate sia dal calendario che dall'elenco, in quanto il componente utilizzato alla base è lo stesso.
 
 #### Notifiche
-Il sistema di notifica dell'applicazione è basato su due differenti meccanismi: notifiche web tramite le WebPush API e notifiche via mail tramite il pacchetto `nodemailer`.
-Le notifiche sono implementate tramite un demone che viene eseguito ogni 60 secondi: ciascuna esecuzione recupera dal db tutti gli eventi ed attività aventi delle notifiche impostate, verifica se è il momento di mandare la notifica e nel caso richiama le funzioni per recapitarla.
-È presente un demone aggiuntivo per notificare le attività in ritardo, il quale viene eseguito ogni 180 secondi. Tale demone prende dal db tutte le attività aventi notifiche impostate, dopodiché per le sole attività in ritardo da almeno un giorno verifica il timestamp dell'ultima notifica. Se è passato almeno un giorno dall'ultima notifica, ne recapita una nuova, altrimenti tace.
+Il sistema di notifica dell'applicazione è basato su due differenti meccanismi: notifiche web tramite le WebPush API e notifiche via mail tramite il pacchetto `nodemailer`. Entrambi per essere attivati necessitano del permesso dell'utente, la cui preferenza resta salvata all'interno del profilo.
+Le notifiche sono implementate tramite un demone che viene eseguito ogni 60 secondi: ciascuna esecuzione recupera dal db tutti gli eventi ed attività aventi delle notifiche impostate, verifica se è il momento di mandare la notifica (orario esatto al minuto) e nel caso richiama le funzioni per recapitarla.
+È presente un demone aggiuntivo per notificare le attività in ritardo, il quale viene eseguito ogni 180 secondi. Tale demone prende dal db tutte le attività aventi notifiche impostate, dopodiché per le sole attività in ritardo da almeno un giorno verifica il timestamp dell'ultima notifica. Se è passato almeno un giorno dall'ultima notifica, ne recapita una nuova calibrata in base al ritardo. Se l'utente viaggia indietro nel tempo, tutte le attività in ritardo vengono notificate (sempre se è passato almeno un giorno).
 
 #### Note
 Le note sono memorizzate come semplice testo all'interno del database. È posta particolare attenzione al salvataggio delle categorie, il cui input viene ripulito dal client prima dell'invio al server. Per quel che concerne le date di creazione e modifica, sono interamente gestite dal server al momento delle operazioni. La visualizzazione in markdown è stata implementata usando la libreria [marked](https://www.npmjs.com/package/marked), secondo la sintassi MD di GitHub.
 
 #### Pomodoro
-Il timer pomodoro è stato realizzato interamente in vanilla JavaScript, utilizzando delle variabili globali per mantenere salvati i dati del timer e renderli disponibili a tutte le funzioni di gestione. Lo sfondo della pagina segue gradualmente l'avanzamento dello stato del timer, tramite un'animazione CSS che si adatta al momento di studio oppure pausa.
+Il timer pomodoro è stato realizzato interamente in vanilla JavaScript, utilizzando delle variabili globali per mantenere salvati i dati del timer e renderli disponibili a tutte le funzioni di gestione. Il codice JavaScript, essendo indipendente, è integrato nell'applicazione tramite un iFrame. Lo sfondo della pagina segue gradualmente l'avanzamento dello stato del timer, tramite un'animazione CSS che si adatta al momento di studio oppure pausa.
 È possibile pianificare la sessione pomodoro attraverso un collegamento con il calendario, che si basa sull'entità Task con un campo specifico legato al pomodoro deciso. Il pomodoro comunica con il resto dell'applicazione React tramite il local storage.
 
 #### Time Machine
@@ -88,12 +89,11 @@ La Time Machine è implementata lato server tramite un campo nell'account dell'u
 
 ### Autori
 Il gruppo di lavoro è composto dai seguenti tre componenti.
-TODO: aggiungere matricole
 |Nome e cognome|Matricola|Email|
 |--------------|---------|-----|
 |Ivan De Simone|0001069314|ivan.desimone@studio.unibo.it|
-|Payam Salarieh| |payam.salarieh@studio.unibo.it|
-|Nicolò Tambini| |nicolo.tambini@studio.unibo.it|
+|Payam Salarieh|0001077673|payam.salarieh@studio.unibo.it|
+|Nicolò Tambini|0001088816|nicolo.tambini@studio.unibo.it|
 
 ### Contributi
 Ognuno dei componenti del gruppo ha apportato un contributo personale nelle seguenti aree.
