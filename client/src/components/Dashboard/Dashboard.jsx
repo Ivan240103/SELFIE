@@ -50,7 +50,7 @@ function PreviewCard({
 
 function Dashboard() {
   const navigate = useNavigate()
-  const { isAuthenticated, logout } = useAuth()
+  const { isAuthenticated, logout, checkAuth } = useAuth()
   const [user, setUser] = useState({})
 
   // recupera il profilo utente
@@ -63,8 +63,13 @@ function Dashboard() {
           })
           setUser(response.data)
         } catch (error) {
-          showError('fetchUser error')
-          setUser({})
+          if (error.response && error.response.status === 401) {
+            logout()
+            checkAuth()
+          } else {
+            showError('fetchUser error')
+            setUser({})
+          }
         }
       } else {
         setUser({})

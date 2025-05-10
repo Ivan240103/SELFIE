@@ -32,8 +32,10 @@ export default function PreviewNote() {
           })
           setNote(response.data)
         } catch (error) {
-          showError('fetchNote error')
-          setNote(null)
+          if (error.response && error.response.status !== 401) {
+            showError('fetchNote error')
+            setNote(null)
+          }
         }
       } else {
         setNote(null)

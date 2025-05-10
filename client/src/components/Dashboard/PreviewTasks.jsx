@@ -51,8 +51,10 @@ export default function PreviewTasks() {
           })
           setTasks(response.data)
         } catch (error) {
-          showError('fetchTasks error')
-          setTasks([])
+          if (error.response && error.response.status !== 401) {
+            showError('fetchTasks error')
+            setTasks([])
+          }
         }
       } else {
         setTasks([])

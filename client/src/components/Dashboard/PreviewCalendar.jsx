@@ -33,7 +33,9 @@ export default function PreviewCalendar() {
             const mappedEvents = events.map(event => mapEvent(event));
             setEvents(mappedEvents);
           } else {
-            throw new Error()
+            if (response.status !== 401) {
+              throw new Error()
+            }
           }
         } catch (error) {
           showError('fetchEvents error')
@@ -64,7 +66,9 @@ export default function PreviewCalendar() {
             const mappedTasks = tasks.map(task => mapTask(task, time))
             setTasks(mappedTasks);
           } else {
-            throw new Error()
+            if (response.status !== 401) {
+              throw new Error()
+            }
           }
         } catch (error) {
           showError('fetchTasks error')

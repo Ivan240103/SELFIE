@@ -17,8 +17,10 @@ export default function PreviewTomato() {
           });
           setTomato(response.data);
         } catch (error) {
-          showError('fetchTomato error');
-          setTomato(null);
+          if (error.response && error.response.status !== 401) {
+            showError('fetchTomato error');
+            setTomato(null);
+          }
         }
       } else {
         setTomato(null)
