@@ -10,7 +10,29 @@ Per informazioni esaustive consultare la relazione allegata.
 Il progetto segue una precisa struttura gerarchica che separa logicamente i vari elementi del client e del server. Qui di seguito è fornita una breve rappresentazione schematizzata:
 - `/client`
   - `/public`
+    - `/audio`: audio riproducibili dal client
+    - `/images`: icone dell'applicazione
+    - `/tomato`: implementazione del timer pomodoro
+  - `/src`
+    - `/components`
+      - `/Calendar`: calendario, eventi e attività
+      - `/Dashboard`: homepage e anteprime
+      - `/Header`: intestazione con Time Machine e notifiche
+      - `/Notes`: editor di note
+      - `/Tomato`: wrapper per il pomodoro
+      - `/User`: gestione dell'account
+    - `/contexts`: gestione di tempo ed autenticazione
+    - `/css`: stili globali
+    - `/fonts`: font scaricati
+    - `/utils`: moduli di utilità
 - `/server`
+  - `/google`: accesso e import da Google
+  - `/images`
+    - `/uploads`: foto profilo degli utenti
+  - `/middleware`: gestione autenticazione ed upload
+  - `/models`: modelli per il db
+  - `/routes`: accesso alle informazioni
+  - `/services`: operazioni logicamente correlate
 
 ## Debug locale
 Per avviare server e client è realizzato uno script unico, il quale installa i loro pacchetti e li avvia:
@@ -18,12 +40,9 @@ Per avviare server e client è realizzato uno script unico, il quale installa i 
 ./selfie.sh
 ```
 
-## Authors
+## Autori
 |Nome e cognome|Matricola|Email|
 |--------------|---------|-----|
 |Ivan De Simone|0001069314|ivan.desimone@studio.unibo.it|
 |Payam Salarieh|0001077673|payam.salarieh@studio.unibo.it|
 |Nicolò Tambini|0001088816|nicolo.tambini@studio.unibo.it|
-
-PAT di accesso in lettura al repo su GitHub:  
-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
