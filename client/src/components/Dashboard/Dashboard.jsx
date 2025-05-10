@@ -65,7 +65,7 @@ function Dashboard() {
         } catch (error) {
           if (error.response && error.response.status === 401) {
             logout()
-            checkAuth()
+            checkAuth(navigate)
           } else {
             showError('fetchUser error')
             setUser({})

@@ -62,8 +62,10 @@ function Notifier() {
           })
           setNotifyPermission(response.data.notification)
         } catch (error) {
-          showError('Retrieve notification permission error')
-          setNotifyPermission(false)
+          if (error.response && error.response.status !== 401) {
+            showError('Retrieve notification permission error')
+            setNotifyPermission(false)
+          }
         }
       } else {
         setNotifyPermission(false)
