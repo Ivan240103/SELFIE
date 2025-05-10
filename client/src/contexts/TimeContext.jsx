@@ -31,9 +31,11 @@ export const TimeProvider = ({ children }) => {
           setTime(new Date(response.data))
           setIsTimeLoading(false)
         } catch (error) {
-          setTime(new Date())
-          setIsTimeLoading(false)
-          showError('fetchTime failed in context')
+          if (error.response && error.response.status !== 401) {
+            setTime(new Date())
+            setIsTimeLoading(false)
+            showError('fetchTime failed in context')
+          }
         }
       } else {
         setTime(new Date())
