@@ -62,6 +62,28 @@ function Profile() {
   // verifica dell'autenticazione
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => checkAuth(navigate), [])
+
+  useEffect(() => {
+    const authGoogle = async () => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const code = urlParams.get('code')
+      if (code && !google) {
+        try {
+          await axios.post(`${process.env.REACT_APP_API ?? ''}/api/users/google/save`, {
+            code: code
+          }, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          })
+          setProfile(prev => ({ ...prev, google: true }))
+          showSuccess('Profilo Google associato')
+        } catch (error) {
+          showError('Profilo Google non associato')
+        }
+      }
+    }
+
+    authGoogle()
+  }, [])
   
   // recupera i dati del profilo dal backend
   useEffect(() => {
@@ -168,13 +190,14 @@ function Profile() {
 
   const syncGoogle = async () => {
     try {
-      await axios.put(`${process.env.REACT_APP_API ?? ''}/api/users/google`, {}, {
+      const response = await axios.put(`${process.env.REACT_APP_API ?? ''}/api/users/google`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       })
-      setProfile(prev => ({ ...prev, google: true }))
-      showSuccess('Profilo Google associato')
+      if (response.data.url) { 
+        window.location.href = response.data.url
+      }
     } catch (err) {
-      showError('Profilo Google non associato')
+      showError('Errore in fase di autenticazione')
     }
   }
 

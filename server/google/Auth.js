@@ -1,21 +1,56 @@
 /**
- * OAuth authentication for Google  
- * _code from Google Dev example_
+ * OAuth authentication for Google (web application)
  */
 
 const fs = require('fs').promises
 const path = require('path')
 const process = require('process')
-const { authenticate } = require('@google-cloud/local-auth')
 const { google } = require('googleapis')
-const User = require('../models/User')
 
 // se si modificano questi scope, eliminare i token
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-const CREDENTIALS_PATH = path.join(process.cwd(), 'google', 'credentials.json')
+const CREDENTIALS_PATH = path.join(process.cwd(), 'google', 'credentials-web.json')
 
-// carica le credenziali dell'utente, se esistono
-function loadSavedCredentialsIfExist(user) {
+// salva le credenziali dell'utente
+async function saveCredentials(user, code) {
+  const content = await fs.readFile(CREDENTIALS_PATH)
+  const { client_id, client_secret, redirect_uris } = JSON.parse(content).web
+
+  const oAuth2Client = new google.auth.OAuth2(
+    client_id,
+    client_secret,
+    redirect_uris[0]
+  )
+  const { tokens } = await oAuth2Client.getToken(code)
+  oAuth2Client.setCredentials(tokens)
+
+  const payload = JSON.stringify({
+    type: 'authorized_user',
+    client_id,
+    client_secret,
+    refresh_token: tokens.refresh_token
+  })
+  user.google = payload
+  await user.save()
+
+  return oAuth2Client
+}
+
+// genera l'URL per il login se l'utente non ha credenziali salvate
+async function getAuthUrl() {
+  const content = await fs.readFile(CREDENTIALS_PATH)
+  const { client_id, client_secret, redirect_uris } = JSON.parse(content).web
+  const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0])
+  const authUrl = oAuth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: SCOPES,
+    prompt: 'consent'
+  })
+  return authUrl
+}
+
+// autorizza l'utente usando credenziali già salvate
+function authorize(user) {
   try {
     const credentials = JSON.parse(user.google)
     return google.auth.fromJSON(credentials)
@@ -24,39 +59,8 @@ function loadSavedCredentialsIfExist(user) {
   }
 }
 
-// salva le credenziali dell'utente
-async function saveCredentials(client, user) {
-  const content = await fs.readFile(CREDENTIALS_PATH)
-  const keys = JSON.parse(content)
-  const key = keys.installed || keys.web
-  const payload = JSON.stringify({
-    type: 'authorized_user',
-    client_id: key.client_id,
-    client_secret: key.client_secret,
-    refresh_token: client.credentials.refresh_token
-  })
-  user.google = payload
-  await user.save()
+module.exports = {
+  authorize,
+  getAuthUrl,
+  saveCredentials
 }
-
-// autorizzazione dell'utente
-async function authorize(username) {
-  const user = await User.findOne({ username: username })
-  if (!user) {
-    return null
-  }
-  let client = loadSavedCredentialsIfExist(user)
-  if (client) {
-    return client
-  }
-  client = await authenticate({
-    scopes: SCOPES,
-    keyfilePath: CREDENTIALS_PATH,
-  })
-  if (client.credentials) {
-    await saveCredentials(client, user)
-  }
-  return client
-}
-
-module.exports = { authorize }

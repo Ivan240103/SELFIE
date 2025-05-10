@@ -41,7 +41,7 @@ router.post('/', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     const events = await Event.find({ owner: req.user.username })
-    const googleEvents = req.user.google ? await listEvents(req.user.username) : []
+    const googleEvents = req.user.google ? await listEvents(req.user) : []
     return res.json(events.concat(googleEvents))
   } catch (err) {
     return res.status(500).send('Error while getting all events')
@@ -53,7 +53,7 @@ router.get('/:id', auth, async (req, res) => {
   let event
   // cerca prima se è su google
   try {
-    event = req.user.google ? await getEvent(req.params.id, req.user.username) : undefined
+    event = req.user.google ? await getEvent(req.params.id, req.user) : undefined
   } catch (error) {
     event = undefined
   }

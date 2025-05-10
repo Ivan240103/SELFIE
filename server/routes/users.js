@@ -10,7 +10,7 @@ const upload = require('../middleware/multer')
 const { getTime, setTime } = require('../services/TimeMachine')
 const { getBdayRrule } = require('../services/RRule')
 const { resetUserTaskTs } = require('../services/Notificate')
-const { authorize } = require('../google/Auth')
+const { authorize, getAuthUrl, saveCredentials } = require('../google/Auth')
 const User = require('../models/User')
 const Event = require('../models/Event')
 const Task = require('../models/Task')
@@ -191,13 +191,25 @@ router.put('/time', auth, async (req, res) => {
 // effettuare l'accesso con google
 router.put('/google', auth, async (req, res) => {
   try {
-    const client = await authorize(req.user.username)
-    if (!client) {
-      return res.status(403).send('Authentication failed')
+    const client = authorize(req.user)
+    if (client) {
+      return res.send('ok')
     }
+    // se non autenticato il frontend farà redirect al login
+    const authUrl = await getAuthUrl()
+    return res.json({ url: authUrl })
+  } catch (err) {
+    return res.status(500).send('Error while initiating Google authentication')
+  }
+})
+
+// callback dall'autenticazione google
+router.post('/google/save', auth, async (req, res) => {
+  try {
+    await saveCredentials(req.user, req.body.code)
     return res.send('ok')
   } catch (err) {
-    return res.status(500).send('Error while performing Google authentication')
+    return res.status(500).send('Google authentication failed')
   }
 })
 
