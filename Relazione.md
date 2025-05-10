@@ -11,7 +11,7 @@
     <h2 style="margin: 0px; padding: 2px;">Progetto di Tecnologie Web 2024/25</h2>
     <h3 style="margin: 4px;"><i>Estensione 18-27</i></h3>
   </div>
-  <div style="display:flex; flex-direction:column; align-items:center; margin-top:40px;">
+  <div style="display:flex; flex-direction:column; align-items:center; margin-top:50px;">
     <h4 style="margin: 8px;">Ivan De Simone - 0001069314</h4>
     <h4 style="margin: 8px;">Payam Salarieh - 0001077673</h4>
     <h4 style="margin: 8px;">Nicolò Tambini - 0001088816</h4>
@@ -39,9 +39,10 @@ Il progetto comprende un client sviluppato in React.js, che comunica con un back
 Il calendario consente di programmare eventi, contraddistinti da un titolo ed una descrizione. L'evento, che si può estendere per uno o più giorni, può avere orari di inizio e fine precisi oppure occupare l'intera giornata. È possibile impostare una regola di ricorrenza per ripetere l'evento indefinitamente oppure fino ad una scadenza, indicata tramite numero di ripetizioni o data limite. L'evento può essere geolocalizzato, nel qual caso sarà presente un collegamento verso Google Maps. È inoltre attivabile un servizio di notifiche, recapitate con un certo anticipo attraverso notifiche push o email.
 Effettuando la sincronizzazione con Google, è possibile visualizzare nel calendario gli eventi importati da Google Calendar, i quali non possono essere modificati o eliminati.
 
+<!-- pagebreak -->
+
 #### Attività
-Il calendario permette di aggiungere i task, ovvero attività da completare entro una certa data. Anche queste sono caratterizzate da un titolo ed una descrizione, nonché dal giorno di scadenza. Le attività non completate entro la data pianificata sono segnalate come "in ritardo". Come per gli eventi, è possibile impostare delle notifiche, con la differenza che in caso di ritardo esse continueranno ad arrivare giornalmente fino al completamento dell'attività.
-Dalla dashboard è possibile accedere ad una sezione che mostra le attività in formato lista, suddividendole in completate e non.
+Il calendario permette di aggiungere i task, ovvero attività da completare entro una certa data. Anche queste sono caratterizzate da un titolo ed una descrizione, nonché dal giorno di scadenza. Le attività non completate entro la data pianificata sono segnalate come "in ritardo". Come per gli eventi, è possibile impostare delle notifiche, con la differenza che in caso di ritardo esse continueranno ad arrivare giornalmente fino al completamento dell'attività. Dalla dashboard è possibile accedere ad una sezione che mostra le attività in formato lista, suddividendole in completate e non.
 
 #### Note
 L'applicazione include un editor di testo per creare, modificare ed eliminare note. Ciascuna nota ha un titolo e una serie di categorie. Il contenuto supporta la sintassi markdown e può essere di lunghezza arbitraria. Le note salvate sono visualizzabili in un elenco ordinabile per data di creazione, titolo, lunghezza o ultima modifica. Ogni nota offre una breve anteprima e opzioni per copiare, modificare, duplicare, scaricare o eliminare il contenuto. È possibile effettuare ricerche testuali all'interno delle note.
@@ -51,6 +52,8 @@ Il timer pomodoro aiuta a gestire lo studio alternando sessioni di lavoro e paus
 
 #### Time Machine
 La Time Machine è un servizio aggiuntivo che permette lo spostamento avanti e indietro nel tempo per testare le funzionalità temporali. Una modifica temporale provoca l'aggiornamento immediato di tutte le visualizzazioni. Il tempo si può facilmente allineare al valore di sistema.
+
+<!-- pagebreak -->
 
 ## Dettagli implementativi
 
@@ -65,6 +68,8 @@ La foto profilo dell'utente viene memorizzata tramite il middleware [Multer](htt
 Dalla pagina del profilo personale è possibile effettuare il collegamento con il proprio account Google, il quale consente l'accesso agli eventi di Google Calendar tramite un token OAuth2 (che verrà poi salvato nell'account SELFIE).
 Se un profilo utente viene eliminato, vengono eliminate anche tutte le risorse ad esso associate.
 
+<!-- pagebreak -->
+
 #### Calendario
 La visualizzazione del calendario utilizza la libreria [FullCalendar](https://fullcalendar.io/), che permette una gestione comoda degli eventi. Tramite il plugin di FullCalendar sul client ed il pacchetto [rrule](https://github.com/jkbrzt/rrule) sul server, vengono gestite le regole di ricorrenza secondo lo standard iCalendar.
 Per quel che concerne la geolocalizzazione degli eventi, viene utilizzata l'API [LocationIQ](https://locationiq.com/) per il geocoding. Se la posizione calcolata viene approvata dall'utente, comparirà un bottone per aprirla su Google Maps.
@@ -76,7 +81,9 @@ Questo servizio è implementato tramite due demoni che vengono eseguiti ogni 60 
 È presente un demone aggiuntivo per notificare le attività in ritardo, eseguito ogni 180 secondi. Tale demone prende dal db tutte le attività aventi notifiche impostate, dopodiché per le sole attività in ritardo da almeno un giorno verifica il timestamp dell'ultima notifica. Se è passato almeno un giorno dall'ultima notifica, ne recapita una nuova calibrata in base al ritardo. Se l'utente viaggia indietro nel tempo, tutte le attività in ritardo vengono notificate (se passato almeno un giorno).
 
 #### Note
-Le note sono memorizzate come semplice testo all'interno del database. È posta particolare attenzione al salvataggio delle categorie, il cui input viene ripulito dal client prima dell'invio al server. Per quel che concerne le date di creazione e modifica, sono interamente gestite dal server al momento delle operazioni. La visualizzazione in markdown è stata implementata usando il pacchetto [marked](https://www.npmjs.com/package/marked), secondo la sintassi classica di GitHub.
+Le note sono memorizzate come semplice testo all'interno del database. È posta particolare attenzione al salvataggio delle categorie, il cui input viene ripulito dal client prima dell'invio al server. Per quel che concerne le date di creazione e modifica, sono interamente gestite dal server al momento delle operazioni. La visualizzazione in markdown è stata implementata usando il pacchetto [marked](https://www.npmjs.com/package/marked), seguendo la sintassi classica di GitHub.
+
+<!-- pagebreak -->
 
 #### Pomodoro
 Il timer pomodoro è realizzato interamente in vanilla JavaScript. Essendo indipendente, è integrato nell'applicazione tramite un iFrame. Lo sfondo della pagina segue gradualmente l'avanzamento del timer, mostrando un'animazione CSS che si adatta al momento di studio oppure pausa.
@@ -95,10 +102,12 @@ Il gruppo di lavoro è formato da tre componenti.
 |Payam Salarieh|0001077673|payam.salarieh@studio.unibo.it|
 |Nicolò Tambini|0001088816|nicolo.tambini@studio.unibo.it|
 
-Ognuno dei componenti del gruppo ha apportato un contributo personale nelle seguenti aree:
+Ogni componente del gruppo ha apportato un contributo personale nelle seguenti aree:
 - Ivan De Simone: profilo personale, dashboard, notifiche, UI, Time Machine
 - Payam Salarieh: eventi, attività, note
 - Nicolò Tambini: timer pomodoro
+
+<!-- pagebreak -->
 
 ## Intelligenza Artificiale
 Durante lo sviluppo del progetto è stato fatto uso di generative AI come copilota, principalmente al fine di generare lo scheletro di codice complesso, rifinito e modificato manualmente, oppure di troubleshooting, in caso di errori nascosti particolarmente difficoltosi da risolvere. Di seguito un esempio di prompt.
