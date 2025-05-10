@@ -38,6 +38,10 @@ body {
   animation: fadeIn 1s ease forwards;
 }
 
+.notes-container {
+  background-color: transparent;
+}
+
 .notes-container ul {
   list-style-type: disc;
 }
