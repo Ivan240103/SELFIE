@@ -4,12 +4,11 @@
 
 const fs = require('fs').promises
 const path = require('path')
-const process = require('process')
 const { google } = require('googleapis')
 
 // se si modificano questi scope, eliminare i token
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-const CREDENTIALS_PATH = path.join(process.cwd(), 'google', 'credentials-web.json')
+const CREDENTIALS_PATH = path.resolve(__dirname, './credentials-web.json')
 
 // salva le credenziali dell'utente
 async function saveCredentials(user, code) {
