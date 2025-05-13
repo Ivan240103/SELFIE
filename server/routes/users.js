@@ -9,7 +9,7 @@ const { auth, getToken } = require('../middleware/auth')
 const upload = require('../middleware/multer')
 const { getTime, setTime } = require('../services/TimeMachine')
 const { getBdayRrule } = require('../services/RRule')
-const { resetUserTaskTs } = require('../services/Notificate')
+const { resetUserTaskTs, sendMail } = require('../services/Notificate')
 const { authorize, getAuthUrl, saveCredentials } = require('../google/Auth')
 const User = require('../models/User')
 const Event = require('../models/Event')
@@ -70,6 +70,12 @@ router.post('/register', async (req, res) => {
 
   try {
     await user.save()
+    sendMail(
+      email,
+      'Registrazione effettuata',
+      `Ciao ${username},\nti confermiamo che la registrazione è andata a buon fine.\n
+      Da questo momento puoi utilizzare tutte le funzioni offerte da SELFIE!`
+    )
     return res.send('ok')
   } catch(err) {
     return res.status(500).send('Error while registering new user')

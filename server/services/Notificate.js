@@ -263,5 +263,6 @@ module.exports = {
   notificateEvents,
   notificateTasks,
   notificateLateTasks,
-  resetUserTaskTs
+  resetUserTaskTs,
+  sendMail
 }
