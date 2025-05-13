@@ -5,14 +5,17 @@
  * @returns evento mappato
  */
 export function mapEvent(event) {
-  return {
+  const mapped = {
     ...event,
     id: event.googleId || event._id,
     eventType: 'event',
-    allDay: event.isAllDay,
-    // l'ultimo giorno non è compreso, per visualizzarlo ne aggiungo uno
-    end: new Date(Date.parse(event.end) + 24*60*60*1000)
+    allDay: event.isAllDay
   }
+  if (event.isAllDay) {
+    // l'ultimo giorno non è compreso, per visualizzarlo ne aggiungo uno
+    mapped.end = new Date(Date.parse(event.end) + 24*60*60*1000)
+  }
+  return mapped
 }
 
 /**
