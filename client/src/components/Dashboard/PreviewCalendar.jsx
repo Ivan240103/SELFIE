@@ -52,7 +52,7 @@ export default function PreviewCalendar() {
   // Carica le task dal backend
   useEffect(() => {
     async function fetchTasks() {
-      if (isAuthenticated) {
+      if (isAuthenticated && !isTimeLoading) {
         try {
           const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/tasks/`, {
             method: 'GET',
@@ -81,21 +81,7 @@ export default function PreviewCalendar() {
 
     fetchTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
-
-  // aggiorna il colore dei task quando cambia il tempo
-  useEffect(() => {
-    function updateTasksColor() {
-      if (!isTimeLoading && tasks.length > 0) {
-        setTasks(prev => prev.map(task => task.isDone ? task : ({
-          ...task,
-          backgroundColor: time > new Date(task.deadline) ? '#f87171' : '#fde68a'
-        })))
-      }
-    }
-
-    updateTasksColor()
-  }, [isTimeLoading])
+  }, [isAuthenticated, isTimeLoading]);
 
   return (
     <div className="size-full lg:p-3">

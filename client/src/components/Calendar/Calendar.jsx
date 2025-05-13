@@ -89,7 +89,7 @@ function Calendar() {
   // Carica le task dal backend
   useEffect(() => {
     async function fetchTasks() {
-      if (isAuthenticated) {
+      if (isAuthenticated && !isTimeLoading) {
         try {
           const response = await fetch(`${process.env.REACT_APP_API ?? ''}/api/tasks/`, {
             method: 'GET',
@@ -116,21 +116,7 @@ function Calendar() {
 
     fetchTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
-
-  // aggiorna il colore dei task quando cambia il tempo
-  useEffect(() => {
-    function updateTasksColor() {
-      if (!isTimeLoading && calendarTasks.length > 0) {
-        setCalendarTasks(prev => prev.map(task => task.isDone ? task : ({
-          ...task,
-          backgroundColor: time > new Date(task.deadline) ? '#f87171' : '#fde68a'
-        })))
-      }
-    }
-
-    updateTasksColor()
-  }, [isTimeLoading])
+  }, [isAuthenticated, isTimeLoading]);
 
   function handleEventSave(event) {
     setIsEventOpen(false)
