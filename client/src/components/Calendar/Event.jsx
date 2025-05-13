@@ -97,7 +97,7 @@ function Event({
       setInterval(event.rrule?.interval || 1)
       if (event.rrule?.until) {
         setTerm('u')
-        setUntil(event.rrule.until)
+        setUntil(new Date(event.rrule.until))
         setCount(1)
       } else if (event.rrule?.count) {
         setTerm('c')
