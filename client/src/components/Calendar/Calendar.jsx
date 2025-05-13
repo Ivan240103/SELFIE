@@ -118,6 +118,14 @@ function Calendar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
+  // aggiorna il colore dei task quando cambia il tempo
+  useEffect(() => {
+    if (!isTimeLoading && calendarTasks.length > 0) {
+      const mappedTasks = calendarTasks.map(task => mapTask(task, time))
+      setCalendarTasks(mappedTasks)
+    }
+  }, [isTimeLoading])
+
   function handleEventSave(event) {
     setIsEventOpen(false)
     setCalendarEvents(prev => [...prev, mapEvent(event)]);

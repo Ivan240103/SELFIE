@@ -83,6 +83,14 @@ export default function PreviewCalendar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
+  // aggiorna il colore dei task quando cambia il tempo
+  useEffect(() => {
+    if (!isTimeLoading && tasks.length > 0) {
+      const mappedTasks = tasks.map(task => mapTask(task, time))
+      setTasks(mappedTasks)
+    }
+  }, [isTimeLoading])
+
   return (
     <div className="size-full lg:p-3">
       {isTimeLoading ? (
