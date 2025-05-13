@@ -89,7 +89,7 @@ export default function PreviewCalendar() {
       if (!isTimeLoading && tasks.length > 0) {
         setTasks(prev => prev.map(task => task.isDone ? task : ({
           ...task,
-          color: time > new Date(task.deadline) ? '#f87171' : '#fde68a'
+          backgroundColor: time > new Date(task.deadline) ? '#f87171' : '#fde68a'
         })))
       }
     }

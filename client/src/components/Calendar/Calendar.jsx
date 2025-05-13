@@ -124,7 +124,7 @@ function Calendar() {
       if (!isTimeLoading && calendarTasks.length > 0) {
         setCalendarTasks(prev => prev.map(task => task.isDone ? task : ({
           ...task,
-          color: time > new Date(task.deadline) ? '#f87171' : '#fde68a'
+          backgroundColor: time > new Date(task.deadline) ? '#f87171' : '#fde68a'
         })))
       }
     }
