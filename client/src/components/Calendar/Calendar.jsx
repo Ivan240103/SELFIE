@@ -120,10 +120,13 @@ function Calendar() {
 
   // aggiorna il colore dei task quando cambia il tempo
   useEffect(() => {
-    if (!isTimeLoading && calendarTasks.length > 0) {
-      const mappedTasks = calendarTasks.map(task => mapTask(task, time))
-      setCalendarTasks(mappedTasks)
+    function updateTasksColor() {
+      if (!isTimeLoading && calendarTasks.length > 0) {
+        setCalendarTasks(prev => prev.map(task => mapTask(task, time)))
+      }
     }
+
+    updateTasksColor()
   }, [isTimeLoading])
 
   function handleEventSave(event) {

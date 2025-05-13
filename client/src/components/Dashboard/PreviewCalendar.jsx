@@ -85,10 +85,13 @@ export default function PreviewCalendar() {
 
   // aggiorna il colore dei task quando cambia il tempo
   useEffect(() => {
-    if (!isTimeLoading && tasks.length > 0) {
-      const mappedTasks = tasks.map(task => mapTask(task, time))
-      setTasks(mappedTasks)
+    function updateTasksColor() {
+      if (!isTimeLoading && tasks.length > 0) {
+        setTasks(prev => prev.map(task => mapTask(task, time)))
+      }
     }
+
+    updateTasksColor()
   }, [isTimeLoading])
 
   return (
