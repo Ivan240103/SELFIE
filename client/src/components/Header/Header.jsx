@@ -15,7 +15,7 @@ function Header() {
         className='w-16 lg:w-20 justify-self-start disabled:bg-transparent'
         color='secondary'
         isIconOnly
-        onPress={() => navigate(-1)}
+        onPress={() => navigate('/')}
         isDisabled={p === '/' || p === '/login'}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="25" height="25">
