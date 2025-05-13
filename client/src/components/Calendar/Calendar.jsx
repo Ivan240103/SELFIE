@@ -122,9 +122,9 @@ function Calendar() {
   useEffect(() => {
     function updateTasksColor() {
       if (!isTimeLoading && calendarTasks.length > 0) {
-        setCalendarTasks(prev => prev.map(task => ({
+        setCalendarTasks(prev => prev.map(task => task.isDone ? task : ({
           ...task,
-          color: task.isDone ? '#86efac' : (time > new Date(task.deadline) ? '#f87171' : '#fde68a')
+          color: time > new Date(task.deadline) ? '#f87171' : '#fde68a'
         })))
       }
     }

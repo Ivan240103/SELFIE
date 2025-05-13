@@ -87,9 +87,9 @@ export default function PreviewCalendar() {
   useEffect(() => {
     function updateTasksColor() {
       if (!isTimeLoading && tasks.length > 0) {
-        setTasks(prev => prev.map(task => ({
+        setTasks(prev => prev.map(task => task.isDone ? task : ({
           ...task,
-          color: task.isDone ? '#86efac' : (time > new Date(task.deadline) ? '#f87171' : '#fde68a')
+          color: time > new Date(task.deadline) ? '#f87171' : '#fde68a'
         })))
       }
     }
