@@ -391,7 +391,7 @@ function Event({
                 setMapsLocated={setMapsLocated}
                 isEditing={isEditing}
               />
-              {user.notification && <div className='self-start w-full ml-1'>
+              {!googleId && user.notification && <div className='self-start w-full ml-1'>
                 <span className='block text-gray-800 self-start'>Promemoria</span>
                 <Reminder
                   type='Email'
