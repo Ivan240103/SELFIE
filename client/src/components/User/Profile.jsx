@@ -157,7 +157,9 @@ function Profile() {
     }
     formData.append('name', name)
     formData.append('surname', surname)
-    formData.append('birthday', birthday)
+    if (birthday) {
+      formData.append('birthday', birthday)
+    }
     formData.append('pic', pic)
 
     try {
